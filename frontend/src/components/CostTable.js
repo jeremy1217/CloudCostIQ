@@ -16,7 +16,7 @@ import { Table, TableHead, TableBody, TableRow, TableCell, Paper, TableContainer
                 console.log("Mock data loaded:", mockCosts);
                 setCosts(mockCosts);
             }, 1000);
-        }, []); //
+        }, [mockCosts]); //
 
     console.log("Current costs state:", costs);  // Debugging
 

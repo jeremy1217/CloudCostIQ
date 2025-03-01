@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from database.db import get_db
-from models.recommendation import Recommendation
-from ai.optimizer import generate_optimization_suggestions
+from backend.database.db import get_db
+from backend.models.recommendation import Recommendation
+from backend.ai.optimizer import generate_optimization_suggestions
 from pydantic import BaseModel
 
 class OptimizationRequest(BaseModel):

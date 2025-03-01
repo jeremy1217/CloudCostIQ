@@ -1,7 +1,7 @@
 from fastapi import APIRouter
-from services.aws_cost import store_aws_cost
-from services.azure_cost import store_azure_cost
-from services.gcp_cost import store_gcp_cost
+from backend.services.aws_cost import store_aws_cost
+from backend.services.azure_cost import store_azure_cost
+from backend.services.gcp_cost import store_gcp_cost
 
 router = APIRouter()
 

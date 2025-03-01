@@ -1,8 +1,8 @@
 from google.cloud import billing_v1
 import datetime
 import json
-from database.db import SessionLocal
-from models.cloud_cost import CloudCost
+from backend.database.db import SessionLocal
+from backend.models.cloud_cost import CloudCost
 import os
 
 def store_gcp_cost():

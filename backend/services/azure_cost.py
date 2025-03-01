@@ -2,8 +2,8 @@
 from azure.mgmt.costmanagement import CostManagementClient
 import datetime
 import json
-from database.db import SessionLocal
-from models.cloud_cost import CloudCost
+from backend.database.db import SessionLocal
+from backend.models.cloud_cost import CloudCost
 
 def store_azure_cost():
     return [

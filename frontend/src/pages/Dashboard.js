@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Container, Typography, CircularProgress } from "@mui/material";
 
 const Dashboard = () => {
@@ -7,16 +6,21 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get("http://localhost:8000/insights/cost-breakdown") // Update the endpoint path
-            .then(response => {
-                setCostBreakdown(response.data?.cost_breakdown || []);
-                setLoading(false);
-            })
-            .catch(error => {
-                console.error("Error fetching cost breakdown:", error);
-                setCostBreakdown([]);
-                setLoading(false);
-            });
+        // Mock data instead of API call
+        const mockCostBreakdown = [
+            { provider: "AWS", service: "EC2", cost: 120.50 },
+            { provider: "Azure", service: "VM", cost: 98.75 },
+            { provider: "GCP", service: "Compute Engine", cost: 85.20 }
+        ];
+        
+        setCostBreakdown(mockCostBreakdown);
+        setLoading(false);
+        
+        // Comment out the axios call for now
+        /*
+        axios.get("http://localhost:8000/insights/cost-breakdown")
+            .then(...)
+        */
     }, []);
 
     if (loading) {

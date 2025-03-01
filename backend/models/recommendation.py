@@ -1,6 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime
-from database.db import Base
+from backend.database.db import Base
 from datetime import datetime  
 
 class Recommendation(Base):

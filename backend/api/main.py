@@ -1,4 +1,4 @@
-from api.routes import costs, insights, actions, optimizations
+from backend.api.routes import costs, insights, actions, optimizations
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse

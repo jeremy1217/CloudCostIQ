@@ -3,10 +3,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 from datetime import datetime, timedelta
 import random
-from database.db import SessionLocal
-from ai.anomaly import detect_anomalies
-from ai.forecast import predict_future_costs
-from models.cloud_cost import CloudCost
+from backend.database.db import SessionLocal
+from backend.ai.anomaly import detect_anomalies
+from backend.ai.forecast import predict_future_costs
+from backend.models.cloud_cost import CloudCost
 
 router = APIRouter()
 
@@ -61,21 +61,13 @@ def get_cost_breakdown(db: Session = Depends(get_db)):
     return {"cost_breakdown": breakdown}
 
 @router.get("/cost-breakdown")
-async def get_cost_breakdown(db: Session = Depends(get_db)):
-    """Return cost breakdown for dashboard"""
-    
-    # Use CloudCost model instead of CostInsight
-    costs = db.query(CloudCost).order_by(CloudCost.timestamp.desc()).limit(10).all()
-    
-    # Format for frontend
-    result = [
-        {
-            "provider": cost.provider,
-            "service": cost.service,
-            "cost": cost.cost,
-            "date": cost.timestamp.strftime("%Y-%m-%d")
-        }
-        for cost in costs
-    ]
-    
-    return {"cost_breakdown": result}
+def get_cost_breakdown():
+    """Return cost breakdown data for dashboard"""
+    # Return mock data for now
+    return {
+        "cost_breakdown": [
+            {"provider": "AWS", "service": "EC2", "cost": 120.50},
+            {"provider": "Azure", "service": "VM", "cost": 98.75},
+            {"provider": "GCP", "service": "Compute Engine", "cost": 85.20}
+        ]
+    }

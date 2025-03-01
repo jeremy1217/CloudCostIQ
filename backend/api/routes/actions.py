@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from services.optimization import rightsizing_recommendation
+from backend.services.optimization import rightsizing_recommendation
 
 router = APIRouter()
 

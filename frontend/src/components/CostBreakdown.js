@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Container, Typography, CircularProgress, Paper } from "@mui/material";
-import { Bar, Line } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import "chart.js/auto";
 
 const CostBreakdown = () => {

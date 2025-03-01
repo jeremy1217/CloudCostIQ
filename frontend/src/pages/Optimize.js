@@ -5,10 +5,10 @@ import { Container, Typography, CircularProgress, Paper, Table, TableHead, Table
 const Optimize = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
-    
-    // Add state to track which recommendations have been applied
+    // Add this state to track applied recommendations
     const [appliedRecommendations, setAppliedRecommendations] = useState([]);
 
+    // Add this function to fetch recommendations
     const fetchRecommendations = () => {
         setLoading(true);
         axios.get("http://localhost:8000/optimize/recommendations")
@@ -24,8 +24,23 @@ const Optimize = () => {
 
     useEffect(() => {
         fetchRecommendations();
+        // Or use mock data for testing:
+        /*
+        const mockData = {
+            current_recommendations: [
+                {provider: "AWS", service: "EC2", suggestion: "Use Reserved Instances", command: "aws ec2 modify-instance-attribute..."},
+                {provider: "Azure", service: "VM", suggestion: "Use Azure Hybrid Benefit", command: "az vm update..."}
+            ],
+            past_recommendations: [
+                {provider: "GCP", service: "Storage", suggestion: "Archive cold data", applied: "Applied"}
+            ]
+        };
+        setData(mockData);
+        setLoading(false);
+        */
     }, []);
 
+    // Add this function to handle optimization application
     const handleApplyOptimization = (recommendation) => {
         axios.post("http://localhost:8000/optimize/apply", { 
             provider: recommendation.provider,
@@ -45,6 +60,7 @@ const Optimize = () => {
         });
     };
 
+    // Add this function to check if a recommendation is applied
     const isApplied = (rec) => {
         return appliedRecommendations.includes(`${rec.provider}-${rec.service}`);
     };
@@ -87,13 +103,13 @@ const Optimize = () => {
                                         <code>{rec.command}</code>
                                     </TableCell>
                                     <TableCell>
-                                    <Button 
-                                        variant="contained" 
-                                        color={isApplied(rec) ? "success" : "primary"}
-                                        onClick={() => handleApplyOptimization(rec)}
-                                        disabled={rec.command === "N/A" || isApplied(rec)}>
-                                        {isApplied(rec) ? "Applied" : "Apply"}
-                                    </Button>
+                                        <Button 
+                                            variant="contained" 
+                                            color={isApplied(rec) ? "success" : "primary"}
+                                            onClick={() => handleApplyOptimization(rec)}
+                                            disabled={rec.command === "N/A" || isApplied(rec)}>
+                                            {isApplied(rec) ? "Applied" : "Apply"}
+                                        </Button>
                                     </TableCell>
                                 </TableRow>
                             ))}

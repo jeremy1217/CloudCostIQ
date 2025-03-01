@@ -1,5 +1,5 @@
-from database.db import SessionLocal
-from models.cloud_cost import CloudCost
+from backend.database.db import SessionLocal
+from backend.models.cloud_cost import CloudCost
 
 def rightsizing_recommendation():
     """Suggest cost optimizations"""

@@ -1,8 +1,8 @@
 import boto3
 import datetime
 import json
-from database.db import SessionLocal
-from models.cloud_cost import CloudCost
+from backend.database.db import SessionLocal
+from backend.models.cloud_cost import CloudCost
 
 def store_aws_cost():
     return [

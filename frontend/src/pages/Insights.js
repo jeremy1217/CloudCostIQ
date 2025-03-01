@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Container, Typography, CircularProgress, Paper, Table, TableHead, TableBody, TableRow, TableCell } from "@mui/material";
 import { Line } from "react-chartjs-2";
 import "chart.js/auto";
@@ -9,17 +8,28 @@ const Insights = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // Mock data for testing
+        const mockInsights = {
+            cost_trends: [
+                {date: "2025-02-20", cost: 120.50, service: "EC2"},
+                {date: "2025-02-21", cost: 98.75, service: "VM"},
+                {date: "2025-02-22", cost: 85.20, service: "Compute Engine"},
+                {date: "2025-02-23", cost: 500.00, service: "RDS"}
+            ],
+            anomalies: [
+                {date: "2025-02-23", service: "RDS", cost: 500.00, root_cause: "Possible cause: Unexpected database queries or connection spikes."}
+            ]
+        };
+        
+        setInsights(mockInsights);
+        setLoading(false);
+        
+        // Comment out the axios call for now
+        /*
         axios.get("http://localhost:8000/insights/mock-insights")
-            .then(response => {
-                setInsights(response.data);
-                setLoading(false);
-            })
-            .catch(error => {
-                console.error("Error fetching insights:", error);
-                setLoading(false);
-            });
+            .then(...)
+        */
     }, []);
-
     if (loading) {
         return <Container><Typography>Loading insights...</Typography><CircularProgress /></Container>;
     }
