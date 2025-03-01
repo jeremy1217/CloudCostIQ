@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { Table, TableHead, TableBody, TableRow, TableCell, Paper, TableContainer, Typography } from "@mui/material";
 
-const CostTable = () => {
-    const mockCosts = [
-        { provider: "AWS", service: "EC2", cost: 120.50, date: "2025-02-20" },
-        { provider: "Azure", service: "VM", cost: 98.75, date: "2025-02-21" },
-        { provider: "GCP", service: "Compute Engine", cost: 85.20, date: "2025-02-22" },
-    ];
-
-    const [costs, setCosts] = useState([]);
-
-    useEffect(() => {
-        console.log("Fetching mock data...");  // Debugging
-        setTimeout(() => {
-            console.log("Mock data loaded:", mockCosts);  // Debugging
-            setCosts(mockCosts);
-        }, 1000);
-    }, []);
+    const CostTable = () => {
+        const mockCosts = [
+            { provider: "AWS", service: "EC2", cost: 120.50, date: "2025-02-20" },
+            { provider: "Azure", service: "VM", cost: 98.75, date: "2025-02-21" },
+            { provider: "GCP", service: "Compute Engine", cost: 85.20, date: "2025-02-22" },
+        ];
+    
+        const [costs, setCosts] = useState([]);
+    
+        useEffect(() => {
+            console.log("Fetching mock data...");
+            setTimeout(() => {
+                console.log("Mock data loaded:", mockCosts);
+                setCosts(mockCosts);
+            }, 1000);
+        }, []); //
 
     console.log("Current costs state:", costs);  // Debugging
 

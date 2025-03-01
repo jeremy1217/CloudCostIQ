@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime
-from backend.database.db import Base  # ✅ Import the correct Base
+from database.db import Base  # This import is now safe
 
 class CloudCost(Base):
     __tablename__ = "cloud_cost"

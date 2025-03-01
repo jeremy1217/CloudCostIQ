@@ -1,6 +1,7 @@
-from sqlalchemy.ext.declarative import declarative_base  # ✅ Import this
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime
-from backend.database.db import Base  # ✅ Import Base from your database module
+from database.db import Base
+from datetime import datetime  
 
 class Recommendation(Base):
     __tablename__ = "recommendations"

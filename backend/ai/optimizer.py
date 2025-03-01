@@ -67,7 +67,7 @@ def generate_recommendation(provider, service, cost_level):
             "command": "N/A"
         }
     
-def basic_recommendations(cost_data)::
+def basic_recommendations(cost_data):
     recommendations = []
 
     for entry in cost_data:

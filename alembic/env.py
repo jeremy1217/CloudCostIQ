@@ -2,10 +2,10 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 from alembic import context
 
-# Import Base from your database module
+# Import Base first
 from backend.database.db import Base
 
-# Import your models so Alembic detects them
+# Then import models AFTER Base is imported
 from backend.models.recommendation import Recommendation
 from backend.models.cloud_cost import CloudCost
 
