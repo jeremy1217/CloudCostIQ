@@ -3,9 +3,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 from datetime import datetime, timedelta
 import random
-from database.db import SessionLocal, CostInsight
+from database.db import SessionLocal
 from ai.anomaly import detect_anomalies
 from ai.forecast import predict_future_costs
+from models.cloud_cost import CloudCost
 
 router = APIRouter()
 
@@ -43,43 +44,6 @@ def generate_mock_costs():
         for i in range(7)
     ]
     return cost_trend
-
-@router.get("/mock-insights")
-def get_mock_insights():
-    try:
-        anomalies = detect_anomalies(mock_cost_trends)
-    except Exception as e:
-        print(f"Error in anomaly detection: {e}")
-        anomalies = []  # Ensure anomalies is always defined
-
-    return {
-        "cost_trends": mock_cost_trends,
-        "anomalies": anomalies
-    }
-    # Detect anomalies
-    anomaly_indices = detect_anomalies(costs)
-    anomalies = [
-        {"date": cost_trend[i]["date"], "service": "EC2", "anomaly": "Cost spike detected"}
-        for i in anomaly_indices
-    ]
-
-    # Store insights in the database
-    for entry in cost_trend:
-        db.add(CostInsight(provider="AWS", service="EC2", cost=entry["cost"], date=datetime.strptime(entry["date"], "%Y-%m-%d")))
-    db.commit()
-
-    # Predict future costs
-    future_costs = predict_future_costs(cost_trend)
-
-    return {
-        "cost_trends": cost_trend,
-        "anomalies": anomalies,
-        "recommendations": [
-            {"service": "EC2", "suggestion": "Consider reserved instances to reduce costs"},
-            {"service": "Storage", "suggestion": "Archive infrequent data to lower-cost tiers"}
-        ],
-        "predicted_costs": future_costs
-    }
 
 @router.get("/anomalies")
 def get_anomalies(db: Session = Depends(get_db)):

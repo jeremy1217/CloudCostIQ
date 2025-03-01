@@ -3,7 +3,12 @@ from sqlalchemy.orm import Session
 from database.db import get_db
 from models.recommendation import Recommendation
 from ai.optimizer import generate_optimization_suggestions
+from pydantic import BaseModel
 
+class OptimizationRequest(BaseModel):
+    provider: str
+    service: str
+    
 router = APIRouter()
 
 # Mock cost data
@@ -46,14 +51,15 @@ def get_optimization_recommendations(db: Session = Depends(get_db)):
     }
 
 @router.post("/apply")
-def apply_optimization(provider: str, service: str, db: Session = Depends(get_db)):
+def apply_optimization(request: OptimizationRequest, db: Session = Depends(get_db)):
     recommendation = db.query(Recommendation).filter(
-        Recommendation.provider == provider,
-        Recommendation.service == service
+        Recommendation.provider == request.provider,
+        Recommendation.service == request.service
     ).first()
 
     if recommendation:
-        recommendation.applied = "Applied"
+        # Change this from "Applied" string to True boolean
+        recommendation.applied = True
         db.commit()
         return {"message": "Optimization applied successfully"}
     else:

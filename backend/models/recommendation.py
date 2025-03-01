@@ -12,4 +12,4 @@ class Recommendation(Base):
     command = Column(String, nullable=False)
     savings = Column(Float, nullable=False)
     applied = Column(Boolean, default=False)
-    timestamp = Column(DateTime, nullable=False)
+    timestamp = Column(DateTime, nullable=False, default=datetime.utcnow)

@@ -2,8 +2,11 @@ from sqlalchemy import create_engine, Column, Integer, Float, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
+from backend.models.cloud_cost import CloudCost
+import os
 
-DATABASE_URL = "sqlite:///backend/database/cloudcostiq.db"  # Update path for SQLite
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///backend/database/cloudcostiq.db")
+
 
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
@@ -18,16 +21,6 @@ def get_db():
     finally:
         db.close()
 
-# Cost Insights Model
-class CostInsight(Base):
-    __tablename__ = "cost_insights"
-
-    id = Column(Integer, primary_key=True, index=True)
-    provider = Column(String, index=True)
-    service = Column(String)
-    cost = Column(Float)
-    date = Column(DateTime, default=datetime.utcnow)
-    anomaly = Column(String, nullable=True)
 
 # Create tables
 Base.metadata.create_all(bind=engine)
