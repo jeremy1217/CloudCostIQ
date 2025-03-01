@@ -59,3 +59,23 @@ def get_cost_breakdown(db: Session = Depends(get_db)):
     breakdown = [{"provider": row[0], "service": row[1], "cost": row[2]} for row in cost_data]
 
     return {"cost_breakdown": breakdown}
+
+@router.get("/cost-breakdown")
+async def get_cost_breakdown(db: Session = Depends(get_db)):
+    """Return cost breakdown for dashboard"""
+    
+    # Use CloudCost model instead of CostInsight
+    costs = db.query(CloudCost).order_by(CloudCost.timestamp.desc()).limit(10).all()
+    
+    # Format for frontend
+    result = [
+        {
+            "provider": cost.provider,
+            "service": cost.service,
+            "cost": cost.cost,
+            "date": cost.timestamp.strftime("%Y-%m-%d")
+        }
+        for cost in costs
+    ]
+    
+    return {"cost_breakdown": result}

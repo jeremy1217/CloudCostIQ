@@ -2,15 +2,16 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Container, Typography, CircularProgress, Paper } from "@mui/material";
 import { Bar, Line } from "react-chartjs-2";
+import "chart.js/auto";
 
 const CostBreakdown = () => {
-    const [data, setData] = useState(null);
+    const [costData, setCostData] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         axios.get("http://localhost:8000/insights/cost-breakdown")
             .then(response => {
-                setData(response.data);
+                setCostData(response.data.cost_breakdown || []);
                 setLoading(false);
             })
             .catch(error => {
@@ -23,39 +24,38 @@ const CostBreakdown = () => {
         return <Container><Typography>Loading cost breakdown...</Typography><CircularProgress /></Container>;
     }
 
-    if (!data) {
+    if (!costData || costData.length === 0) {
         return <Container><Typography>No cost data available.</Typography></Container>;
     }
 
-    const { cost_by_provider, cost_by_service, cost_trends, ai_insights } = data;
-
-    // Chart Data
+    // Process data for charts
+    const providerCosts = {};
+    const serviceCosts = {};
+    
+    costData.forEach(item => {
+        // Aggregate by provider
+        providerCosts[item.provider] = (providerCosts[item.provider] || 0) + item.cost;
+        
+        // Aggregate by service
+        serviceCosts[item.service] = (serviceCosts[item.service] || 0) + item.cost;
+    });
+    
+    // Format for charts
     const providerChartData = {
-        labels: Object.keys(cost_by_provider),
+        labels: Object.keys(providerCosts),
         datasets: [{
             label: "Cost by Provider ($)",
-            data: Object.values(cost_by_provider),
+            data: Object.values(providerCosts),
             backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
         }]
     };
 
     const serviceChartData = {
-        labels: Object.keys(cost_by_service),
+        labels: Object.keys(serviceCosts),
         datasets: [{
             label: "Cost by Service ($)",
-            data: Object.values(cost_by_service),
+            data: Object.values(serviceCosts),
             backgroundColor: ["#4CAF50", "#FFA726", "#42A5F5"],
-        }]
-    };
-
-    const trendsChartData = {
-        labels: cost_trends.map(entry => entry.date),
-        datasets: [{
-            label: "Total Cost Over Time",
-            data: cost_trends.map(entry => entry.total_cost),
-            borderColor: "#42A5F5",
-            fill: false,
-            tension: 0.1
         }]
     };
 
@@ -75,22 +75,6 @@ const CostBreakdown = () => {
             <Paper sx={{ padding: 2, marginBottom: 4 }}>
                 <Typography variant="h6">Cost by Service</Typography>
                 <Bar data={serviceChartData} />
-            </Paper>
-
-            {/* Cost Trends Over Time */}
-            <Paper sx={{ padding: 2, marginBottom: 4 }}>
-                <Typography variant="h6">Cost Trends Over Time</Typography>
-                <Line data={trendsChartData} />
-            </Paper>
-
-            {/* AI Insights */}
-            <Paper sx={{ padding: 2, marginBottom: 4 }}>
-                <Typography variant="h6">AI-Generated Insights 🔥</Typography>
-                {ai_insights.map((insight, index) => (
-                    <Typography key={index} sx={{ marginBottom: 1 }}>
-                        <b>{insight.provider}:</b> {insight.suggestion} (<i>{insight.savings} savings</i>)
-                    </Typography>
-                ))}
             </Paper>
         </Container>
     );

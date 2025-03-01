@@ -1,16 +1,36 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3000"; // Update if deployed
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
-// Fetch cloud costs (AWS, Azure, GCP)
+// Create an Axios instance with default config
+const apiClient = axios.create({
+  baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Add response interceptor for error handling
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Log error
+    console.error("API Error:", error);
+    
+    // You could also add toast notifications here
+    
+    return Promise.reject(error);
+  }
+);
+
+// Export API functions using the configured client
 export const getCloudCosts = async () => {
-    try {
-        const response = await axios.get(`${API_URL}/costs/ingest`);
-        return response.data;
-    } catch (error) {
-        console.error("Error fetching cloud costs:", error);
-        return [];
-    }
+  try {
+    const response = await apiClient.get("/costs/mock-costs");
+    return response.data;
+  } catch (error) {
+    return [];
+  }
 };
 
 // Get AI-powered cost predictions

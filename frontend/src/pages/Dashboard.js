@@ -7,14 +7,14 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get("http://localhost:8000/cost-breakdown")
+        axios.get("http://localhost:8000/insights/cost-breakdown") // Update the endpoint path
             .then(response => {
-                setCostBreakdown(response.data?.cost_breakdown || []);  // ✅ Ensure it's always an array
+                setCostBreakdown(response.data?.cost_breakdown || []);
                 setLoading(false);
             })
             .catch(error => {
                 console.error("Error fetching cost breakdown:", error);
-                setCostBreakdown([]);  // ✅ Fallback to an empty array on error
+                setCostBreakdown([]);
                 setLoading(false);
             });
     }, []);

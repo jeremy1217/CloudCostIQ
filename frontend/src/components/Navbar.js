@@ -9,9 +9,11 @@ const Navbar = () => {
                 <Typography variant="h6" sx={{ flexGrow: 1 }}>
                     CloudCostIQ
                 </Typography>
-                <Button color="inherit" component={Link} to="/">Home</Button>
+                <Button color="inherit" component={Link} to="/">Dashboard</Button>
                 <Button color="inherit" component={Link} to="/insights">Insights</Button>
                 <Button color="inherit" component={Link} to="/optimize">Optimize</Button>
+                <Button color="inherit" component={Link} to="/costs">Cost Table</Button>
+                <Button color="inherit" component={Link} to="/cost-breakdown">Cost Breakdown</Button>
             </Toolbar>
         </AppBar>
     );
