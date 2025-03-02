@@ -1,31 +1,55 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { Container, Typography, CircularProgress, Paper } from "@mui/material";
+import { Container, Typography, CircularProgress, Paper, Box } from "@mui/material";
 import { Bar } from "react-chartjs-2";
 import "chart.js/auto";
+import { getCostBreakdown } from "../services/api";
+import LoadingIndicator from "./LoadingIndicator";
 
 const CostBreakdown = () => {
-    const [costData, setCostData] = useState(null);
+    const [costData, setCostData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        axios.get("http://localhost:8000/insights/cost-breakdown")
-            .then(response => {
-                setCostData(response.data.cost_breakdown || []);
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const data = await getCostBreakdown();
+                setCostData(data);
+                setError(null);
+            } catch (err) {
+                console.error("Error fetching cost breakdown:", err);
+                setError("Failed to load cost breakdown data. Please try again later.");
+            } finally {
                 setLoading(false);
-            })
-            .catch(error => {
-                console.error("Error fetching cost breakdown:", error);
-                setLoading(false);
-            });
+            }
+        };
+
+        fetchData();
     }, []);
 
     if (loading) {
-        return <Container><Typography>Loading cost breakdown...</Typography><CircularProgress /></Container>;
+        return <LoadingIndicator message="Loading cost breakdown data..." />;
+    }
+
+    if (error) {
+        return (
+            <Container>
+                <Box sx={{ p: 3, textAlign: 'center' }}>
+                    <Typography color="error">{error}</Typography>
+                </Box>
+            </Container>
+        );
     }
 
     if (!costData || costData.length === 0) {
-        return <Container><Typography>No cost data available.</Typography></Container>;
+        return (
+            <Container>
+                <Box sx={{ p: 3, textAlign: 'center' }}>
+                    <Typography>No cost data available.</Typography>
+                </Box>
+            </Container>
+        );
     }
 
     // Process data for charts
@@ -55,7 +79,7 @@ const CostBreakdown = () => {
         datasets: [{
             label: "Cost by Service ($)",
             data: Object.values(serviceCosts),
-            backgroundColor: ["#4CAF50", "#FFA726", "#42A5F5"],
+            backgroundColor: ["#4CAF50", "#FFA726", "#42A5F5", "#9C27B0", "#607D8B"],
         }]
     };
 
@@ -75,6 +99,25 @@ const CostBreakdown = () => {
             <Paper sx={{ padding: 2, marginBottom: 4 }}>
                 <Typography variant="h6">Cost by Service</Typography>
                 <Bar data={serviceChartData} />
+            </Paper>
+
+            {/* Total Cost Summary */}
+            <Paper sx={{ padding: 2, marginBottom: 4 }}>
+                <Typography variant="h6">Cost Summary</Typography>
+                <Box sx={{ mt: 2 }}>
+                    <Typography variant="body1">
+                        <strong>Total Cost:</strong> ${Object.values(providerCosts).reduce((sum, cost) => sum + cost, 0).toFixed(2)}
+                    </Typography>
+                    
+                    <Typography variant="body1">
+                        <strong>Highest Service Cost:</strong> {
+                            Object.entries(serviceCosts)
+                                .sort((a, b) => b[1] - a[1])[0][0]
+                        } (${
+                            Math.max(...Object.values(serviceCosts)).toFixed(2)
+                        })
+                    </Typography>
+                </Box>
             </Paper>
         </Container>
     );

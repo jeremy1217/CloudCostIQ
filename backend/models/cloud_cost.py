@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime
-from backend.database.db import Base  # This import is now safe
+from datetime import datetime
+from backend.database.db import Base
 
 class CloudCost(Base):
     __tablename__ = "cloud_cost"
@@ -8,4 +9,6 @@ class CloudCost(Base):
     provider = Column(String, nullable=False)
     service = Column(String, nullable=False)
     cost = Column(Float, nullable=False)
-    timestamp = Column(DateTime, nullable=False)
+    date = Column(String, nullable=False)  # ISO format date string (YYYY-MM-DD)
+    timestamp = Column(DateTime, nullable=False, default=datetime.utcnow)
+    metadata = Column(String, nullable=True)  # JSON string for additional metadata

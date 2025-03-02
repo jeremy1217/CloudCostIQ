@@ -1,24 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { Table, TableHead, TableBody, TableRow, TableCell, Paper, TableContainer, Typography } from "@mui/material";
+import { Table, TableHead, TableBody, TableRow, TableCell, Paper, TableContainer, Typography, CircularProgress, Box } from "@mui/material";
+import { getCloudCosts } from "../services/api";
 
-    const CostTable = () => {
-        const mockCosts = [
-            { provider: "AWS", service: "EC2", cost: 120.50, date: "2025-02-20" },
-            { provider: "Azure", service: "VM", cost: 98.75, date: "2025-02-21" },
-            { provider: "GCP", service: "Compute Engine", cost: 85.20, date: "2025-02-22" },
-        ];
-    
-        const [costs, setCosts] = useState([]);
-    
-        useEffect(() => {
-            console.log("Fetching mock data...");
-            setTimeout(() => {
-                console.log("Mock data loaded:", mockCosts);
-                setCosts(mockCosts);
-            }, 1000);
-        }, [mockCosts]); //
+const CostTable = () => {
+    const [costs, setCosts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    console.log("Current costs state:", costs);  // Debugging
+    useEffect(() => {
+        const fetchCosts = async () => {
+            try {
+                setLoading(true);
+                const data = await getCloudCosts();
+                setCosts(data);
+                setError(null);
+            } catch (err) {
+                console.error("Error fetching costs:", err);
+                setError("Failed to load cost data. Please try again later.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCosts();
+    }, []);
+
+    if (error) {
+        return (
+            <TableContainer component={Paper}>
+                <Box sx={{ p: 3, textAlign: 'center' }}>
+                    <Typography color="error">{error}</Typography>
+                </Box>
+            </TableContainer>
+        );
+    }
 
     return (
         <TableContainer component={Paper}>
@@ -35,10 +50,18 @@ import { Table, TableHead, TableBody, TableRow, TableCell, Paper, TableContainer
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {costs.length === 0 ? (
+                    {loading ? (
                         <TableRow>
                             <TableCell colSpan={4} align="center">
-                                Loading data...
+                                <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                                    <CircularProgress size={40} />
+                                </Box>
+                            </TableCell>
+                        </TableRow>
+                    ) : costs.length === 0 ? (
+                        <TableRow>
+                            <TableCell colSpan={4} align="center">
+                                No cost data available.
                             </TableCell>
                         </TableRow>
                     ) : (

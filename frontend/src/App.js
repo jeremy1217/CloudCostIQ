@@ -1,4 +1,3 @@
-// In frontend/src/App.js
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
@@ -7,20 +6,45 @@ import Insights from "./pages/Insights";
 import Optimize from "./pages/Optimize";
 import CostTable from "./components/CostTable";
 import CostBreakdown from "./components/CostBreakdown";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
     return (
-        <Router>
-            <Navbar />
-            <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/insights" element={<Insights />} />
-                <Route path="/optimize" element={<Optimize />} />
-                <Route path="/costs" element={<CostTable />} />
-                <Route path="/cost-breakdown" element={<CostBreakdown />} />
-            </Routes>
-        </Router>
+        <ErrorBoundary>
+            <Router>
+                <Navbar />
+                <div style={{ padding: '20px' }}>
+                    <Routes>
+                        <Route path="/" element={
+                            <ErrorBoundary>
+                                <Dashboard />
+                            </ErrorBoundary>
+                        } />
+                        <Route path="/insights" element={
+                            <ErrorBoundary>
+                                <Insights />
+                            </ErrorBoundary>
+                        } />
+                        <Route path="/optimize" element={
+                            <ErrorBoundary>
+                                <Optimize />
+                            </ErrorBoundary>
+                        } />
+                        <Route path="/costs" element={
+                            <ErrorBoundary>
+                                <CostTable />
+                            </ErrorBoundary>
+                        } />
+                        <Route path="/cost-breakdown" element={
+                            <ErrorBoundary>
+                                <CostBreakdown />
+                            </ErrorBoundary>
+                        } />
+                    </Routes>
+                </div>
+            </Router>
+        </ErrorBoundary>
     );
 }
 
-export default App; // Add this line - it's crucial!
+export default App;

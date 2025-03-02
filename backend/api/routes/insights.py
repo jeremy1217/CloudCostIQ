@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 from datetime import datetime, timedelta
 import random
-from backend.database.db import SessionLocal
+from backend.database.db import get_db
 from backend.ai.anomaly import detect_anomalies
 from backend.ai.forecast import predict_future_costs
 from backend.models.cloud_cost import CloudCost
@@ -18,56 +18,57 @@ mock_costs = [
     {"date": "2025-02-24", "cost": 92.10, "service": "S3"},
 ]
 
-# Mock Cost Data (replace this with actual DB retrieval later)
-mock_cost_trends = [
-    {"date": "2025-02-10", "cost": 100.5, "service": "EC2"},
-    {"date": "2025-02-11", "cost": 98.2, "service": "EC2"},
-    {"date": "2025-02-12", "cost": 150.7, "service": "EC2"},  # Anomaly
-    {"date": "2025-02-13", "cost": 99.9, "service": "EC2"},
-    {"date": "2025-02-14", "cost": 97.3, "service": "EC2"},
-    {"date": "2025-02-15", "cost": 180.4, "service": "S3"},  # Anomaly
-    {"date": "2025-02-16", "cost": 101.2, "service": "S3"},
-]
+@router.get("/anomalies")
+def get_anomalies(db: Session = Depends(get_db)):
+    """Detect and return cost anomalies"""
+    # Use mock data for now
+    return detect_anomalies(mock_costs)
 
-# Dependency to get DB session
-def get_db():
-    db = SessionLocal()
+@router.get("/cost-breakdown")
+def get_cost_breakdown(db: Session = Depends(get_db)):
+    """Return cost breakdown data for dashboard"""
     try:
-        yield db
-    finally:
-        db.close()
+        # Try to get data from database first
+        cost_data = db.query(CloudCost).all()
+        
+        if cost_data:
+            breakdown = [
+                {"provider": cost.provider, "service": cost.service, "cost": cost.cost} 
+                for cost in cost_data
+            ]
+        else:
+            # Fall back to mock data
+            breakdown = [
+                {"provider": "AWS", "service": "EC2", "cost": 120.50},
+                {"provider": "Azure", "service": "VM", "cost": 98.75},
+                {"provider": "GCP", "service": "Compute Engine", "cost": 85.20}
+            ]
+        
+        return {"cost_breakdown": breakdown}
+    except Exception as e:
+        # Log the error and return mock data
+        print(f"Error getting cost breakdown: {str(e)}")
+        return {
+            "cost_breakdown": [
+                {"provider": "AWS", "service": "EC2", "cost": 120.50},
+                {"provider": "Azure", "service": "VM", "cost": 98.75},
+                {"provider": "GCP", "service": "Compute Engine", "cost": 85.20}
+            ]
+        }
+
+@router.get("/forecast")
+def get_forecast(days_ahead: int = 7, db: Session = Depends(get_db)):
+    """Generate cost forecast"""
+    # Mock cost data
+    cost_trend = generate_mock_costs()
+    forecast = predict_future_costs(cost_trend, days_ahead)
+    return {"forecast": forecast}
 
 def generate_mock_costs():
+    """Generate mock cost data for the last 7 days"""
     today = datetime.today()
     cost_trend = [
         {"date": (today - timedelta(days=i)).strftime("%Y-%m-%d"), "cost": round(random.uniform(50, 200), 2)}
         for i in range(7)
     ]
     return cost_trend
-
-@router.get("/anomalies")
-def get_anomalies(db: Session = Depends(get_db)):
-    """Detect and return cost anomalies"""
-    return detect_anomalies(db)
-
-@router.get("/cost-breakdown", response_model=None)
-def get_cost_breakdown(db: Session = Depends(get_db)): 
-    # Explicitly declare SQL query as text
-    cost_data = db.execute(text("SELECT provider, service, cost FROM cost_insights")).fetchall()
-    
-    # Format data properly
-    breakdown = [{"provider": row[0], "service": row[1], "cost": row[2]} for row in cost_data]
-
-    return {"cost_breakdown": breakdown}
-
-@router.get("/cost-breakdown")
-def get_cost_breakdown():
-    """Return cost breakdown data for dashboard"""
-    # Return mock data for now
-    return {
-        "cost_breakdown": [
-            {"provider": "AWS", "service": "EC2", "cost": 120.50},
-            {"provider": "Azure", "service": "VM", "cost": 98.75},
-            {"provider": "GCP", "service": "Compute Engine", "cost": 85.20}
-        ]
-    }
