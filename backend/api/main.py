@@ -1,7 +1,10 @@
-from backend.api.routes import costs, insights, actions, optimizations
+from backend.api.routes import costs, insights, actions, optimizations, forecasting, anomalies, attribution
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from app.config import settings
+import uvicorn
+
 
 app = FastAPI(title="CloudCostIQ")
 
@@ -16,6 +19,9 @@ async def global_exception_handler(request: Request, exc: Exception):
 app.include_router(costs.router, prefix="/costs", tags=["Costs"])
 app.include_router(insights.router, prefix="/insights", tags=["Insights"])
 app.include_router(optimizations.router, prefix="/optimize", tags=["Optimizations"])  # This handles all optimizations
+app.include_router(forecasting.router, prefix="/api", tags=["forecasting"])
+app.include_router(anomalies.router, prefix="/api", tags=["anomalies"])
+app.include_router(attribution.router, prefix="/api", tags=["attribution"])
 
 app.add_middleware(
     CORSMiddleware,
