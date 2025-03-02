@@ -4,8 +4,10 @@ import datetime
 import json
 from backend.database.db import SessionLocal
 from backend.models.cloud_cost import CloudCost
+import os
 
 def store_azure_cost():
+    """Return mock Azure cost data"""
     return [
         {"provider": "Azure", "service": "VM", "cost": 98.75, "date": "2025-02-21"},
         {"provider": "Azure", "service": "Storage", "cost": 50.25, "date": "2025-02-22"},
@@ -43,7 +45,7 @@ def store_azure_cost():
             service=item.service_name,
             cost=item.cost,
             date=item.date,
-            metadata=json.dumps(item)
+            extra_data=json.dumps(item)  # Use extra_data instead of metadata
         )
         db.add(cloud_cost)
 

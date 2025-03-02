@@ -2,7 +2,7 @@ from backend.api.routes import costs, insights, actions, optimizations, forecast
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from app.config import settings
+from backend.config import settings
 import uvicorn
 
 
@@ -37,4 +37,4 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host=settings.API_HOST, port=settings.API_PORT, debug=settings.API_DEBUG)

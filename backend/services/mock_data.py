@@ -1,6 +1,7 @@
 import datetime
 import random
 import uuid
+import json
 from typing import List, Dict, Any, Optional
 
 def generate_provider_service_map():
@@ -178,11 +179,19 @@ def populate_db_with_mock_data(db_session, days: int = 30, models=None):
     
     # Add to database
     for cost_data in mock_costs:
+        # Create a copy of the data with extra_data instead of metadata
+        extra_data = {
+            "resource_id": cost_data.get("resource_id", "unknown"),
+            "region": random.choice(["us-east-1", "us-west-2", "eu-west-1", "ap-southeast-1"]),
+            "account": f"account-{random.randint(1000, 9999)}"
+        }
+        
         cloud_cost = models["CloudCost"](
             provider=cost_data["provider"],
             service=cost_data["service"],
             cost=cost_data["cost"],
-            date=cost_data["date"]
+            date=cost_data["date"],
+            extra_data=json.dumps(extra_data)  # Use extra_data instead of metadata
         )
         db_session.add(cloud_cost)
     

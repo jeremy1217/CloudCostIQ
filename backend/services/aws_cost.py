@@ -5,12 +5,12 @@ from backend.database.db import SessionLocal
 from backend.models.cloud_cost import CloudCost
 
 def store_aws_cost():
+    """Return mock AWS cost data"""
     return [
         {"provider": "AWS", "service": "EC2", "cost": 120.50, "date": "2025-02-20"},
         {"provider": "Azure", "service": "VM", "cost": 98.75, "date": "2025-02-21"},
         {"provider": "GCP", "service": "Compute Engine", "cost": 85.20, "date": "2025-02-22"},
     ]
-
 
 '''
 client = boto3.client("ce")
@@ -38,7 +38,13 @@ def store_aws_cost():
             service = group["Keys"][0]
             cost = float(group["Metrics"]["UnblendedCost"]["Amount"])
 
-            cloud_cost = CloudCost(provider="AWS", service=service, cost=cost, date=date, metadata=json.dumps(group))
+            cloud_cost = CloudCost(
+                provider="AWS", 
+                service=service, 
+                cost=cost, 
+                date=date, 
+                extra_data=json.dumps(group)  # Use extra_data instead of metadata
+            )
             db.add(cloud_cost)
 
     db.commit()

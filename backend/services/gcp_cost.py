@@ -6,12 +6,14 @@ from backend.models.cloud_cost import CloudCost
 import os
 
 def store_gcp_cost():
+    """Return mock GCP cost data"""
     return [
         {"provider": "GCP", "service": "VM", "cost": 98.75, "date": "2025-02-21"},
         {"provider": "GCP", "service": "Storage", "cost": 50.25, "date": "2025-02-22"},
     ]
 
-'''# Initialize GCP Billing Client
+'''
+# Initialize GCP Billing Client
 client = billing_v1.CloudBillingClient()
 
 def get_gcp_cost():
@@ -43,7 +45,7 @@ def store_gcp_cost():
             service=item["service"],
             cost=item["cost"],
             date=item["date"],
-            metadata=json.dumps(item),
+            extra_data=json.dumps(item),  # Use extra_data instead of metadata
         )
         db.add(cloud_cost)
 
@@ -51,5 +53,4 @@ def store_gcp_cost():
     db.close()
 
     print("✅ GCP Cost Data Stored")
-
-    '''
+'''

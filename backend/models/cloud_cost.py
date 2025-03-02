@@ -11,4 +11,4 @@ class CloudCost(Base):
     cost = Column(Float, nullable=False)
     date = Column(String, nullable=False)  # ISO format date string (YYYY-MM-DD)
     timestamp = Column(DateTime, nullable=False, default=datetime.utcnow)
-    metadata = Column(String, nullable=True)  # JSON string for additional metadata
+    extra_data = Column(String, nullable=True)  # JSON string for additional metadata (renamed from 'metadata')
