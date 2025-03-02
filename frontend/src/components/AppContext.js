@@ -11,6 +11,11 @@ export function AppProvider({ children }) {
     const [error, setError] = useState(null);
     const [notifications, setNotifications] = useState([]);
 
+    // Remove a notification
+    const removeNotification = useCallback((id) => {
+        setNotifications(prev => prev.filter(notification => notification.id !== id));
+    }, []);
+
     // Add a notification
     const addNotification = useCallback((message, type = 'info') => {
         const id = Date.now();
@@ -22,12 +27,7 @@ export function AppProvider({ children }) {
         }, 5000);
         
         return id;
-    }, []);
-
-    // Remove a notification
-    const removeNotification = useCallback((id) => {
-        setNotifications(prev => prev.filter(notification => notification.id !== id));
-    }, []);
+    }, [removeNotification]); // Fixed: Added removeNotification as a dependency
 
     // Set global loading state
     const setLoading = useCallback((loading) => {

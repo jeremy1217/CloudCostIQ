@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Typography, CircularProgress, Paper, Box } from "@mui/material";
+import { Container, Typography, Paper, Box, Button } from "@mui/material";
 import { Bar } from "react-chartjs-2";
 import "chart.js/auto";
 import { getCostBreakdown } from "../services/api";
@@ -19,7 +19,7 @@ const CostBreakdown = () => {
                 setError(null);
             } catch (err) {
                 console.error("Error fetching cost breakdown:", err);
-                setError("Failed to load cost breakdown data. Please try again later.");
+                setError('Failed to load cost breakdown data. Please try again later.');
             } finally {
                 setLoading(false);
             }
@@ -37,6 +37,13 @@ const CostBreakdown = () => {
             <Container>
                 <Box sx={{ p: 3, textAlign: 'center' }}>
                     <Typography color="error">{error}</Typography>
+                    <Button 
+                        variant="contained" 
+                        sx={{ mt: 2 }} 
+                        onClick={() => window.location.reload()}
+                    >
+                        Retry
+                    </Button>
                 </Box>
             </Container>
         );

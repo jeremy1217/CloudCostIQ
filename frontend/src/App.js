@@ -6,6 +6,7 @@ import Insights from "./pages/Insights";
 import Optimize from "./pages/Optimize";
 import CostTable from "./components/CostTable";
 import CostBreakdown from "./components/CostBreakdown";
+import EnhancedAIDashboard from "./pages/EnhancedAIDashboard"; // Import the new component
 import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
@@ -38,6 +39,12 @@ function App() {
                         <Route path="/cost-breakdown" element={
                             <ErrorBoundary>
                                 <CostBreakdown />
+                            </ErrorBoundary>
+                        } />
+                        {/* Add the new Enhanced AI Dashboard route */}
+                        <Route path="/ai-dashboard" element={
+                            <ErrorBoundary>
+                                <EnhancedAIDashboard />
                             </ErrorBoundary>
                         } />
                     </Routes>

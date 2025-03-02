@@ -4,6 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from backend.config import settings
 import uvicorn
+from backend.api.routes.ai_routes import router as ai_router
 
 
 app = FastAPI(title="CloudCostIQ")
@@ -22,6 +23,7 @@ app.include_router(optimizations.router, prefix="/optimize", tags=["Optimization
 app.include_router(forecasting.router, prefix="/api", tags=["forecasting"])
 app.include_router(anomalies.router, prefix="/api", tags=["anomalies"])
 app.include_router(attribution.router, prefix="/api", tags=["attribution"])
+app.include_router(ai_router, prefix="/ai", tags=["AI Capabilities"])
 
 app.add_middleware(
     CORSMiddleware,

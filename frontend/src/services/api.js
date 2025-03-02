@@ -33,8 +33,21 @@ apiClient.interceptors.response.use(
 // Cost data API functions
 export const getCloudCosts = async () => {
   try {
-    const response = await apiClient.get("/costs/mock-costs");
-    return response.data;
+    // First try to get real data from API
+    try {
+      const response = await apiClient.get("/costs/mock-costs");
+      return response.data;
+    } catch (apiError) {
+      console.log("Using mock cloud costs data");
+      // Fall back to mock data
+      return [
+        { provider: "AWS", service: "EC2", cost: 120.50, date: "2025-02-20" },
+        { provider: "Azure", service: "VM", cost: 98.75, date: "2025-02-21" },
+        { provider: "GCP", service: "Compute Engine", cost: 85.20, date: "2025-02-22" },
+        { provider: "AWS", service: "S3", cost: 65.30, date: "2025-02-23" },
+        { provider: "AWS", service: "RDS", cost: 110.45, date: "2025-02-24" }
+      ];
+    }
   } catch (error) {
     console.error("Error fetching cloud costs:", error);
     return [];
@@ -43,8 +56,21 @@ export const getCloudCosts = async () => {
 
 export const getCostBreakdown = async () => {
   try {
-    const response = await apiClient.get("/insights/cost-breakdown");
-    return response.data.cost_breakdown || [];
+    // First try to get real data from API
+    try {
+      const response = await apiClient.get("/insights/cost-breakdown");
+      return response.data.cost_breakdown || [];
+    } catch (apiError) {
+      console.log("Using mock cost breakdown data");
+      // Fall back to mock data
+      return [
+        { provider: "AWS", service: "EC2", cost: 120.50 },
+        { provider: "Azure", service: "VM", cost: 98.75 },
+        { provider: "GCP", service: "Compute Engine", cost: 85.20 },
+        { provider: "AWS", service: "S3", cost: 65.30 },
+        { provider: "AWS", service: "RDS", cost: 110.45 }
+      ];
+    }
   } catch (error) {
     console.error("Error fetching cost breakdown:", error);
     return [];
