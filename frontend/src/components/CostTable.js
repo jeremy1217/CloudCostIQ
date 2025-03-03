@@ -1,35 +1,36 @@
-import React, { useEffect, useState } from "react";
-import { Table, TableHead, TableBody, TableRow, TableCell, Paper, TableContainer, Typography, CircularProgress, Box } from "@mui/material";
-import { getCloudCosts } from "../services/api";
+// frontend/src/components/CostTable.js
+import React from "react";
+import { Table, TableHead, TableBody, TableRow, TableCell, Paper, TableContainer, Typography, CircularProgress, Box, Button } from "@mui/material";
+import { useCloudCosts } from '../hooks/useApi';
 
 const CostTable = () => {
-    const [costs, setCosts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const { data: costs, isLoading, isError, error, refetch } = useCloudCosts();
 
-    useEffect(() => {
-        const fetchCosts = async () => {
-            try {
-                setLoading(true);
-                const data = await getCloudCosts();
-                setCosts(data);
-                setError(null);
-            } catch (err) {
-                console.error("Error fetching costs:", err);
-                setError("Failed to load cost data. Please try again later.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchCosts();
-    }, []);
-
-    if (error) {
+    if (isLoading) {
         return (
             <TableContainer component={Paper}>
                 <Box sx={{ p: 3, textAlign: 'center' }}>
-                    <Typography color="error">{error}</Typography>
+                    <CircularProgress size={40} />
+                    <Typography variant="body1" sx={{ mt: 2 }}>
+                        Loading cost data...
+                    </Typography>
+                </Box>
+            </TableContainer>
+        );
+    }
+
+    if (isError) {
+        return (
+            <TableContainer component={Paper}>
+                <Box sx={{ p: 3, textAlign: 'center' }}>
+                    <Typography color="error">{error?.message || 'Failed to load cost data. Please try again later.'}</Typography>
+                    <Button 
+                        variant="contained" 
+                        sx={{ mt: 2 }} 
+                        onClick={() => refetch()}
+                    >
+                        Retry
+                    </Button>
                 </Box>
             </TableContainer>
         );
@@ -50,15 +51,7 @@ const CostTable = () => {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {loading ? (
-                        <TableRow>
-                            <TableCell colSpan={4} align="center">
-                                <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                                    <CircularProgress size={40} />
-                                </Box>
-                            </TableCell>
-                        </TableRow>
-                    ) : costs.length === 0 ? (
+                    {!costs || costs.length === 0 ? (
                         <TableRow>
                             <TableCell colSpan={4} align="center">
                                 No cost data available.
