@@ -1,32 +1,19 @@
-import React, { useCallback } from "react";
-import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
+import React, { useState } from "react";
+import { AppBar, Toolbar, Typography, Button, Box, Menu, MenuItem } from "@mui/material";
 import { Link } from "react-router-dom";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';  // Add this import
 
 const Navbar = () => {
-    // Add prefetch functions
-    const prefetchDashboard = useCallback(() => {
-        import("../pages/Dashboard");
-    }, []);
-    
-    const prefetchInsights = useCallback(() => {
-        import("../pages/Insights");
-    }, []);
-    
-    const prefetchOptimize = useCallback(() => {
-        import("../pages/Optimize");
-    }, []);
-    
-    const prefetchCostTable = useCallback(() => {
-        import("../components/CostTable");
-    }, []);
-    
-    const prefetchCostBreakdown = useCallback(() => {
-        import("../components/CostBreakdown");
-    }, []);
-    
-    const prefetchAIDashboard = useCallback(() => {
-        import("../pages/EnhancedAIDashboard");
-    }, []);
+    const [costsAnchorEl, setCostsAnchorEl] = useState(null);
+    const openCostsMenu = Boolean(costsAnchorEl);
+
+    const handleCostsMenuClick = (event) => {
+        setCostsAnchorEl(event.currentTarget);
+    };
+
+    const handleCostsMenuClose = () => {
+        setCostsAnchorEl(null);
+    };
 
     return (
         <AppBar position="static">
@@ -35,19 +22,55 @@ const Navbar = () => {
                     CloudCostIQ
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1 }}>
+                    {/* Primary Navigation */}
                     <Button 
                         color="inherit" 
                         component={Link} 
                         to="/"
-                        onMouseEnter={prefetchDashboard}
                     >
                         Dashboard
                     </Button>
+                    
+                    {/* Costs Dropdown */}
+                    <Button 
+                        color="inherit"
+                        onClick={handleCostsMenuClick}
+                        endIcon={<ExpandMoreIcon />}
+                    >
+                        Costs
+                    </Button>
+                    <Menu
+                        anchorEl={costsAnchorEl}
+                        open={openCostsMenu}
+                        onClose={handleCostsMenuClose}
+                    >
+                        <MenuItem 
+                            component={Link} 
+                            to="/costs/by-service" 
+                            onClick={handleCostsMenuClose}
+                        >
+                            By Service
+                        </MenuItem>
+                        <MenuItem 
+                            component={Link} 
+                            to="/costs/by-provider" 
+                            onClick={handleCostsMenuClose}
+                        >
+                            By Provider
+                        </MenuItem>
+                        <MenuItem 
+                            component={Link} 
+                            to="/costs/attribution" 
+                            onClick={handleCostsMenuClose}
+                        >
+                            Cost Attribution
+                        </MenuItem>
+                    </Menu>
+                    
                     <Button 
                         color="inherit" 
                         component={Link} 
                         to="/insights"
-                        onMouseEnter={prefetchInsights}
                     >
                         Insights
                     </Button>
@@ -55,37 +78,19 @@ const Navbar = () => {
                         color="inherit" 
                         component={Link} 
                         to="/optimize"
-                        onMouseEnter={prefetchOptimize}
                     >
                         Optimize
                     </Button>
                     <Button 
                         color="inherit" 
                         component={Link} 
-                        to="/costs"
-                        onMouseEnter={prefetchCostTable}
-                    >
-                        Cost Table
-                    </Button>
-                    <Button 
-                        color="inherit" 
-                        component={Link} 
-                        to="/cost-breakdown"
-                        onMouseEnter={prefetchCostBreakdown}
-                    >
-                        Cost Breakdown
-                    </Button>
-                    <Button 
-                        color="inherit" 
-                        component={Link} 
                         to="/ai-dashboard"
-                        onMouseEnter={prefetchAIDashboard}
                         sx={{ 
                             backgroundColor: 'rgba(255,255,255,0.15)', 
                             '&:hover': { backgroundColor: 'rgba(255,255,255,0.25)' }
                         }}
                     >
-                        AI Dashboard
+                        Advanced AI
                     </Button>
                 </Box>
             </Toolbar>
