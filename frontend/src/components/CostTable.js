@@ -1,10 +1,29 @@
-// frontend/src/components/CostTable.js
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Table, TableHead, TableBody, TableRow, TableCell, Paper, TableContainer, Typography, CircularProgress, Box, Button } from "@mui/material";
-import { useCloudCosts } from '../hooks/useApi';
+import api from "../services/api";
 
 const CostTable = () => {
-    const { data: costs, isLoading, isError, error, refetch } = useCloudCosts();
+    const [costs, setCosts] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const fetchCosts = async () => {
+        setIsLoading(true);
+        try {
+            const data = await api.getCloudCosts();
+            setCosts(data);
+            setError(null);
+        } catch (err) {
+            console.error("Error fetching cost data:", err);
+            setError('Failed to load cost data. Please try again later.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchCosts();
+    }, []);
 
     if (isLoading) {
         return (
@@ -19,15 +38,15 @@ const CostTable = () => {
         );
     }
 
-    if (isError) {
+    if (error) {
         return (
             <TableContainer component={Paper}>
                 <Box sx={{ p: 3, textAlign: 'center' }}>
-                    <Typography color="error">{error?.message || 'Failed to load cost data. Please try again later.'}</Typography>
+                    <Typography color="error">{error}</Typography>
                     <Button 
                         variant="contained" 
                         sx={{ mt: 2 }} 
-                        onClick={() => refetch()}
+                        onClick={fetchCosts}
                     >
                         Retry
                     </Button>
