@@ -1,13 +1,16 @@
-import React from "react";
+import React, { Suspense, lazy } from "react"; // Add Suspense and lazy imports
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Dashboard from "./pages/Dashboard";
-import Insights from "./pages/Insights";
-import Optimize from "./pages/Optimize";
-import CostTable from "./components/CostTable";
-import CostBreakdown from "./components/CostBreakdown";
-import EnhancedAIDashboard from "./pages/EnhancedAIDashboard"; // Import the new component
 import ErrorBoundary from "./components/ErrorBoundary";
+import LoadingIndicator from "./components/LoadingIndicator"; // Import LoadingIndicator
+
+// Replace direct imports with lazy imports
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Insights = lazy(() => import("./pages/Insights"));
+const Optimize = lazy(() => import("./pages/Optimize"));
+const CostTable = lazy(() => import("./components/CostTable"));
+const CostBreakdown = lazy(() => import("./components/CostBreakdown"));
+const EnhancedAIDashboard = lazy(() => import("./pages/EnhancedAIDashboard"));
 
 function App() {
     return (
@@ -15,39 +18,40 @@ function App() {
             <Router>
                 <Navbar />
                 <div style={{ padding: '20px' }}>
-                    <Routes>
-                        <Route path="/" element={
-                            <ErrorBoundary>
-                                <Dashboard />
-                            </ErrorBoundary>
-                        } />
-                        <Route path="/insights" element={
-                            <ErrorBoundary>
-                                <Insights />
-                            </ErrorBoundary>
-                        } />
-                        <Route path="/optimize" element={
-                            <ErrorBoundary>
-                                <Optimize />
-                            </ErrorBoundary>
-                        } />
-                        <Route path="/costs" element={
-                            <ErrorBoundary>
-                                <CostTable />
-                            </ErrorBoundary>
-                        } />
-                        <Route path="/cost-breakdown" element={
-                            <ErrorBoundary>
-                                <CostBreakdown />
-                            </ErrorBoundary>
-                        } />
-                        {/* Add the new Enhanced AI Dashboard route */}
-                        <Route path="/ai-dashboard" element={
-                            <ErrorBoundary>
-                                <EnhancedAIDashboard />
-                            </ErrorBoundary>
-                        } />
-                    </Routes>
+                    <Suspense fallback={<LoadingIndicator message="Loading page..." />}>
+                        <Routes>
+                            <Route path="/" element={
+                                <ErrorBoundary>
+                                    <Dashboard />
+                                </ErrorBoundary>
+                            } />
+                            <Route path="/insights" element={
+                                <ErrorBoundary>
+                                    <Insights />
+                                </ErrorBoundary>
+                            } />
+                            <Route path="/optimize" element={
+                                <ErrorBoundary>
+                                    <Optimize />
+                                </ErrorBoundary>
+                            } />
+                            <Route path="/costs" element={
+                                <ErrorBoundary>
+                                    <CostTable />
+                                </ErrorBoundary>
+                            } />
+                            <Route path="/cost-breakdown" element={
+                                <ErrorBoundary>
+                                    <CostBreakdown />
+                                </ErrorBoundary>
+                            } />
+                            <Route path="/ai-dashboard" element={
+                                <ErrorBoundary>
+                                    <EnhancedAIDashboard />
+                                </ErrorBoundary>
+                            } />
+                        </Routes>
+                    </Suspense>
                 </div>
             </Router>
         </ErrorBoundary>
