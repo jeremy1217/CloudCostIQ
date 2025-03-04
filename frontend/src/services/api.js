@@ -450,8 +450,74 @@ export const getCombinedInsights = async (params = {}) => {
   }
 };
 
-// A default export of all functions
+
+// Multi-Cloud Comparison API functions
+export const getProviderComparison = async (timeRange = 'month', serviceCategory = 'all') => {
+  try {
+    const response = await apiClient.get('/multi-cloud/comparison', {
+      params: { timeRange, serviceCategory }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching provider comparison:', error);
+    // For demo, you could add mock data generation here as a fallback
+    return [];
+  }
+};
+
+export const getMigrationAnalysis = async (sourceProvider = 'AWS', targetProvider = 'Azure') => {
+  try {
+    const response = await apiClient.get('/multi-cloud/migration-analysis', {
+      params: { sourceProvider, targetProvider }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching migration analysis:', error);
+    // For demo, you could add mock data generation here as a fallback
+    return {};
+  }
+};
+
+export const getCrossCloudOptimizations = async () => {
+  try {
+    const response = await apiClient.get('/multi-cloud/optimizations');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching cross-cloud optimizations:', error);
+    // For demo, you could add mock data generation here as a fallback
+    return [];
+  }
+};
+
+export const generateMigrationPlan = async (sourceProvider, targetProvider, options = {}) => {
+  try {
+    const response = await apiClient.post('/multi-cloud/migration-plan', {
+      sourceProvider,
+      targetProvider,
+      ...options
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error generating migration plan:', error);
+    throw new Error('Failed to generate migration plan');
+  }
+};
+
+export const getServiceMapping = async (sourceProvider, targetProvider) => {
+  try {
+    const response = await apiClient.get('/multi-cloud/service-mapping', {
+      params: { sourceProvider, targetProvider }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching service mapping:', error);
+    return [];
+  }
+};
+
+// Update the default export to include the new functions
 const api = {
+  // Existing functions
   getCloudCosts,
   getCostBreakdown,
   getCostPredictions,
@@ -465,7 +531,14 @@ const api = {
   configureAI,
   generateForecast,
   detectAnomalies,
-  getCombinedInsights
+  getCombinedInsights,
+  
+  // New multi-cloud functions
+  getProviderComparison,
+  getMigrationAnalysis,
+  getCrossCloudOptimizations,
+  generateMigrationPlan,
+  getServiceMapping
 };
 
-export default api
+export default api;
