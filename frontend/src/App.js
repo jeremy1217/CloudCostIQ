@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import ErrorBoundary from "./components/ErrorBoundary";
 import LoadingIndicator from "./components/LoadingIndicator";
+import MultiCloudComparisonPage from './pages/MultiCloudComparisonPage';
 
 // Lazy load pages
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -12,6 +13,7 @@ const CostAttribution = lazy(() => import("./pages/costs/CostAttribution"));
 const Insights = lazy(() => import("./pages/Insights"));
 const Optimize = lazy(() => import("./pages/Optimize"));
 const EnhancedAIDashboard = lazy(() => import("./pages/EnhancedAIDashboard"));
+
 
 function App() {
     return (
@@ -26,7 +28,8 @@ function App() {
                             <Route path="/insights" element={<Insights />} />
                             <Route path="/optimize" element={<Optimize />} />
                             <Route path="/ai-dashboard" element={<EnhancedAIDashboard />} />
-                            
+                            <Route path="/multi-cloud" element={<MultiCloudComparisonPage />} />
+
                             {/* Costs sub-routes */}
                             <Route path="/costs/by-service" element={<CostsByService />} />
                             <Route path="/costs/by-provider" element={<CostsByProvider />} />

@@ -2,8 +2,11 @@
   "dependencies": {
     "@mui/icons-material": "^6.4.5",
     "@mui/material": "^6.4.5",
+    "@reduxjs/toolkit": "^2.6.0",
     "axios": "^1.7.9",
+    "react-redux": "^9.2.0",
     "react-router-dom": "^7.2.0",
-    "recharts": "^2.15.1"
+    "recharts": "^2.15.1",
+    "redux": "^5.0.1"
   }
 }

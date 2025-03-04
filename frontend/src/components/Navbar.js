@@ -84,6 +84,13 @@ const Navbar = () => {
                     <Button 
                         color="inherit" 
                         component={Link} 
+                        to="/multi-cloud"
+                    >
+                        Mult-Cloud
+                    </Button>
+                    <Button 
+                        color="inherit" 
+                        component={Link} 
                         to="/ai-dashboard"
                         sx={{ 
                             backgroundColor: 'rgba(255,255,255,0.15)', 
@@ -92,6 +99,7 @@ const Navbar = () => {
                     >
                         Advanced AI
                     </Button>
+
                 </Box>
             </Toolbar>
         </AppBar>
