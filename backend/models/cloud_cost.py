@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime
+# Update backend/models/cloud_cost.py
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime
 from backend.database.db import Base
 
@@ -11,4 +13,8 @@ class CloudCost(Base):
     cost = Column(Float, nullable=False)
     date = Column(String, nullable=False)  # ISO format date string (YYYY-MM-DD)
     timestamp = Column(DateTime, nullable=False, default=datetime.utcnow)
-    extra_data = Column(String, nullable=True)  # JSON string for additional metadata (renamed from 'metadata')
+    extra_data = Column(String, nullable=True)  # JSON string for additional metadata
+    
+    # User relationship
+    user_id = Column(Integer, ForeignKey("users.id"))
+    user = relationship("UserModel", back_populates="cloud_costs")

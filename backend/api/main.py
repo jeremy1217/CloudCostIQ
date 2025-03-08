@@ -3,10 +3,49 @@ from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 import json
 from datetime import datetime
+from fastapi.middleware.cors import CORSMiddleware
 
 from auth import get_current_user
-from models.user import User
+from backend.auth.models.user import User
 from services.multi_cloud_service import MultiCloudService
+from backend.api.routes.costs import router as costs_router
+from backend.api.routes.insights import router as insights_router
+
+# Import auth dependencies
+from backend.auth.utils import get_current_active_user, has_role
+
+app = FastAPI(title="CloudCostIQ API")
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, set specific origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Add auth routers
+app.include_router(auth_router)
+
+# Add existing routers with auth protection
+app.include_router(costs_router, dependencies=[Depends(get_current_active_user)])
+app.include_router(insights_router, dependencies=[Depends(get_current_active_user)])
+app.include_router(api_keys_router)
+
+# Add admin-only routes with role-based protection
+admin_router = FastAPI()
+app.include_router(
+    admin_router,
+    prefix="/admin",
+    dependencies=[Depends(has_role(["admin"]))],
+    tags=["admin"]
+)
+
+# Root endpoint
+@app.get("/")
+async def root():
+    return {"message": "Welcome to CloudCostIQ API"}
 
 # Create router for multi-cloud endpoints
 multi_cloud_router = APIRouter(

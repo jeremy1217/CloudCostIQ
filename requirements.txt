@@ -13,3 +13,7 @@ pytest==7.3.1
 httpx==0.23.3
 pmdarima==2.0.3
 prophet==1.1.4
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.5
+cryptography==38.0.4
