@@ -1,4 +1,13 @@
 import axios from "axios";
+import {
+  getMockHistoricalCostData,
+  getMockForecastData,
+  getMockAnomalyData,
+  getMockCostAttributionData,
+  getMockUntaggedResourcesData,
+  getMockOptimizationRecommendations,
+  getMockCombinedInsights
+} from "./mockData";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
@@ -29,76 +38,6 @@ apiClient.interceptors.response.use(
     return Promise.reject(error.response?.data || error);
   }
 );
-
-// Generate mock optimization recommendations
-const generateMockOptimizationRecommendations = () => {
-  const current_recommendations = [
-    {
-      provider: "AWS",
-      service: "EC2",
-      suggestion: "Use Reserved Instances to save costs.",
-      command: "aws ec2 modify-instance-attribute --instance-id i-1234567890abcdef0 --instance-type reserved",
-      savings: 345.67,
-      applied: false
-    },
-    {
-      provider: "Azure",
-      service: "VM",
-      suggestion: "Resize underutilized virtual machines to optimize costs.",
-      command: "az vm resize --resource-group myResourceGroup --name myVM --size Standard_B2s",
-      savings: 128.90,
-      applied: false
-    },
-    {
-      provider: "AWS",
-      service: "S3",
-      suggestion: "Configure lifecycle policies to move data to lower-cost storage tiers.",
-      command: "aws s3api put-bucket-lifecycle-configuration --bucket my-bucket --lifecycle-configuration file://lifecycle.json",
-      savings: 87.45,
-      applied: false
-    },
-    {
-      provider: "GCP",
-      service: "Compute Engine",
-      suggestion: "Enable Committed Use Discounts for stable workloads.",
-      command: "gcloud compute commitments create my-commitment --plan 12-month --region us-central1 --resources vcpu=4,memory=16GB",
-      savings: 156.78,
-      applied: false
-    },
-    {
-      provider: "AWS",
-      service: "RDS",
-      suggestion: "Delete unused database snapshots.",
-      command: "aws rds delete-db-snapshot --db-snapshot-identifier my-snapshot-id",
-      savings: 42.35,
-      applied: false
-    }
-  ];
-
-  const past_recommendations = [
-    {
-      provider: "AWS",
-      service: "Lambda",
-      suggestion: "Optimize Lambda function memory allocations.",
-      command: "aws lambda update-function-configuration --function-name my-function --memory-size 512",
-      savings: 18.90,
-      applied: true
-    },
-    {
-      provider: "Azure",
-      service: "Storage",
-      suggestion: "Use Azure Blob lifecycle management for data retention.",
-      command: "az storage account management-policy create --account-name myAccount --resource-group myRG --policy @policy.json",
-      savings: 32.55,
-      applied: true
-    }
-  ];
-
-  return {
-    current_recommendations,
-    past_recommendations
-  };
-};
 
 // Cost data API functions
 export const getCloudCosts = async () => {
@@ -154,7 +93,10 @@ export const getCostPredictions = async (data = {}) => {
     return response.data;
   } catch (error) {
     console.error("Error fetching cost predictions:", error);
-    return { historical_data: [], forecast_data: [] };
+    // Use mock data as fallback
+    const historicalData = getMockHistoricalCostData(30);
+    const forecastData = getMockForecastData(historicalData, 14);
+    return { historical_data: historicalData, forecast_data: forecastData };
   }
 };
 
@@ -164,7 +106,8 @@ export const getAnomalyDetection = async (data = {}) => {
     return response.data.anomalies || [];
   } catch (error) {
     console.error("Error detecting cost anomalies:", error);
-    return [];
+    // Use mock data as fallback
+    return getMockAnomalyData();
   }
 };
 
@@ -176,7 +119,8 @@ export const getCostAttribution = async (attributionType = 'team', timeRange = '
     return response.data.attribution || [];
   } catch (error) {
     console.error("Error fetching cost attribution:", error);
-    return [];
+    // Use mock data as fallback
+    return getMockCostAttributionData(attributionType);
   }
 };
 
@@ -186,7 +130,8 @@ export const getUntaggedResources = async () => {
     return response.data.untagged_resources || [];
   } catch (error) {
     console.error("Error fetching untagged resources:", error);
-    return [];
+    // Use mock data as fallback
+    return getMockUntaggedResourcesData();
   }
 };
 
@@ -205,12 +150,12 @@ export const getOptimizationRecommendations = async () => {
     } catch (apiError) {
       console.log("Using mock optimization recommendations data");
       // Fall back to mock data
-      return generateMockOptimizationRecommendations();
+      return getMockOptimizationRecommendations();
     }
   } catch (error) {
     console.error("Error fetching optimization recommendations:", error);
     // Return mock data as a last resort
-    return generateMockOptimizationRecommendations();
+    return getMockOptimizationRecommendations();
   }
 };
 
@@ -235,129 +180,6 @@ export const ingestCostData = async () => {
   }
 };
 
-// Generate mock data for AI features
-const generateMockAIStatus = () => {
-  return {
-    enhanced_ai_enabled: true,
-    capabilities: {
-      forecasting: {
-        algorithms: ["linear", "arima", "exp_smoothing", "random_forest", "auto"],
-        max_forecast_days: 365,
-        min_data_points: 5
-      },
-      anomaly_detection: {
-        methods: ["zscore", "isolation_forest", "dbscan", "seasonal_decompose", "ensemble"],
-        root_cause_analysis: true
-      },
-      optimization: {
-        categories: [
-          "instance_rightsizing",
-          "reserved_instances",
-          "storage_optimization",
-          "idle_resources",
-          "licensing_optimization"
-        ]
-      }
-    },
-    version: "1.0.0",
-    last_updated: "2025-03-02"
-  };
-};
-
-// Generate mock combined insights
-const generateMockCombinedInsights = (params = {}) => {
-  // Calculate dates for historical and forecast data
-  const today = new Date();
-  const daysToAnalyze = params.days || 30;
-  const daysToForecast = params.forecast_days || 14;
-  
-  // Generate historical data
-  const historicalData = [];
-  for (let i = daysToAnalyze - 1; i >= 0; i--) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - i);
-    const cost = 100 + (daysToAnalyze - i) * 2 + (Math.random() * 20 - 10);
-    historicalData.push({
-      date: date.toISOString().split('T')[0],
-      cost: parseFloat(cost.toFixed(2))
-    });
-  }
-  
-  // Generate forecast data
-  const forecastData = [];
-  const lastHistoricalCost = historicalData[historicalData.length - 1].cost;
-  for (let i = 1; i <= daysToForecast; i++) {
-    const date = new Date(today);
-    date.setDate(date.getDate() + i);
-    const trendFactor = 1 + (i * 0.01);
-    const randomFactor = 1 + ((Math.random() * 0.1) - 0.05);
-    const predictedCost = lastHistoricalCost * trendFactor * randomFactor;
-    const uncertaintyFactor = 0.05 + (i * 0.005);
-    
-    forecastData.push({
-      date: date.toISOString().split('T')[0],
-      predicted_cost: parseFloat(predictedCost.toFixed(2)),
-      lower_bound: parseFloat((predictedCost * (1 - uncertaintyFactor)).toFixed(2)),
-      upper_bound: parseFloat((predictedCost * (1 + uncertaintyFactor)).toFixed(2))
-    });
-  }
-  
-  // Generate anomalies
-  const anomalies = [
-    {
-      date: '2025-02-25',
-      service: 'EC2',
-      cost: 250.75,
-      baseline_cost: 150.25,
-      cost_difference: 100.50,
-      anomaly_score: 3.2,
-      root_cause: {
-        primary_cause: 'Increase in running instances or workload spikes.'
-      }
-    },
-    {
-      date: '2025-02-28',
-      service: 'S3',
-      cost: 180.40,
-      baseline_cost: 90.20,
-      cost_difference: 90.20,
-      anomaly_score: 2.8,
-      root_cause: {
-        primary_cause: 'High data transfer or increased storage consumption.'
-      }
-    }
-  ];
-  
-  // Get recommendations from our existing mock function
-  const optimizationData = generateMockOptimizationRecommendations();
-  
-  // Calculate total costs and savings
-  const totalHistoricalCost = historicalData.reduce((sum, item) => sum + item.cost, 0);
-  const totalForecastCost = forecastData.reduce((sum, item) => sum + item.predicted_cost, 0);
-  const totalPotentialSavings = optimizationData.current_recommendations.reduce(
-    (sum, rec) => sum + (rec.savings || 0), 0
-  );
-  
-  return {
-    summary: {
-      total_cost: parseFloat(totalHistoricalCost.toFixed(2)),
-      forecast_total: parseFloat(totalForecastCost.toFixed(2)),
-      anomaly_count: anomalies.length,
-      potential_savings: parseFloat(totalPotentialSavings.toFixed(2)),
-      days_analyzed: daysToAnalyze,
-      days_forecasted: daysToForecast
-    },
-    forecast: forecastData,
-    anomalies: anomalies,
-    optimizations: optimizationData.current_recommendations,
-    ai_metadata: {
-      forecast_algorithm: 'ensemble',
-      anomaly_method: 'isolation_forest',
-      optimization_categories: 5
-    }
-  };
-};
-
 // AI Dashboard API functions
 export const getAIStatus = async () => {
   try {
@@ -365,7 +187,32 @@ export const getAIStatus = async () => {
     return response.data;
   } catch (error) {
     console.log("Using mock AI status data");
-    return generateMockAIStatus();
+    // Return mock AI status
+    return {
+      enhanced_ai_enabled: true,
+      capabilities: {
+        forecasting: {
+          algorithms: ["linear", "arima", "exp_smoothing", "random_forest", "auto"],
+          max_forecast_days: 365,
+          min_data_points: 5
+        },
+        anomaly_detection: {
+          methods: ["zscore", "isolation_forest", "dbscan", "seasonal_decompose", "ensemble"],
+          root_cause_analysis: true
+        },
+        optimization: {
+          categories: [
+            "instance_rightsizing",
+            "reserved_instances",
+            "storage_optimization",
+            "idle_resources",
+            "licensing_optimization"
+          ]
+        }
+      },
+      version: "1.0.0",
+      last_updated: "2025-03-02"
+    };
   }
 };
 
@@ -380,8 +227,18 @@ export const configureAI = async (enableEnhanced) => {
     return {
       message: `Enhanced AI capabilities ${enableEnhanced ? 'enabled' : 'disabled'}`,
       status: {
-        ...generateMockAIStatus(),
-        enhanced_ai_enabled: enableEnhanced
+        enhanced_ai_enabled: enableEnhanced,
+        capabilities: {
+          forecasting: {
+            algorithms: ["linear", "arima", "exp_smoothing", "random_forest", "auto"],
+            max_forecast_days: 365,
+            min_data_points: 5
+          },
+          anomaly_detection: {
+            methods: ["zscore", "isolation_forest", "dbscan", "seasonal_decompose", "ensemble"],
+            root_cause_analysis: true
+          }
+        }
       }
     };
   }
@@ -397,12 +254,12 @@ export const generateForecast = async (params = {}) => {
     return response.data;
   } catch (error) {
     console.log("Using mock forecast data");
-    const insights = generateMockCombinedInsights({
-      days: 30,
-      forecast_days: params.days_ahead || 7
-    });
+    // Use mock data as fallback
+    const historicalData = getMockHistoricalCostData(30);
+    const forecastData = getMockForecastData(historicalData, params.days_ahead || 7);
+    
     return {
-      forecast: insights.forecast,
+      forecast: forecastData,
       algorithm_used: params.algorithm || "auto",
       algorithm_name: "Ensemble Method",
       data_points_used: 30,
@@ -423,9 +280,9 @@ export const detectAnomalies = async (params = {}) => {
     return response.data;
   } catch (error) {
     console.log("Using mock anomaly data");
-    const insights = generateMockCombinedInsights();
+    // Use mock data as fallback
     return {
-      anomalies: insights.anomalies,
+      anomalies: getMockAnomalyData(),
       detection_method: params.method || "ensemble",
       method_name: "Ensemble Method",
       threshold: params.threshold || 2.0,
@@ -446,10 +303,10 @@ export const getCombinedInsights = async (params = {}) => {
     return response.data;
   } catch (error) {
     console.log("Using mock combined insights data");
-    return generateMockCombinedInsights(params);
+    // Use mock data as fallback
+    return getMockCombinedInsights(params);
   }
 };
-
 
 // Multi-Cloud Comparison API functions
 export const getProviderComparison = async (timeRange = 'month', serviceCategory = 'all') => {
@@ -460,8 +317,43 @@ export const getProviderComparison = async (timeRange = 'month', serviceCategory
     return response.data;
   } catch (error) {
     console.error('Error fetching provider comparison:', error);
-    // For demo, you could add mock data generation here as a fallback
-    return [];
+    // For demo, fallback to mock data
+    return {
+      serviceComparison: [
+        {
+          serviceCategory: "Compute",
+          awsCost: 4500,
+          gcpCost: 3800,
+          azureCost: 4200
+        },
+        {
+          serviceCategory: "Storage",
+          awsCost: 2100,
+          gcpCost: 2300,
+          azureCost: 1900
+        },
+        {
+          serviceCategory: "Database",
+          awsCost: 1800,
+          gcpCost: 1600,
+          azureCost: 1900
+        },
+        {
+          serviceCategory: "Networking",
+          awsCost: 1300,
+          gcpCost: 1000,
+          azureCost: 1300
+        }
+      ],
+      totalCosts: {
+        aws: 9700,
+        gcp: 8700,
+        azure: 9300
+      },
+      lowestCostProvider: "GCP",
+      potentialSavings: 1000,
+      potentialAnnualSavings: 12000
+    };
   }
 };
 
@@ -473,7 +365,7 @@ export const getMigrationAnalysis = async (sourceProvider = 'AWS', targetProvide
     return response.data;
   } catch (error) {
     console.error('Error fetching migration analysis:', error);
-    // For demo, you could add mock data generation here as a fallback
+    // Mock data fallback would go here
     return {};
   }
 };
@@ -484,7 +376,7 @@ export const getCrossCloudOptimizations = async () => {
     return response.data;
   } catch (error) {
     console.error('Error fetching cross-cloud optimizations:', error);
-    // For demo, you could add mock data generation here as a fallback
+    // Mock data fallback would go here
     return [];
   }
 };
@@ -517,23 +409,31 @@ export const getServiceMapping = async (sourceProvider, targetProvider) => {
 
 // Update the default export to include the new functions
 const api = {
-  // Existing functions
+  // Cost data functions
   getCloudCosts,
   getCostBreakdown,
+  
+  // AI insights functions
   getCostPredictions,
   getAnomalyDetection,
   getCostAttribution,
   getUntaggedResources,
+  
+  // Optimization functions
   getOptimizationRecommendations,
   applyOptimization,
+  
+  // Data management functions
   ingestCostData,
+  
+  // AI Dashboard functions
   getAIStatus,
   configureAI,
   generateForecast,
   detectAnomalies,
   getCombinedInsights,
   
-  // New multi-cloud functions
+  // Multi-cloud functions
   getProviderComparison,
   getMigrationAnalysis,
   getCrossCloudOptimizations,

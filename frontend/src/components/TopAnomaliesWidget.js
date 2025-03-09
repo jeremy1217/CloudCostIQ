@@ -1,14 +1,23 @@
 import React from 'react';
 import { Box, Typography, List, ListItem, ListItemText, Chip } from '@mui/material';
+import { getMockAnomalyData } from '../services/mockData';
 
 const TopAnomaliesWidget = ({ limit = 3 }) => {
-    // Mock data - replace with API call in production
-    const anomalies = [
-        { id: 1, service: 'EC2', impact: '$120.50', date: '2025-03-01', severity: 'high' },
-        { id: 2, service: 'S3', impact: '$87.30', date: '2025-02-28', severity: 'medium' },
-        { id: 3, service: 'RDS', impact: '$65.40', date: '2025-02-27', severity: 'low' },
-        { id: 4, service: 'Lambda', impact: '$45.20', date: '2025-02-26', severity: 'medium' }
-    ].slice(0, limit);
+    // Get anomalies from centralized mock data service instead of hardcoding here
+    const allAnomalies = getMockAnomalyData();
+    
+    // Sort by timestamp (newest first) and limit to requested number
+    const anomalies = allAnomalies
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+        .slice(0, limit)
+        .map(anomaly => ({
+            id: anomaly.id,
+            service: anomaly.service,
+            impact: `$${(anomaly.anomalyCost - anomaly.baseCost).toFixed(2)}`,
+            date: anomaly.timestamp.split('T')[0],
+            severity: anomaly.deviation > 200 ? 'high' : 
+                     anomaly.deviation > 100 ? 'medium' : 'low'
+        }));
 
     // Function to determine severity color
     const getSeverityColor = (severity) => {

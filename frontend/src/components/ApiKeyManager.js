@@ -34,7 +34,7 @@ const ApiKeyManager = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [newKey, setNewKey] = useState({ name: '', provider: 'AWS' });
+  const [newKey, setNewKey] = useState({ name: '', provider: 'AWS', credentials: {} });
   const [createdKey, setCreatedKey] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
 
@@ -98,14 +98,6 @@ const ApiKeyManager = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  // Add to ApiKeyManager.js
-
-// Update the state to include credentials
-const [newKey, setNewKey] = useState({ 
-  name: '', 
-  provider: 'AWS',
-  credentials: {}
-});
 
 // Add provider-specific credential fields
 const renderCredentialFields = () => {

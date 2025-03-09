@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import jwt_decode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 
@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
       if (token) {
         try {
           // Validate token by checking expiration
-          const decoded = jwt_decode(token);
+          const decoded = jwtDecode(token);
           
           // Check if token is expired
           if (decoded.exp * 1000 < Date.now()) {
@@ -71,7 +71,7 @@ export function AuthProvider({ children }) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
       
       // Decode token to get user info
-      const decoded = jwt_decode(access_token);
+      const decoded = jwtDecode(access_token);
       setUser({ username: decoded.sub });
       
       // Redirect to the dashboard

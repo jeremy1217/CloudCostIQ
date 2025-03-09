@@ -1,53 +1,11 @@
 import React, { useState, useEffect } from 'react';
 // import axios from 'axios';  // Uncomment when ready to use for API calls
-
-// Simple linear regression function for forecasting
-const linearRegression = (data) => {
-  const n = data.length;
-  if (n < 2) return { slope: 0, intercept: data.length > 0 ? data[0].cost : 0 };
-  
-  let sumX = 0;
-  let sumY = 0;
-  let sumXY = 0;
-  let sumXX = 0;
-  
-  for (let i = 0; i < n; i++) {
-    sumX += i;
-    sumY += data[i].cost;
-    sumXY += i * data[i].cost;
-    sumXX += i * i;
-  }
-  
-  const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-  const intercept = (sumY - slope * sumX) / n;
-  
-  return { slope, intercept };
-};
-
-// Generate forecast data points
-const generateForecast = (historicalData, months) => {
-  const { slope, intercept } = linearRegression(historicalData);
-  const forecast = [];
-  
-  const lastDate = new Date(historicalData[historicalData.length - 1].date);
-  
-  for (let i = 1; i <= months; i++) {
-    const forecastDate = new Date(lastDate);
-    forecastDate.setMonth(forecastDate.getMonth() + i);
-    
-    const predictedCost = intercept + slope * (historicalData.length - 1 + i);
-    // Ensure cost isn't negative
-    const cost = Math.max(0, predictedCost);
-    
-    forecast.push({
-      date: forecastDate.toISOString().split('T')[0],
-      cost: Math.round(cost * 100) / 100,
-      isProjected: true
-    });
-  }
-  
-  return forecast;
-};
+import { 
+  getMockHistoricalCostData, 
+  getMockForecastData, 
+  linearRegression, 
+  formatDate 
+} from '../services/mockData';
 
 function CostForecasting() {
   const [historicalData, setHistoricalData] = useState([]);
@@ -57,18 +15,11 @@ function CostForecasting() {
   const [selectedService, setSelectedService] = useState('all');
   const [confidenceLevel, setConfidenceLevel] = useState('medium');
   
-  // Mock data - replace with API call in production
+  // Fetch data - now using our centralized mock data service
   useEffect(() => {
     // Simulate API call delay
     setTimeout(() => {
-      const mockHistoricalData = [
-        { date: '2024-09-01', cost: 12346.78 },
-        { date: '2024-10-01', cost: 13245.92 },
-        { date: '2024-11-01', cost: 14532.45 },
-        { date: '2024-12-01', cost: 15678.32 },
-        { date: '2025-01-01', cost: 15124.56 },
-        { date: '2025-02-01', cost: 16789.23 }
-      ];
+      const mockHistoricalData = getMockHistoricalCostData(6); // 6 months of data
       setHistoricalData(mockHistoricalData);
       setIsLoading(false);
     }, 1000);
@@ -82,10 +33,9 @@ function CostForecasting() {
     }
   }, [historicalData, forecastMonths]);
   
-  // Format date for display
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  // Generate forecast data points - using the linearRegression helper from mockData service
+  const generateForecast = (data, months) => {
+    return getMockForecastData(data, months);
   };
   
   // Calculate confidence interval based on selected level
@@ -244,11 +194,11 @@ function CostForecasting() {
                 
                 {/* Forecast data (future months) */}
                 {forecastData.map((item, index) => {
-                  const interval = getConfidenceInterval(item.cost);
+                  const interval = getConfidenceInterval(item.predictedCost);
                   return (
                     <tr key={`forecast-${index}`} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: '#fafbfc' }}>
                       <td style={{ padding: '12px' }}>{formatDate(item.date)}</td>
-                      <td style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>${item.cost.toLocaleString()}</td>
+                      <td style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>${item.predictedCost.toLocaleString()}</td>
                       <td style={{ padding: '12px', textAlign: 'right', color: '#047857' }}>${Math.round(interval.lower).toLocaleString()}</td>
                       <td style={{ padding: '12px', textAlign: 'right', color: '#b91c1c' }}>${Math.round(interval.upper).toLocaleString()}</td>
                       <td style={{ padding: '12px' }}>
@@ -289,7 +239,7 @@ function CostForecasting() {
             <div>
               <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Total Forecast ({forecastMonths} mo)</p>
               <p style={{ fontSize: '18px', fontWeight: 'bold' }}>
-                ${forecastData.reduce((sum, item) => sum + item.cost, 0).toLocaleString()}
+                ${forecastData.reduce((sum, item) => sum + item.predictedCost, 0).toLocaleString()}
               </p>
             </div>
             
@@ -303,7 +253,7 @@ function CostForecasting() {
             <div>
               <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Monthly Average (Forecast)</p>
               <p style={{ fontSize: '18px', fontWeight: 'bold' }}>
-                ${(forecastData.reduce((sum, item) => sum + item.cost, 0) / forecastData.length).toLocaleString()}
+                ${(forecastData.reduce((sum, item) => sum + item.predictedCost, 0) / forecastData.length).toLocaleString()}
               </p>
             </div>
           </div>

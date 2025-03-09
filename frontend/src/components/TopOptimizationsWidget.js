@@ -1,14 +1,22 @@
 import React from 'react';
 import { Box, Typography, List, ListItem, ListItemText, Chip } from '@mui/material';
+import { getMockOptimizationRecommendations } from '../services/mockData';
 
 const TopOptimizationsWidget = ({ limit = 3 }) => {
-    // Mock data - replace with API call in production
-    const optimizations = [
-        { id: 1, service: 'EC2', savings: '$145.30', description: 'Right-size underutilized instances', priority: 'high' },
-        { id: 2, service: 'S3', savings: '$87.15', description: 'Use lifecycle policies for older objects', priority: 'medium' },
-        { id: 3, service: 'RDS', savings: '$65.40', description: 'Delete unused snapshots', priority: 'low' },
-        { id: 4, service: 'EC2', savings: '$55.20', description: 'Reserved Instance opportunity', priority: 'medium' }
-    ].slice(0, limit);
+    // Get optimization recommendations from centralized mock data service
+    const allRecommendations = getMockOptimizationRecommendations();
+    
+    // Extract and format the necessary data
+    const optimizations = allRecommendations.current_recommendations
+        .slice(0, limit)
+        .map(rec => ({
+            id: rec.id || Math.random().toString(36).substring(2, 9),
+            service: rec.service,
+            savings: `$${rec.savings.toFixed(2)}`,
+            description: rec.suggestion,
+            priority: rec.savings > 200 ? 'high' : 
+                      rec.savings > 100 ? 'medium' : 'low'
+        }));
 
     // Function to determine priority color
     const getPriorityColor = (priority) => {

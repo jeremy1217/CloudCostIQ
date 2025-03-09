@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 
 const Login = () => {
+  // Initialize form with useForm hook
   const { register, handleSubmit, formState: { errors } } = useForm();
   const { login, loading, error } = useAuth();
   const [showPassword, setShowPassword] = useState(false);

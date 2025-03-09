@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 // import axios from 'axios';  // Uncomment when ready for API calls
+import { getMockAnomalyData, formatDate } from '../services/mockData';
 
 function AnomalyDetection() {
   const [anomalies, setAnomalies] = useState([]);
@@ -12,109 +13,11 @@ function AnomalyDetection() {
     minImpact: 100
   });
   
-  // Mock data - replace with API call in production
+  // Mock data - replaced with our centralized mock data service
   useEffect(() => {
     // Simulate API call delay
     setTimeout(() => {
-      const mockAnomalies = [
-        {
-          id: 1,
-          timestamp: '2025-02-28T14:23:12Z',
-          service: 'EC2',
-          region: 'us-east-1',
-          resourceId: 'i-0abc123def456',
-          description: 'Sudden 245% increase in compute usage',
-          baseCost: 123.45,
-          anomalyCost: 425.89,
-          deviation: 245,
-          status: 'open',
-          confidence: 'high',
-          pattern: 'spike',
-          resourceGroup: 'production',
-          tags: { 'environment': 'production', 'project': 'web-app' }
-        },
-        {
-          id: 2,
-          timestamp: '2025-02-27T08:12:45Z',
-          service: 'S3',
-          region: 'us-west-2',
-          resourceId: 'customer-data-bucket',
-          description: 'Unusual data transfer pattern',
-          baseCost: 56.78,
-          anomalyCost: 178.92,
-          deviation: 215,
-          status: 'investigating',
-          confidence: 'medium',
-          pattern: 'sustained',
-          resourceGroup: 'data-storage',
-          tags: { 'environment': 'production', 'data-classification': 'customer' }
-        },
-        {
-          id: 3,
-          timestamp: '2025-02-26T22:05:31Z',
-          service: 'RDS',
-          region: 'eu-west-1',
-          resourceId: 'db-cluster-001',
-          description: 'Database storage cost spike',
-          baseCost: 234.56,
-          anomalyCost: 389.12,
-          deviation: 66,
-          status: 'resolved',
-          confidence: 'high',
-          pattern: 'spike',
-          resourceGroup: 'database',
-          tags: { 'environment': 'staging', 'team': 'backend' }
-        },
-        {
-          id: 4,
-          timestamp: '2025-02-25T16:32:18Z',
-          service: 'Lambda',
-          region: 'us-east-2',
-          resourceId: 'data-processor-function',
-          description: 'Excessive function execution time',
-          baseCost: 45.23,
-          anomalyCost: 167.89,
-          deviation: 271,
-          status: 'open',
-          confidence: 'high',
-          pattern: 'recurring',
-          resourceGroup: 'serverless',
-          tags: { 'environment': 'production', 'team': 'data-science' }
-        },
-        {
-          id: 5,
-          timestamp: '2025-02-24T09:45:22Z',
-          service: 'CloudFront',
-          region: 'global',
-          resourceId: 'distribution-001',
-          description: 'Unusual data transfer to Asia Pacific',
-          baseCost: 89.67,
-          anomalyCost: 156.34,
-          deviation: 74,
-          status: 'dismissed',
-          confidence: 'low',
-          pattern: 'gradual',
-          resourceGroup: 'content-delivery',
-          tags: { 'environment': 'production', 'product': 'media-service' }
-        },
-        {
-          id: 6,
-          timestamp: '2025-02-23T11:28:42Z',
-          service: 'EC2',
-          region: 'ap-southeast-1',
-          resourceId: 'i-0def456abc789',
-          description: 'Instance running in non-business hours',
-          baseCost: 67.89,
-          anomalyCost: 112.45,
-          deviation: 65,
-          status: 'resolved',
-          confidence: 'medium',
-          pattern: 'recurring',
-          resourceGroup: 'development',
-          tags: { 'environment': 'development', 'team': 'frontend' }
-        },
-      ];
-      
+      const mockAnomalies = getMockAnomalyData();
       setAnomalies(mockAnomalies);
       setIsLoading(false);
     }, 1000);
@@ -180,18 +83,6 @@ function AnomalyDetection() {
         setSelectedServices([...newSelectedServices, serviceId]);
       }
     }
-  };
-  
-  // Format timestamp to readable date
-  const formatDate = (timestamp) => {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
   };
   
   // Get badge color based on status
