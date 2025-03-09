@@ -1,9 +1,14 @@
-# backend/services/forecast_service.py
-from sqlalchemy.orm import Session
-from backend.models.cloud_cost import CloudCost
+# Standard library imports
 from datetime import datetime, timedelta
-import pandas as pd
+
+# Third-party imports
+from sqlalchemy.orm import Session
 import numpy as np
+import pandas as pd
+
+# Local imports
+from backend.models.cloud_cost import CloudCost
+# backend/services/forecast_service.py
 
 def generate_forecast(db: Session, service: str, time_range: str, confidence_level: str):
     """

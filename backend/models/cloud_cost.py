@@ -1,7 +1,11 @@
-# Update backend/models/cloud_cost.py
+# Standard library imports
+from datetime import datetime
+
+# Third-party imports
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from datetime import datetime
+
+# Local imports
 from backend.database.db import Base
 
 class CloudCost(Base):

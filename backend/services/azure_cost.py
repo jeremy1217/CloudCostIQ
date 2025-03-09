@@ -1,10 +1,15 @@
-# from azure.identity import ClientSecretCredential
-from azure.mgmt.costmanagement import CostManagementClient
+# Standard library imports
 import datetime
 import json
+import os
+
+# Third-party imports
+from azure.mgmt.costmanagement import CostManagementClient
+
+# Local imports
 from backend.database.db import SessionLocal
 from backend.models.cloud_cost import CloudCost
-import os
+# from azure.identity import ClientSecretCredential
 
 def store_azure_cost():
     """Return mock Azure cost data"""

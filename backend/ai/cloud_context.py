@@ -1,8 +1,11 @@
-from typing import Dict, List, Any, Optional, Tuple
-import pandas as pd
-import numpy as np
+# Standard library imports
 from datetime import datetime, timedelta
+from typing import Dict, List, Any, Optional, Tuple
 import logging
+
+# Third-party imports
+import numpy as np
+import pandas as pd
 
 class CloudContextAnomalyDetection:
     """
@@ -131,9 +134,6 @@ class CloudContextAnomalyDetection:
     def _detect_basic_anomalies(self, cost_data: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Run basic anomaly detection using existing methods."""
         # This would call the existing anomaly detection methods
-        # For example:
-        # return self.detect_anomalies(cost_data, method="ensemble")
-        # 
         # For demonstration, let's return a mock result
         return {
             "anomalies": [

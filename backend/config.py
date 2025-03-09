@@ -2,8 +2,12 @@
 Application configuration module.
 Provides centralized configuration management for the application.
 """
-import os
+
+# Standard library imports
 from pathlib import Path
+import os
+
+# Third-party imports
 from pydantic import Field
 from pydantic_settings import BaseSettings
 

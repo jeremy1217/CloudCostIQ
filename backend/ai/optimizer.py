@@ -1,6 +1,9 @@
+# Standard library imports
 import random
-import numpy as np
+
+# Third-party imports
 from sklearn.cluster import KMeans
+import numpy as np
 
 # AI-based cost optimization suggestions
 def generate_optimization_suggestions(cost_data):

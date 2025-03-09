@@ -1,16 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from typing import List, Dict, Any, Optional
-from pydantic import BaseModel
+# Standard library imports
 from datetime import datetime, timedelta
+from typing import List, Dict, Any, Optional
 
+# Third-party imports
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+# Local imports
+from backend.ai.integration import predict_costs, detect_anomalies, optimize_costs, get_ai_status, enable_enhanced_ai
 from backend.database.db import get_db
 from backend.models.cloud_cost import CloudCost
 from backend.services.mock_data import generate_mock_costs
 
 # Import the enhanced AI capabilities integration
-from backend.ai.integration import predict_costs, detect_anomalies, optimize_costs, get_ai_status, enable_enhanced_ai
-
 
 router = APIRouter(prefix="/ai", tags=["AI Capabilities"])
 

@@ -1,8 +1,11 @@
-from cryptography.fernet import Fernet
-from typing import Optional
-import base64
-import os
+# Standard library imports
 from pathlib import Path
+from typing import Optional
+import os
+
+# Third-party imports
+from cryptography.fernet import Fernet
+import base64
 
 # Load or generate encryption key
 def get_encryption_key() -> bytes:

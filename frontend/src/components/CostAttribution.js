@@ -7,7 +7,7 @@ import {
   getMockUntaggedResourcesData,
   getMockOptimizationRecommendations,
   getMockCombinedInsights
-} from "./mockData";
+} from "frontend/src/services/mockData";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 

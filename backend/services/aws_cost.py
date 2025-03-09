@@ -1,6 +1,11 @@
-import boto3
+# Standard library imports
 import datetime
 import json
+
+# Third-party imports
+import boto3
+
+# Local imports
 from backend.database.db import SessionLocal
 from backend.models.cloud_cost import CloudCost
 

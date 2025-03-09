@@ -1,9 +1,14 @@
+# Standard library imports
+from datetime import datetime, timedelta
+from typing import List, Optional
+
+# Third-party imports
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List, Optional
-from datetime import datetime, timedelta
-from backend.database.db import get_db
+
+# Local imports
 from backend.ai.anomaly import detect_anomalies
+from backend.database.db import get_db
 from backend.models.cloud_cost import CloudCost
 
 router = APIRouter()

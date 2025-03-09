@@ -1,9 +1,12 @@
+# Standard library imports
+from datetime import datetime
+from pathlib import Path
 import os
+
+# Third-party imports
 from sqlalchemy import create_engine, Column, Integer, Float, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from datetime import datetime
-from pathlib import Path
 
 # Create the directory if it doesn't exist
 db_dir = Path(os.path.dirname(os.path.abspath(__file__)))

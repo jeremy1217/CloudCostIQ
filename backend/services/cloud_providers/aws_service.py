@@ -1,6 +1,9 @@
-import boto3
+# Standard library imports
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
+
+# Third-party imports
+import boto3
 
 class AWSService:
     """AWS Cloud Service integration"""

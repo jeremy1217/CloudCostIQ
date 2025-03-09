@@ -1,9 +1,14 @@
-from google.cloud import billing_v1
+# Standard library imports
 import datetime
 import json
+import os
+
+# Third-party imports
+from google.cloud import billing_v1
+
+# Local imports
 from backend.database.db import SessionLocal
 from backend.models.cloud_cost import CloudCost
-import os
 
 def store_gcp_cost():
     """Return mock GCP cost data"""

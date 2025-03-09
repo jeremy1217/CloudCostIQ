@@ -1,14 +1,26 @@
+# Standard library imports
+from datetime import datetime, timedelta
+from typing import Dict, List, Any, Optional, Union
+import logging
+
+# Third-party imports
+from sklearn.ensemble import RandomForestRegressor
+from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.statespace.sarimax import SARIMAX
 import numpy as np
 import pandas as pd
-from statsmodels.tsa.arima.model import ARIMA
-from sklearn.ensemble import RandomForestRegressor
-from datetime import datetime, timedelta
-import logging
-from typing import Dict, List, Any, Optional, Union
-
-# Add these imports
 import statsmodels.api as sm
-from statsmodels.tsa.statespace.sarimax import SARIMAX
+
+# Local imports
+from backend.ai.base_models import BaseForecasting
+from backend.ai.utils import detect_seasonality, calculate_confidence_intervals, preprocess_time_series_data
+# backend/ai/enhanced_forecast.py
+
+# Standard library imports
+
+# Third-party imports
+
+# Check if Prophet is available
 try:
     from prophet import Prophet
     PROPHET_AVAILABLE = True
@@ -16,8 +28,7 @@ except ImportError:
     PROPHET_AVAILABLE = False
     logging.warning("Prophet not installed. Prophet forecasting will not be available.")
 
-from backend.ai.base_models import BaseForecasting
-from backend.ai.utils import detect_seasonality, calculate_confidence_intervals, preprocess_time_series_data
+# Local imports
 
 logger = logging.getLogger(__name__)
 

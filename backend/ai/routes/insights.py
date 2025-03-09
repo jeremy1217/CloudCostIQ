@@ -1,6 +1,7 @@
-from fastapi import APIRouter
-from ai.inference import predict_cost
+# Third-party imports
 from ai.detect import detect_anomaly
+from ai.inference import predict_cost
+from fastapi import APIRouter
 
 router = APIRouter()
 

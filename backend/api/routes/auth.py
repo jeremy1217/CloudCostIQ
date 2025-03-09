@@ -1,18 +1,22 @@
+# Standard library imports
 from datetime import timedelta
+
+# Third-party imports
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from backend.database.db import get_db
+# Local imports
 from backend.auth.models import Token, User, UserCreate
 from backend.auth.utils import (
+from backend.database.db import get_db
+from backend.models.user import UserModel, RoleModel
+
     authenticate_user, create_access_token, 
     get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES
 )
-from backend.models.user import UserModel, RoleModel
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
-
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(
@@ -31,7 +35,6 @@ async def login_for_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
-
 
 @router.post("/register", response_model=User)
 async def register_user(user: UserCreate, db: Session = Depends(get_db)):

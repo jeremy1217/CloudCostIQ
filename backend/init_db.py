@@ -1,17 +1,20 @@
 """
 Database initialization script to populate mock data for development.
 """
+
+# Standard library imports
+from pathlib import Path
 import os
 import sys
-from pathlib import Path
+
+# Local imports
+from backend.database.db import SessionLocal, Base, engine
+from backend.models.cloud_cost import CloudCost
+from backend.models.recommendation import Recommendation
+from backend.services.mock_data import populate_db_with_mock_data
 
 # Add the project root to the Python path
 sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from backend.database.db import SessionLocal, Base, engine
-from backend.services.mock_data import populate_db_with_mock_data
-from backend.models.cloud_cost import CloudCost
-from backend.models.recommendation import Recommendation
 
 def init_db():
     """Initialize the database with mock data"""

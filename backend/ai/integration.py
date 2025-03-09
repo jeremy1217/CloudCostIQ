@@ -1,11 +1,13 @@
-import logging
-from typing import List, Dict, Any, Optional, Union
+# Standard library imports
 from datetime import datetime
+from typing import List, Dict, Any, Optional, Union
+import logging
 
-from backend.ai.model_factory import ModelFactory
+# Local imports
+from backend.ai.anomaly import detect_anomalies as original_detect_anomalies
 from backend.ai.decorators import with_fallback
 from backend.ai.forecast import predict_future_costs as original_predict_future_costs
-from backend.ai.anomaly import detect_anomalies as original_detect_anomalies
+from backend.ai.model_factory import ModelFactory
 from backend.ai.optimizer import generate_optimization_suggestions as original_generate_optimization_suggestions
 
 logger = logging.getLogger(__name__)

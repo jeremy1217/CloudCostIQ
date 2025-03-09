@@ -1,6 +1,11 @@
-import sys
+# Standard library imports
 import os
+import sys
+
+# Third-party imports
 from sqlalchemy.orm import Session
+
+# Local imports
 from backend.database.db import engine
 from backend.models.cloud_cost import CloudCost
 from backend.models.recommendations import Recommendation

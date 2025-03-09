@@ -1,18 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Response
-from typing import List, Dict, Any, Optional
-from pydantic import BaseModel
-import json
+# Standard library imports
 from datetime import datetime
-from fastapi.middleware.cors import CORSMiddleware
+from typing import List, Dict, Any, Optional
+import json
 
+# Third-party imports
 from auth import get_current_user
-from backend.auth.models.user import User
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Response
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from services.multi_cloud_service import MultiCloudService
+
+# Local imports
 from backend.api.routes.costs import router as costs_router
 from backend.api.routes.insights import router as insights_router
+from backend.auth.models.user import User
+from backend.auth.utils import get_current_active_user, has_role
 
 # Import auth dependencies
-from backend.auth.utils import get_current_active_user, has_role
 
 app = FastAPI(title="CloudCostIQ API")
 
@@ -77,7 +81,6 @@ class TimeRange(BaseModel):
 class ProviderCostRequest(BaseModel):
     providers: List[str]
     timeRange: TimeRange
-
 
 # Initialize the multi-cloud service
 multi_cloud_service = MultiCloudService()

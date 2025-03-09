@@ -1,10 +1,19 @@
-import numpy as np
-import pandas as pd
-from sklearn.linear_model import LinearRegression
+# Standard library imports
 from datetime import datetime, timedelta
+from typing import Dict, List, Any, Optional, Union
 import logging
 
+# Third-party imports
+from sklearn.linear_model import LinearRegression
+import numpy as np
+import pandas as pd
+
+# Local imports
 from backend.ai.utils import preprocess_time_series_data, calculate_confidence_intervals, detect_seasonality
+
+# Third-party imports
+
+# Local imports
 
 logger = logging.getLogger(__name__)
 
@@ -196,8 +205,6 @@ class BaseAnomalyDetector:
             anomalies.append(anomaly)
             
         return anomalies
-
-# backend/ai/base_models.py (add to existing file)
 
 class BaseOptimizer:
     """Base class for all optimization engines"""

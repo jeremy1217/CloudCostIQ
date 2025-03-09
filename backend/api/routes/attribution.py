@@ -1,6 +1,11 @@
+# Standard library imports
+from typing import List, Optional
+
+# Third-party imports
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List, Optional
+
+# Local imports
 from backend.database.db import get_db
 from backend.models.cloud_cost import CloudCost
 

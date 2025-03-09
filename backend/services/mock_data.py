@@ -1,8 +1,13 @@
+# Standard library imports
+from typing import List, Dict, Any, Optional
 import datetime
+import json
 import random
 import uuid
-import json
-from typing import List, Dict, Any, Optional
+
+# No third-party imports needed for this module
+
+# No local imports needed for this module
 
 def generate_provider_service_map():
     """Return a mapping of cloud providers to their services"""
@@ -191,7 +196,8 @@ def populate_db_with_mock_data(db_session, days: int = 30, models=None):
             service=cost_data["service"],
             cost=cost_data["cost"],
             date=cost_data["date"],
-            extra_data=json.dumps(extra_data)  # Use extra_data instead of metadata
+            extra_data=json.dumps(extra_data),  # Use extra_data instead of metadata
+            resource_id=cost_data.get("resource_id")
         )
         db_session.add(cloud_cost)
     

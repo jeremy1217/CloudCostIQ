@@ -1,4 +1,7 @@
+# Third-party imports
 from fastapi import APIRouter
+
+# Local imports
 from backend.services.optimization import rightsizing_recommendation
 
 router = APIRouter()

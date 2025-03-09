@@ -1,7 +1,3 @@
-// src/services/mockData.js
-// Centralized mock data service for the application
-
-// Helper function to generate dates for time series data
 export const generateDateRange = (daysCount, startFromToday = true) => {
     const dates = [];
     const today = new Date();

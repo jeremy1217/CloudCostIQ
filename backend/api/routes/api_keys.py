@@ -1,13 +1,17 @@
+# Standard library imports
 from datetime import datetime
-import secrets
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 from typing import List
-from pydantic import BaseModel
 
-from backend.database.db import get_db
-from backend.auth.utils import get_current_active_user, get_password_hash, verify_password
+# Third-party imports
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+import secrets
+
+# Local imports
 from backend.auth.models import User
+from backend.auth.utils import get_current_active_user, get_password_hash, verify_password
+from backend.database.db import get_db
 from backend.models.user import ApiKeyModel
 from backend.utils.encryption import encrypt_data, decrypt_data
 
@@ -39,7 +43,6 @@ class ApiKeyList(BaseModel):
 
     class Config:
         orm_mode = True
-
 
 def get_provider_credentials(api_key_id: int, db: Session) -> Optional[Dict]:
     """
@@ -100,7 +103,6 @@ async def create_api_key(
         "is_active": db_api_key.is_active
     }
 
-
 @router.get("/", response_model=List[ApiKeyList])
 async def list_api_keys(
     db: Session = Depends(get_db),
@@ -109,7 +111,6 @@ async def list_api_keys(
     # Get API keys for the current user
     api_keys = db.query(ApiKeyModel).filter(ApiKeyModel.user_id == current_user.id).all()
     return api_keys
-
 
 @router.delete("/{key_id}")
 async def delete_api_key(
@@ -134,7 +135,6 @@ async def delete_api_key(
     db.commit()
     
     return {"message": "API key deleted successfully"}
-
 
 # Utility function to validate API keys (for internal use)
 def validate_api_key(key: str, provider: str, db: Session):

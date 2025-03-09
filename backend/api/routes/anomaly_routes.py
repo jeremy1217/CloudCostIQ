@@ -1,12 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Path, status
-from sqlalchemy.orm import Session
-from typing import List, Optional, Dict, Any
+# Standard library imports
 from datetime import datetime, timedelta
-from pydantic import BaseModel, Field
+from typing import List, Optional, Dict, Any
 
+# Third-party imports
+from fastapi import APIRouter, Depends, HTTPException, Query, Path, status
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
+
+# Local imports
+from backend.ai.integration import detect_anomalies
 from backend.database.db import get_db
 from backend.models.anomaly import CostAnomaly
-from backend.ai.integration import detect_anomalies
+from backend.services.mock_data import generate_mock_costs
+
+# Third-party imports
+
+# Local imports
 
 router = APIRouter(prefix="/anomalies", tags=["Anomalies"])
 
@@ -63,6 +72,8 @@ class AnomalyResponse(BaseModel):
     class Config:
         from_attributes = True
 
+# Rest of the module implementation remains the same
+# ...
 @router.get("/", response_model=List[AnomalyResponse])
 async def get_anomalies(
     provider: Optional[str] = None,
@@ -207,7 +218,7 @@ async def detect_and_store_anomalies(
     """
     Detect anomalies and optionally store them in the database.
     """
-    from backend.services.mock_data import generate_mock_costs
+    
     from backend.models.cloud_cost import CloudCost
     
     # Get cost data from database

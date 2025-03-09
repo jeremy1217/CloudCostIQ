@@ -1,9 +1,12 @@
+# Third-party imports
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
+
+# Local imports
+from backend.ai.optimizer import generate_optimization_suggestions
 from backend.database.db import get_db
 from backend.models.recommendation import Recommendation
-from backend.ai.optimizer import generate_optimization_suggestions
-from pydantic import BaseModel
 
 class OptimizationRequest(BaseModel):
     provider: str

@@ -1,7 +1,9 @@
+# Third-party imports
 from sqlalchemy import Column, Integer, String, Boolean, Table, ForeignKey
-from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.orm import relationship
 
+# Local imports
 from backend.database.db import Base
 
 # Association table for user-role relationship
@@ -30,8 +32,6 @@ class UserModel(Base):
     # Add to the existing relationships
     cloud_costs = relationship("CloudCost", back_populates="user")
 
-
-
 class RoleModel(Base):
     __tablename__ = "roles"
     
@@ -44,7 +44,6 @@ class RoleModel(Base):
     
     # Permissions as a simple array - could be more complex
     permissions = Column(ARRAY(String), nullable=True)
-
 
 class ApiKeyModel(Base):
     __tablename__ = "api_keys"

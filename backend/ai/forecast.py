@@ -1,7 +1,10 @@
+# Standard library imports
+from datetime import datetime, timedelta
+
+# Third-party imports
+from sklearn.linear_model import LinearRegression
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LinearRegression
-from datetime import datetime, timedelta
 
 def predict_future_costs(cost_trend, days_ahead=7):
     """

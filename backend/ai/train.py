@@ -1,9 +1,10 @@
-import pandas as pd
-import numpy as np
-import joblib
-from sklearn.ensemble import RandomForestRegressor
+# Third-party imports
 from database.db import SessionLocal
 from models.cloud_cost import CloudCost
+from sklearn.ensemble import RandomForestRegressor
+import joblib
+import numpy as np
+import pandas as pd
 
 def load_data():
     """Load cloud cost data from database"""

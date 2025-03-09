@@ -1,12 +1,14 @@
-from backend.api.routes import costs, insights, actions, optimizations, forecasting, anomalies, attribution
-from backend.api.routes import anomaly_routes, forecast_routes, resource_routes  # Import our new routes
-from fastapi.middleware.cors import CORSMiddleware
+# Third-party imports
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from backend.config import settings
 import uvicorn
-from backend.api.routes.ai_routes import router as ai_router
 
+# Local imports
+from backend.api.routes import anomaly_routes, forecast_routes, resource_routes  # Import our new routes
+from backend.api.routes import costs, insights, actions, optimizations, forecasting, anomalies, attribution
+from backend.api.routes.ai_routes import router as ai_router
+from backend.config import settings
 
 app = FastAPI(title="CloudCostIQ")
 
@@ -44,5 +46,5 @@ async def root():
     return {"message": "Welcome to CloudCostIQ"}
 
 if __name__ == "__main__":
-    import uvicorn
+    
     uvicorn.run(app, host=settings.API_HOST, port=settings.API_PORT, debug=settings.API_DEBUG)

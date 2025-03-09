@@ -1,11 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from typing import List, Optional
+# Standard library imports
 from datetime import datetime, timedelta
-from backend.database.db import get_db
-from backend.ai.forecast import predict_future_costs
-from backend.models.cloud_cost import CloudCost
+from typing import List, Optional
+
+# Third-party imports
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+# Local imports
+from backend.ai.forecast import predict_future_costs
+from backend.database.db import get_db
+from backend.models.cloud_cost import CloudCost
 
 router = APIRouter()
 

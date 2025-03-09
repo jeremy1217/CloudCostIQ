@@ -1,9 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Path, status
-from sqlalchemy.orm import Session
-from typing import List, Optional, Dict, Any
+# Standard library imports
 from datetime import datetime
-from pydantic import BaseModel, Field
+from typing import List, Optional, Dict, Any
 
+# Third-party imports
+from fastapi import APIRouter, Depends, HTTPException, Query, Path, status
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
+
+# Local imports
 from backend.database.db import get_db
 from backend.models.resource import CloudResource, ResourceTag, resource_tag_association
 
