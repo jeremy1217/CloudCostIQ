@@ -1,6 +1,7 @@
 # Standard library imports
 from datetime import datetime, timedelta
 from typing import Optional
+import os
 
 # Third-party imports
 from fastapi import Depends, HTTPException, status
@@ -12,33 +13,53 @@ from sqlalchemy.orm import Session
 # Local imports
 from backend.auth.models import TokenData, User
 from backend.database.db import get_db
-from backend.models.user import UserModel  # We'll create this next
+from backend.models.user import UserModel
 
 # Security settings
-SECRET_KEY = "YOUR_SECRET_KEY_HERE"  # Use a strong secret key in production
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-stored-securely")  # In production, always use environment variable
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")  # Update to use the full path
 
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        return pwd_context.verify(plain_password, hashed_password)
+    except Exception as e:
+        print(f"Password verification error: {e}")  # Add logging for debugging
+        return False
 
 def get_password_hash(password):
     return pwd_context.hash(password)
 
 def get_user(db: Session, username: str):
-    return db.query(UserModel).filter(UserModel.username == username).first()
+    try:
+        user = db.query(UserModel).filter(UserModel.username == username).first()
+        if user:
+            print(f"Found user: {username}")  # Add logging for debugging
+        else:
+            print(f"User not found: {username}")  # Add logging for debugging
+        return user
+    except Exception as e:
+        print(f"Database error in get_user: {e}")  # Add logging for debugging
+        return None
 
 def authenticate_user(db: Session, username: str, password: str):
-    user = get_user(db, username)
-    if not user:
+    try:
+        user = get_user(db, username)
+        if not user:
+            print(f"Authentication failed: user {username} not found")  # Add logging for debugging
+            return False
+        if not verify_password(password, user.hashed_password):
+            print(f"Authentication failed: invalid password for user {username}")  # Add logging for debugging
+            return False
+        print(f"Authentication successful for user {username}")  # Add logging for debugging
+        return user
+    except Exception as e:
+        print(f"Authentication error: {e}")  # Add logging for debugging
         return False
-    if not verify_password(password, user.hashed_password):
-        return False
-    return user
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()

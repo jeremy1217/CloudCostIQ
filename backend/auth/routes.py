@@ -10,7 +10,8 @@ from sqlalchemy.orm import Session
 from backend.auth.models import Token, User, UserCreate
 from backend.auth.utils import (
     authenticate_user, create_access_token, 
-    get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES
+    get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES,
+    get_current_user
 )
 from backend.database.db import get_db
 from backend.models.user import UserModel, RoleModel
@@ -35,8 +36,45 @@ async def login_for_access_token(
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
+@router.get("/me", response_model=User)
+async def get_current_user_info(current_user: UserModel = Depends(get_current_user)):
+    """Get information about the currently authenticated user."""
+    return User(
+        id=current_user.id,
+        email=current_user.email,
+        username=current_user.username,
+        full_name=current_user.full_name,
+        is_active=current_user.is_active,
+        roles=[role.name for role in current_user.roles]
+    )
+
 @router.post("/register", response_model=User)
 async def register_user(user: UserCreate, db: Session = Depends(get_db)):
+    # Validate password
+    if len(user.password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 8 characters long"
+        )
+    
+    if not any(c.isupper() for c in user.password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must contain at least one uppercase letter"
+        )
+    
+    if not any(c.islower() for c in user.password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must contain at least one lowercase letter"
+        )
+    
+    if not any(c.isdigit() for c in user.password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must contain at least one number"
+        )
+    
     # Check if user already exists
     db_user = db.query(UserModel).filter(
         (UserModel.email == user.email) | (UserModel.username == user.username)

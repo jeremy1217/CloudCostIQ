@@ -10,17 +10,34 @@ import {
   Typography,
   Paper,
   Alert,
-  CircularProgress
+  CircularProgress,
+  IconButton,
+  InputAdornment
 } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const Login = () => {
   // Initialize form with useForm hook
   const { register, handleSubmit, formState: { errors } } = useForm();
   const { login, loading, error } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [networkError, setNetworkError] = useState(null);
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
 
   const onSubmit = async (data) => {
-    await login(data.username, data.password);
+    setNetworkError(null);
+    try {
+      await login(data.username, data.password);
+    } catch (err) {
+      setNetworkError('Network error. Please check your connection and try again.');
+    }
   };
 
   return (
@@ -35,6 +52,7 @@ const Login = () => {
           </Typography>
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {networkError && <Alert severity="error" sx={{ mb: 2 }}>{networkError}</Alert>}
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <TextField
@@ -45,6 +63,7 @@ const Login = () => {
               label="Username"
               autoComplete="username"
               autoFocus
+              disabled={loading}
               {...register('username', { required: 'Username is required' })}
               error={!!errors.username}
               helperText={errors.username?.message}
@@ -57,9 +76,24 @@ const Login = () => {
               label="Password"
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
+              disabled={loading}
               {...register('password', { required: 'Password is required' })}
               error={!!errors.password}
               helperText={errors.password?.message}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
             <Button
               type="submit"

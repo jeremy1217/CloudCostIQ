@@ -26,8 +26,8 @@ class UserModel(Base):
     # Relationships
     roles = relationship("RoleModel", secondary=user_role_association, back_populates="users")
     api_keys = relationship("ApiKeyModel", back_populates="user")
-    # Fix this line to properly define the relationship
-    cloud_costs = relationship("CloudCost", back_populates="user")
+    # Remove the cloud_costs relationship for now as it's causing issues
+    # cloud_costs = relationship("CloudCost", back_populates="user")
 
 class RoleModel(Base):
     __tablename__ = "roles"

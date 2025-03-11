@@ -52,14 +52,19 @@ export function AuthProvider({ children }) {
     setError(null);
     
     try {
-      // Convert credentials to form data format as required by OAuth
-      const formData = new FormData();
+      // Use URLSearchParams for proper form encoding
+      const formData = new URLSearchParams();
       formData.append('username', username);
       formData.append('password', password);
 
       const response = await axios.post(
         `${API_BASE_URL}/auth/token`, 
-        formData
+        formData,
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        }
       );
       
       const { access_token } = response.data;
@@ -93,7 +98,7 @@ export function AuthProvider({ children }) {
     setError(null);
     
     try {
-      const response = await axios.post(
+      await axios.post(
         `${API_BASE_URL}/auth/register`,
         userData
       );

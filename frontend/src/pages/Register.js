@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
@@ -10,18 +10,54 @@ import {
   Typography,
   Paper,
   Alert,
-  CircularProgress
+  CircularProgress,
+  IconButton,
+  InputAdornment
 } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const Register = () => {
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
   const { register: registerUser, loading, error } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [networkError, setNetworkError] = useState(null);
   
   const password = watch('password', '');
 
+  const handleClickShowPassword = (field) => {
+    if (field === 'password') {
+      setShowPassword(!showPassword);
+    } else {
+      setShowConfirmPassword(!showConfirmPassword);
+    }
+  };
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
+
   const onSubmit = async (data) => {
-    const { confirmPassword, ...userData } = data;
-    await registerUser(userData);
+    setNetworkError(null);
+    try {
+      const { confirmPassword, ...userData } = data;
+      await registerUser(userData);
+    } catch (err) {
+      setNetworkError('Network error. Please check your connection and try again.');
+    }
+  };
+
+  const passwordValidation = {
+    required: 'Password is required',
+    minLength: {
+      value: 8,
+      message: 'Password must be at least 8 characters'
+    },
+    validate: {
+      hasUpperCase: v => /[A-Z]/.test(v) || 'Password must contain at least one uppercase letter',
+      hasLowerCase: v => /[a-z]/.test(v) || 'Password must contain at least one lowercase letter',
+      hasNumber: v => /\d/.test(v) || 'Password must contain at least one number'
+    }
   };
 
   return (
@@ -36,6 +72,7 @@ const Register = () => {
           </Typography>
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {networkError && <Alert severity="error" sx={{ mb: 2 }}>{networkError}</Alert>}
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <TextField
@@ -46,6 +83,7 @@ const Register = () => {
               label="Username"
               autoComplete="username"
               autoFocus
+              disabled={loading}
               {...register('username', { 
                 required: 'Username is required',
                 minLength: {
@@ -63,6 +101,7 @@ const Register = () => {
               id="email"
               label="Email Address"
               autoComplete="email"
+              disabled={loading}
               {...register('email', { 
                 required: 'Email is required',
                 pattern: {
@@ -79,6 +118,7 @@ const Register = () => {
               id="fullName"
               label="Full Name"
               autoComplete="name"
+              disabled={loading}
               {...register('full_name')}
             />
             <TextField
@@ -87,17 +127,26 @@ const Register = () => {
               fullWidth
               id="password"
               label="Password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               autoComplete="new-password"
-              {...register('password', { 
-                required: 'Password is required',
-                minLength: {
-                  value: 8,
-                  message: 'Password must be at least 8 characters'
-                }
-              })}
+              disabled={loading}
+              {...register('password', passwordValidation)}
               error={!!errors.password}
               helperText={errors.password?.message}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={() => handleClickShowPassword('password')}
+                      onMouseDown={handleMouseDownPassword}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
             <TextField
               margin="normal"
@@ -105,13 +154,28 @@ const Register = () => {
               fullWidth
               id="confirmPassword"
               label="Confirm Password"
-              type="password"
+              type={showConfirmPassword ? 'text' : 'password'}
+              disabled={loading}
               {...register('confirmPassword', { 
                 required: 'Please confirm your password',
                 validate: value => value === password || 'Passwords do not match'
               })}
               error={!!errors.confirmPassword}
               helperText={errors.confirmPassword?.message}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={() => handleClickShowPassword('confirm')}
+                      onMouseDown={handleMouseDownPassword}
+                      edge="end"
+                    >
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
             <Button
               type="submit"

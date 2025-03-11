@@ -20,5 +20,4 @@ class CloudCost(Base):
     extra_data = Column(String, nullable=True)  # JSON string for additional metadata
     
     # User relationship
-    # user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    user = relationship("UserModel", back_populates="cloud_costs")
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
