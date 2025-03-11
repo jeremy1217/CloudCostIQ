@@ -16,8 +16,8 @@ BASE_DIR = Path(__file__).parent.parent
 
 class Settings(BaseSettings):
     """Application settings"""
-    # Database
-    DATABASE_URL: str = Field(default=f"sqlite:///{os.path.join(BASE_DIR, 'cloudcostiq.db')}")
+    # Database - PostgreSQL connection
+    DATABASE_URL: str = Field(default="postgresql://postgres:postgres@localhost:5432/cloudcostiq")
     
     # API
     API_HOST: str = Field(default="0.0.0.0")

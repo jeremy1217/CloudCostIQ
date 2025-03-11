@@ -13,14 +13,15 @@ from backend.models.cloud_cost import CloudCost
 from backend.models.recommendation import Recommendation
 from backend.services.mock_data import generate_mock_costs, generate_mock_recommendations
 
-# Test database URL
-TEST_DATABASE_URL = "sqlite:///./test.db"
+# Test database URL - Use PostgreSQL for testing
+TEST_DATABASE_URL = os.environ.get(
+    "TEST_DATABASE_URL", 
+    "postgresql://postgres:postgres@localhost:5432/cloudcostiq_test"
+)
 
 def get_test_db():
     """Create a test database and session"""
-    engine = create_engine(
-        TEST_DATABASE_URL, connect_args={"check_same_thread": False}
-    )
+    engine = create_engine(TEST_DATABASE_URL)
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     
     # Create tables
@@ -73,9 +74,7 @@ def seed_test_db(db: Session):
 @pytest.fixture
 def test_db():
     """Pytest fixture for database testing"""
-    engine = create_engine(
-        TEST_DATABASE_URL, connect_args={"check_same_thread": False}
-    )
+    engine = create_engine(TEST_DATABASE_URL)
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     
     # Create tables

@@ -1,6 +1,5 @@
 # Third-party imports
-from sqlalchemy import Column, Integer, String, Boolean, Table, ForeignKey
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy import Column, Integer, String, Boolean, Table, ForeignKey, ARRAY
 from sqlalchemy.orm import relationship
 
 # Local imports
@@ -24,13 +23,10 @@ class UserModel(Base):
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
     
-    # Relationship with roles
+    # Relationships
     roles = relationship("RoleModel", secondary=user_role_association, back_populates="users")
-    
-    # API keys relationship
     api_keys = relationship("ApiKeyModel", back_populates="user")
-    # Add to the existing relationships
-    cloud_costs = relationship("CloudCost", back_populates="user")
+    cloud_costs = relationship("CloudCost", back_populates="user")  # Add this line if missing
 
 class RoleModel(Base):
     __tablename__ = "roles"
@@ -42,7 +38,7 @@ class RoleModel(Base):
     # Relationship with users
     users = relationship("UserModel", secondary=user_role_association, back_populates="roles")
     
-    # Permissions as a simple array - could be more complex
+    # Permissions as a simple array - using standard ARRAY for PostgreSQL
     permissions = Column(ARRAY(String), nullable=True)
 
 class ApiKeyModel(Base):

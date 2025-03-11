@@ -1,9 +1,11 @@
 # Standard library imports
 from datetime import datetime
 
+
 # Third-party imports
 from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, ForeignKey, JSON, Index, Text
 from sqlalchemy.orm import relationship
+from sqlalchemy import JSON
 
 # Local imports
 from backend.database.db import Base
