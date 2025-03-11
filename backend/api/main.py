@@ -1,22 +1,23 @@
 # Standard library imports
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 import json
 
 # Third-party imports
-from auth import get_current_user
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI
 from pydantic import BaseModel
-from services.multi_cloud_service import MultiCloudService
+from backend.services.multi_cloud_service import MultiCloudService
 
 # Local imports
 from backend.api.routes.costs import router as costs_router
 from backend.api.routes.insights import router as insights_router
-from backend.auth.models.user import User
+from backend.auth.models import User  # Import User from auth.models instead of models.user
 from backend.auth.utils import get_current_active_user, has_role
 
 # Import auth dependencies
+from backend.auth.utils import get_current_user
 
 app = FastAPI(title="CloudCostIQ API")
 
@@ -30,15 +31,19 @@ app.add_middleware(
 )
 
 # Add auth routers
+from backend.auth.routes import router as auth_router
 app.include_router(auth_router)
+
+# Add API keys router
+from backend.api.routes.api_keys import router as api_keys_router
+app.include_router(api_keys_router)
 
 # Add existing routers with auth protection
 app.include_router(costs_router, dependencies=[Depends(get_current_active_user)])
 app.include_router(insights_router, dependencies=[Depends(get_current_active_user)])
-app.include_router(api_keys_router)
 
 # Add admin-only routes with role-based protection
-admin_router = FastAPI()
+admin_router = APIRouter()
 app.include_router(
     admin_router,
     prefix="/admin",
@@ -115,27 +120,6 @@ async def get_service_mapping(current_user: User = Depends(get_current_user)):
 async def analyze_migration(
     request: MigrationRequest,
     current_user: User = Depends(get_current_user)
-):
-    """Apply selected optimization plans"""
-    try:
-        result = multi_cloud_service.apply_optimization_plan(
-            current_user.id,
-            request.optimizationIds
-        )
-        return result
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error applying optimization plan: {str(e)}"
-        )
-
-# Add the router to the main app
-# This goes in the main FastAPI app initialization
-
-# app = FastAPI(...)
-# ...
-# app.include_router(multi_cloud_router)
- Depends(get_current_user)
 ):
     """Analyze migration costs between providers"""
     try:
@@ -279,4 +263,20 @@ async def generate_optimization_report(
 @multi_cloud_router.post("/apply-optimization")
 async def apply_optimization_plan(
     request: OptimizationApplyRequest,
-    current_user: User =
+    current_user: User = Depends(get_current_user)
+):
+    """Apply selected optimization plans"""
+    try:
+        result = multi_cloud_service.apply_optimization_plan(
+            current_user.id,
+            request.optimizationIds
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error applying optimization plan: {str(e)}"
+        )
+
+# Add the multi-cloud router to the main app
+app.include_router(multi_cloud_router)

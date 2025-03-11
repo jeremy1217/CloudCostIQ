@@ -1,6 +1,7 @@
 # Standard library imports
 from datetime import datetime
-from typing import List
+from typing import List, Optional, Dict
+import json
 
 # Third-party imports
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -39,7 +40,7 @@ class ApiKeyList(BaseModel):
     provider: str
     created_at: str
     is_active: bool
-    last_used: str = None
+    last_used: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -73,10 +74,11 @@ async def create_api_key(
     # Generate a secure random key
     key = secrets.token_urlsafe(32)
     
-    # Encrypt the provider credentails
+    # Encrypt the provider credentials
+    encrypted_credentials = None
     if api_key.credentials:
         encrypted_credentials = encrypt_data(json.dumps(api_key.credentials))
-                                             )
+    
     # Create a new API key entry
     now = datetime.utcnow().isoformat()
     db_api_key = ApiKeyModel(
