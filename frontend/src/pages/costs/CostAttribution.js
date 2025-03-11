@@ -4,7 +4,7 @@ import CostAttribution from '../../components/CostAttribution';
 
 const CostAttributionPage = () => {
     return (
-        <Container>
+        <Container maxWidth="lg">
             <Typography variant="h4" gutterBottom>Cost Attribution</Typography>
             <CostAttribution />
         </Container>

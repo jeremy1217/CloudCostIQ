@@ -1,10 +1,14 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { ThemeProvider, CssBaseline, Box } from '@mui/material';
 import Navbar from "./components/Navbar";
+import Sidebar from "./components/Sidebar";
 import ErrorBoundary from "./components/ErrorBoundary";
 import LoadingIndicator from "./components/LoadingIndicator";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
+import ConnectionHealthPage from './pages/admin/ConnectionHealthPage';
+import theme from './theme';
 
 // Auth pages
 import Login from "./pages/Login";
@@ -22,90 +26,134 @@ const EnhancedAIDashboard = lazy(() => import("./pages/EnhancedAIDashboard"));
 const MultiCloudComparisonPage = lazy(() => import("./pages/MultiCloudComparisonPage"));
 const UserProfile = lazy(() => import("./pages/UserProfile"));
 const ApiKeyManagement = lazy(() => import("./pages/ApiKeyManagement"));
+const DataVisualizationDemo = lazy(() => import("./pages/DataVisualizationDemo"));
+
+const DRAWER_WIDTH = 280;
 
 function App() {
+    const [mobileOpen, setMobileOpen] = useState(false);
+
+    const handleDrawerToggle = () => {
+        setMobileOpen(!mobileOpen);
+    };
+
     return (
-        <ErrorBoundary>
-            <Router>
-                <AuthProvider>
-                    <Navbar />
-                    <div style={{ padding: '20px' }}>
-                        <Suspense fallback={<LoadingIndicator message="Loading page..." />}>
-                            <Routes>
-                                {/* Public routes */}
-                                <Route path="/login" element={<Login />} />
-                                <Route path="/register" element={<Register />} />
-                                <Route path="/unauthorized" element={<Unauthorized />} />
-                                
-                                {/* Protected routes - regular users */}
-                                <Route path="/" element={
-                                    <ProtectedRoute>
-                                        <Dashboard />
-                                    </ProtectedRoute>
-                                } />
-                                <Route path="/insights" element={
-                                    <ProtectedRoute>
-                                        <Insights />
-                                    </ProtectedRoute>
-                                } />
-                                <Route path="/optimize" element={
-                                    <ProtectedRoute>
-                                        <Optimize />
-                                    </ProtectedRoute>
-                                } />
-                                <Route path="/ai-dashboard" element={
-                                    <ProtectedRoute>
-                                        <EnhancedAIDashboard />
-                                    </ProtectedRoute>
-                                } />
-                                <Route path="/multi-cloud" element={
-                                    <ProtectedRoute>
-                                        <MultiCloudComparisonPage />
-                                    </ProtectedRoute>
-                                } />
-                                <Route path="/profile" element={
-                                    <ProtectedRoute>
-                                        <UserProfile />
-                                    </ProtectedRoute>
-                                } />
-                                <Route path="/api-keys" element={
-                                    <ProtectedRoute>
-                                        <ApiKeyManagement />
-                                    </ProtectedRoute>
-                                } />
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <ErrorBoundary>
+                <Router>
+                    <AuthProvider>
+                        <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+                            <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
+                            <Box
+                                component="main"
+                                sx={{
+                                    flexGrow: 1,
+                                    p: 3,
+                                    width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+                                    bgcolor: 'background.default',
+                                    minHeight: '100vh',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                }}
+                            >
+                                <Navbar onDrawerToggle={handleDrawerToggle} />
+                                <Box sx={{ flex: 1, py: 2 }}>
+                                    <Suspense fallback={
+                                        <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
+                                            <LoadingIndicator message="Loading page..." />
+                                        </Box>
+                                    }>
+                                        <Routes>
+                                            {/* Public routes */}
+                                            <Route path="/login" element={<Login />} />
+                                            <Route path="/register" element={<Register />} />
+                                            <Route path="/unauthorized" element={<Unauthorized />} />
+                                            
+                                            {/* Protected routes - regular users */}
+                                            <Route path="/" element={
+                                                <ProtectedRoute>
+                                                    <Dashboard />
+                                                </ProtectedRoute>
+                                            } />
+                                            <Route path="/insights" element={
+                                                <ProtectedRoute>
+                                                    <Insights />
+                                                </ProtectedRoute>
+                                            } />
+                                            <Route path="/optimize" element={
+                                                <ProtectedRoute>
+                                                    <Optimize />
+                                                </ProtectedRoute>
+                                            } />
+                                            <Route path="/ai-dashboard" element={
+                                                <ProtectedRoute>
+                                                    <EnhancedAIDashboard />
+                                                </ProtectedRoute>
+                                            } />
+                                            <Route path="/multi-cloud" element={
+                                                <ProtectedRoute>
+                                                    <MultiCloudComparisonPage />
+                                                </ProtectedRoute>
+                                            } />
+                                            <Route path="/profile" element={
+                                                <ProtectedRoute>
+                                                    <UserProfile />
+                                                </ProtectedRoute>
+                                            } />
+                                            <Route path="/api-keys" element={
+                                                <ProtectedRoute>
+                                                    <ApiKeyManagement />
+                                                </ProtectedRoute>
+                                            } />
 
-                                {/* Costs sub-routes */}
-                                <Route path="/costs/by-service" element={
-                                    <ProtectedRoute>
-                                        <CostsByService />
-                                    </ProtectedRoute>
-                                } />
-                                <Route path="/costs/by-provider" element={
-                                    <ProtectedRoute>
-                                        <CostsByProvider />
-                                    </ProtectedRoute>
-                                } />
-                                <Route path="/costs/attribution" element={
-                                    <ProtectedRoute>
-                                        <CostAttribution />
-                                    </ProtectedRoute>
-                                } />
+                                            {/* Costs sub-routes */}
+                                            <Route path="/costs/by-service" element={
+                                                <ProtectedRoute>
+                                                    <CostsByService />
+                                                </ProtectedRoute>
+                                            } />
+                                            <Route path="/costs/by-provider" element={
+                                                <ProtectedRoute>
+                                                    <CostsByProvider />
+                                                </ProtectedRoute>
+                                            } />
+                                            <Route path="/costs/attribution" element={
+                                                <ProtectedRoute>
+                                                    <CostAttribution />
+                                                </ProtectedRoute>
+                                            } />
 
-                                {/* Admin routes */}
-                                <Route path="/admin/*" element={
-                                    <ProtectedRoute roles={["admin"]}>
-                                        <AdminRoutes />
-                                    </ProtectedRoute>
-                                } />
+                                            {/* Admin routes */}
+                                            <Route path="/admin/*" element={
+                                                <ProtectedRoute roles={["admin"]}>
+                                                    <AdminRoutes />
+                                                </ProtectedRoute>
+                                            } />
+                                            <Route path="/admin/connection-health" element={
+                                                <ProtectedRoute requiredRole="admin">
+                                                    <ConnectionHealthPage />
+                                                </ProtectedRoute>
+                                            } />
 
-                                {/* Fallback route */}
-                                <Route path="*" element={<Navigate to="/" replace />} />
-                            </Routes>
-                        </Suspense>
-                    </div>
-                </AuthProvider>
-            </Router>
-        </ErrorBoundary>
+                                            {/* Demo routes */}
+                                            <Route path="/demo/data-viz" element={
+                                                <ProtectedRoute>
+                                                    <DataVisualizationDemo />
+                                                </ProtectedRoute>
+                                            } />
+
+                                            {/* Fallback route */}
+                                            <Route path="*" element={<Navigate to="/" replace />} />
+                                        </Routes>
+                                    </Suspense>
+                                </Box>
+                            </Box>
+                        </Box>
+                    </AuthProvider>
+                </Router>
+            </ErrorBoundary>
+        </ThemeProvider>
     );
 }
 
@@ -113,11 +161,13 @@ function App() {
 const AdminRoutes = () => {
     const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
     const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
+    const CloudConnections = lazy(() => import("./pages/admin/CloudConnections"));
     
     return (
         <Routes>
             <Route path="/" element={<AdminDashboard />} />
             <Route path="/users" element={<UserManagement />} />
+            <Route path="/cloud-connections" element={<CloudConnections />} />
             <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
     );
