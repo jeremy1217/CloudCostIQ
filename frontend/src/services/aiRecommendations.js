@@ -64,25 +64,49 @@ class AIRecommendationsService {
                                     current: 45,
                                     optimal: 70,
                                     industry: 65,
-                                    history: [42, 44, 45, 43, 45]
+                                    history: [42, 44, 45, 43, 45],
+                                    details: {
+                                        avgLoad: 1.2,
+                                        peakLoad: 2.8,
+                                        throttling: '0%',
+                                        contextSwitches: '2.5k/s'
+                                    }
                                 },
                                 memory: {
                                     current: 60,
                                     optimal: 75,
                                     industry: 70,
-                                    history: [58, 59, 60, 61, 60]
+                                    history: [58, 59, 60, 61, 60],
+                                    details: {
+                                        swapUsage: '0%',
+                                        pageSize: '4KB',
+                                        cached: '2.5GB',
+                                        available: '6.4GB'
+                                    }
                                 },
                                 network: {
                                     current: 30,
                                     optimal: 50,
                                     industry: 45,
-                                    history: [28, 29, 30, 31, 30]
+                                    history: [28, 29, 30, 31, 30],
+                                    details: {
+                                        throughput: '120MB/s',
+                                        packetLoss: '0.001%',
+                                        latency: '1.2ms',
+                                        connections: 245
+                                    }
                                 },
                                 iops: {
                                     current: 2500,
                                     optimal: 3000,
                                     industry: 2800,
-                                    history: [2400, 2450, 2500, 2480, 2500]
+                                    history: [2400, 2450, 2500, 2480, 2500],
+                                    details: {
+                                        readIOPS: 1500,
+                                        writeIOPS: 1000,
+                                        queueDepth: 2,
+                                        latency: '0.8ms'
+                                    }
                                 }
                             },
                             resourceSpecific: {
@@ -90,7 +114,11 @@ class AIRecommendationsService {
                                 vcpus: 4,
                                 memory: 16,
                                 networkPerformance: 'Up to 5 Gigabit',
-                                baselinePerformance: '60%'
+                                baselinePerformance: '60%',
+                                architecture: 'x86_64',
+                                clockSpeed: '2.5 GHz',
+                                burstable: true,
+                                cpuCredits: 'Available'
                             }
                         },
                         roi: {
@@ -109,12 +137,25 @@ class AIRecommendationsService {
                         industryComparison: {
                             percentile: 35,
                             similarWorkloads: 'Web Application Servers',
-                            efficiencyScore: 0.75
+                            efficiencyScore: 0.75,
+                            workloadPatterns: {
+                                type: 'Variable',
+                                peakHours: '9AM-5PM',
+                                burstFrequency: 'Medium',
+                                predictability: 'High'
+                            }
                         },
                         potentialImprovements: {
                             performance: 'Maintain current performance levels with smaller instance',
                             cost: 'Reduce costs by 10% with no performance impact',
                             reliability: 'No negative impact on reliability metrics'
+                        },
+                        resourceHealth: {
+                            status: 'Healthy',
+                            issues: [],
+                            lastIncident: null,
+                            uptime: '99.99%',
+                            performanceScore: 0.85
                         }
                     },
                     estimatedSavings: 234.50,
@@ -228,17 +269,50 @@ class AIRecommendationsService {
                             compute: {
                                 averageUtilization: 55,
                                 industryAverage: 70,
-                                optimizationScore: 0.78
+                                optimizationScore: 0.78,
+                                details: {
+                                    cpuEfficiency: 0.82,
+                                    memoryEfficiency: 0.75,
+                                    networkEfficiency: 0.85,
+                                    powerEfficiency: 0.80
+                                },
+                                trends: {
+                                    daily: [52, 54, 55, 53, 55, 54, 56],
+                                    weekly: [50, 52, 55, 54],
+                                    monthly: [48, 50, 53, 55]
+                                }
                             },
                             storage: {
                                 averageUtilization: 65,
                                 industryAverage: 75,
-                                optimizationScore: 0.85
+                                optimizationScore: 0.85,
+                                details: {
+                                    readLatency: '2ms',
+                                    writeLatency: '1ms',
+                                    iopsEfficiency: 0.88,
+                                    throughputEfficiency: 0.82
+                                },
+                                trends: {
+                                    daily: [62, 64, 65, 63, 65, 64, 66],
+                                    weekly: [60, 62, 65, 64],
+                                    monthly: [58, 60, 63, 65]
+                                }
                             },
                             database: {
                                 averageUtilization: 45,
                                 industryAverage: 60,
-                                optimizationScore: 0.72
+                                optimizationScore: 0.72,
+                                details: {
+                                    queryPerformance: 0.85,
+                                    connectionEfficiency: 0.78,
+                                    cacheHitRatio: 0.92,
+                                    bufferEfficiency: 0.88
+                                },
+                                trends: {
+                                    daily: [42, 44, 45, 43, 45, 44, 46],
+                                    weekly: [40, 42, 45, 44],
+                                    monthly: [38, 40, 43, 45]
+                                }
                             }
                         }
                     },
@@ -263,6 +337,112 @@ class AIRecommendationsService {
                             compute: [52, 54, 55, 53, 55],
                             storage: [62, 64, 65, 65, 65],
                             database: [42, 43, 45, 44, 45]
+                        }
+                    },
+                    costPerformanceMetrics: {
+                        overview: {
+                            costPerformanceScore: 0.82,
+                            industryBenchmark: 0.85,
+                            monthlyTrend: [0.78, 0.79, 0.80, 0.81, 0.82],
+                            potentialImprovement: 15
+                        },
+                        resourceTypes: {
+                            compute: {
+                                costPerHour: 0.45,
+                                costPerRequest: 0.00012,
+                                utilizationEfficiency: 0.75,
+                                performanceCostRatio: 0.82,
+                                trends: {
+                                    daily: [0.80, 0.81, 0.82, 0.81, 0.82],
+                                    weekly: [0.79, 0.80, 0.81, 0.82]
+                                },
+                                metrics: {
+                                    costPerCPUCore: 28.50,
+                                    costPerGBMemory: 7.25,
+                                    costPerIOPS: 0.015,
+                                    performanceIndex: 85
+                                }
+                            },
+                            storage: {
+                                costPerGB: 0.08,
+                                costPerIOPS: 0.005,
+                                utilizationEfficiency: 0.82,
+                                performanceCostRatio: 0.88,
+                                trends: {
+                                    daily: [0.86, 0.87, 0.88, 0.87, 0.88],
+                                    weekly: [0.85, 0.86, 0.87, 0.88]
+                                },
+                                metrics: {
+                                    costPerThroughput: 0.025,
+                                    costPerSnapshot: 0.12,
+                                    performanceIndex: 92
+                                }
+                            },
+                            database: {
+                                costPerHour: 0.85,
+                                costPerQuery: 0.00025,
+                                utilizationEfficiency: 0.78,
+                                performanceCostRatio: 0.84,
+                                trends: {
+                                    daily: [0.82, 0.83, 0.84, 0.83, 0.84],
+                                    weekly: [0.81, 0.82, 0.83, 0.84]
+                                },
+                                metrics: {
+                                    costPerConnection: 0.001,
+                                    costPerGBStorage: 0.15,
+                                    costPerBackup: 0.08,
+                                    performanceIndex: 88
+                                }
+                            }
+                        },
+                        recommendations: [
+                            {
+                                type: "Compute Rightsizing",
+                                potentialSavings: 125.50,
+                                performanceImpact: "Neutral",
+                                roi: 2.8,
+                                implementationComplexity: "Low"
+                            },
+                            {
+                                type: "Storage Optimization",
+                                potentialSavings: 85.25,
+                                performanceImpact: "Positive",
+                                roi: 3.2,
+                                implementationComplexity: "Medium"
+                            },
+                            {
+                                type: "Database Configuration",
+                                potentialSavings: 95.80,
+                                performanceImpact: "Positive",
+                                roi: 2.5,
+                                implementationComplexity: "Medium"
+                            }
+                        ],
+                        industryComparison: {
+                            percentile: 75,
+                            averageCostPerformance: 0.85,
+                            leadingPractices: [
+                                "Automated scaling based on demand",
+                                "Regular performance optimization",
+                                "Resource lifecycle management"
+                            ],
+                            benchmarks: {
+                                compute: {
+                                    industry: 0.85,
+                                    current: 0.82,
+                                    bestInClass: 0.92
+                                },
+                                storage: {
+                                    industry: 0.88,
+                                    current: 0.88,
+                                    bestInClass: 0.95
+                                },
+                                database: {
+                                    industry: 0.86,
+                                    current: 0.84,
+                                    bestInClass: 0.93
+                                }
+                            }
                         }
                     }
                 }

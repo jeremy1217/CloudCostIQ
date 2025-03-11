@@ -11,9 +11,16 @@ import StorageIcon from '@mui/icons-material/Storage';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import PieChartIcon from '@mui/icons-material/PieChart';
 import SpeedIcon from '@mui/icons-material/Speed';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import AIRecommendationCard from "../components/AIRecommendationCard";
 import aiRecommendations from "../services/aiRecommendations";
 import api from "../services/api";
+import MoneyOffIcon from '@mui/icons-material/MoneyOff';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
 const Optimize = () => {
     const [data, setData] = useState(null);
@@ -361,7 +368,9 @@ const Optimize = () => {
                                             {type}
                                         </Typography>
                                     </Box>
-                                    <Box sx={{ mb: 2 }}>
+
+                                    {/* Main Utilization */}
+                                    <Box sx={{ mb: 3 }}>
                                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                                             <Typography variant="body2" color="text.secondary">
                                                 Current Utilization
@@ -383,7 +392,69 @@ const Optimize = () => {
                                             }}
                                         />
                                     </Box>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+
+                                    {/* Detailed Metrics */}
+                                    <Box sx={{ mb: 3 }}>
+                                        <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <AssessmentIcon fontSize="small" color="primary" />
+                                            Efficiency Metrics
+                                        </Typography>
+                                        <Grid container spacing={1}>
+                                            {Object.entries(metrics.details || {}).map(([key, value]) => (
+                                                <Grid item xs={6} key={key}>
+                                                    <Box sx={{ p: 1, bgcolor: 'background.default', borderRadius: 1 }}>
+                                                        <Typography variant="body2" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
+                                                            {key.replace(/([A-Z])/g, ' $1').trim()}
+                                                        </Typography>
+                                                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                                                            {typeof value === 'number' ? `${(value * 100).toFixed(0)}%` : value}
+                                                        </Typography>
+                                                    </Box>
+                                                </Grid>
+                                            ))}
+                                        </Grid>
+                                    </Box>
+
+                                    {/* Trends */}
+                                    <Box>
+                                        <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <TrendingUpIcon fontSize="small" color="primary" />
+                                            Performance Trends
+                                        </Typography>
+                                        <Grid container spacing={1}>
+                                            {Object.entries(metrics.trends || {}).map(([period, values]) => (
+                                                <Grid item xs={12} key={period}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                        <Typography variant="body2" color="text.secondary" sx={{ minWidth: 80, textTransform: 'capitalize' }}>
+                                                            {period}
+                                                        </Typography>
+                                                        <Box sx={{ flex: 1, display: 'flex', gap: 0.5 }}>
+                                                            {values.map((value, index) => (
+                                                                <Box
+                                                                    key={index}
+                                                                    sx={{
+                                                                        flex: 1,
+                                                                        height: 24,
+                                                                        bgcolor: 'primary.main',
+                                                                        opacity: 0.1 + (0.9 * value / 100),
+                                                                        borderRadius: 0.5
+                                                                    }}
+                                                                />
+                                                            ))}
+                                                        </Box>
+                                                        <Typography variant="body2">
+                                                            {values[values.length - 1]}%
+                                                        </Typography>
+                                                    </Box>
+                                                </Grid>
+                                            ))}
+                                        </Grid>
+                                    </Box>
+
+                                    <Divider sx={{ my: 2 }} />
+
+                                    {/* Summary */}
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <Box>
                                             <Typography variant="body2" color="text.secondary">
                                                 Industry Average
@@ -412,6 +483,288 @@ const Optimize = () => {
                         </Grid>
                     ))}
                 </Grid>
+
+                {/* Cost-Performance Analysis */}
+                <Typography variant="h5" gutterBottom sx={{ mt: 4, mb: 2 }}>
+                    Cost-Performance Analysis
+                </Typography>
+                
+                {/* Overview Card */}
+                <Card sx={{ mb: 3 }}>
+                    <CardContent>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                            <CompareArrowsIcon color="primary" />
+                            <Typography variant="h6">
+                                Overall Cost-Performance Ratio
+                            </Typography>
+                        </Box>
+                        
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} md={6}>
+                                <Box sx={{ position: 'relative', p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
+                                    <Typography variant="h3" color="primary" sx={{ mb: 1 }}>
+                                        {(data?.metadata?.analysis?.costPerformanceMetrics?.overview?.costPerformanceScore * 100).toFixed(0)}%
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        Cost-Performance Score
+                                    </Typography>
+                                    <Box sx={{ mt: 2 }}>
+                                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                                            Industry Benchmark: {(data?.metadata?.analysis?.costPerformanceMetrics?.overview?.industryBenchmark * 100).toFixed(0)}%
+                                        </Typography>
+                                        <LinearProgress
+                                            variant="determinate"
+                                            value={(data?.metadata?.analysis?.costPerformanceMetrics?.overview?.costPerformanceScore / data?.metadata?.analysis?.costPerformanceMetrics?.overview?.industryBenchmark) * 100}
+                                            sx={{
+                                                height: 8,
+                                                borderRadius: 4,
+                                                bgcolor: 'rgba(0,0,0,0.1)',
+                                                '& .MuiLinearProgress-bar': {
+                                                    bgcolor: 'primary.main'
+                                                }
+                                            }}
+                                        />
+                                    </Box>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                                    <Box>
+                                        <Typography variant="subtitle2" gutterBottom>
+                                            Monthly Trend
+                                        </Typography>
+                                        <Box sx={{ display: 'flex', gap: 0.5, mb: 2 }}>
+                                            {data?.metadata?.analysis?.costPerformanceMetrics?.overview?.monthlyTrend.map((value, index) => (
+                                                <Box
+                                                    key={index}
+                                                    sx={{
+                                                        flex: 1,
+                                                        height: 40,
+                                                        bgcolor: 'primary.main',
+                                                        opacity: 0.3 + (0.7 * value),
+                                                        borderRadius: 1,
+                                                        display: 'flex',
+                                                        alignItems: 'flex-end',
+                                                        justifyContent: 'center',
+                                                        pb: 0.5
+                                                    }}
+                                                >
+                                                    <Typography variant="caption" sx={{ color: 'white', fontSize: '0.7rem' }}>
+                                                        {(value * 100).toFixed(0)}%
+                                                    </Typography>
+                                                </Box>
+                                            ))}
+                                        </Box>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', gap: 2 }}>
+                                        <Chip
+                                            icon={<TrendingUpIcon />}
+                                            label={`${data?.metadata?.analysis?.costPerformanceMetrics?.overview?.potentialImprovement}% Potential Improvement`}
+                                            color="primary"
+                                            variant="outlined"
+                                        />
+                                        <Chip
+                                            icon={<ShowChartIcon />}
+                                            label={`${data?.metadata?.analysis?.costPerformanceMetrics?.industryComparison?.percentile}th Percentile`}
+                                            color="success"
+                                        />
+                                    </Box>
+                                </Box>
+                            </Grid>
+                        </Grid>
+                    </CardContent>
+                </Card>
+
+                {/* Resource Type Analysis */}
+                <Grid container spacing={3}>
+                    {Object.entries(data?.metadata?.analysis?.costPerformanceMetrics?.resourceTypes || {}).map(([type, metrics]) => (
+                        <Grid item xs={12} md={4} key={type}>
+                            <Card>
+                                <CardContent>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                                        <MoneyOffIcon color="primary" />
+                                        <Typography variant="h6" sx={{ textTransform: 'capitalize' }}>
+                                            {type} Efficiency
+                                        </Typography>
+                                    </Box>
+
+                                    {/* Cost Metrics */}
+                                    <Box sx={{ mb: 3 }}>
+                                        <Typography variant="subtitle2" gutterBottom>
+                                            Cost Metrics
+                                        </Typography>
+                                        <Grid container spacing={1}>
+                                            {Object.entries(metrics.metrics || {}).map(([key, value]) => (
+                                                <Grid item xs={6} key={key}>
+                                                    <Box sx={{ p: 1, bgcolor: 'background.default', borderRadius: 1 }}>
+                                                        <Typography variant="body2" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
+                                                            {key.replace(/([A-Z])/g, ' $1').trim()}
+                                                        </Typography>
+                                                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                                                            ${typeof value === 'number' ? value.toFixed(3) : value}
+                                                        </Typography>
+                                                    </Box>
+                                                </Grid>
+                                            ))}
+                                        </Grid>
+                                    </Box>
+
+                                    {/* Performance Cost Ratio */}
+                                    <Box sx={{ mb: 3 }}>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                            <Typography variant="body2" color="text.secondary">
+                                                Performance/Cost Ratio
+                                            </Typography>
+                                            <Typography variant="body2">
+                                                {(metrics.performanceCostRatio * 100).toFixed(0)}%
+                                            </Typography>
+                                        </Box>
+                                        <LinearProgress
+                                            variant="determinate"
+                                            value={metrics.performanceCostRatio * 100}
+                                            sx={{
+                                                height: 8,
+                                                borderRadius: 4,
+                                                bgcolor: 'rgba(0,0,0,0.1)',
+                                                '& .MuiLinearProgress-bar': {
+                                                    bgcolor: metrics.performanceCostRatio >= 0.85 ? 'success.main' : 'warning.main'
+                                                }
+                                            }}
+                                        />
+                                    </Box>
+
+                                    {/* Trends */}
+                                    <Box>
+                                        <Typography variant="subtitle2" gutterBottom>
+                                            Efficiency Trends
+                                        </Typography>
+                                        <Grid container spacing={1}>
+                                            {Object.entries(metrics.trends || {}).map(([period, values]) => (
+                                                <Grid item xs={12} key={period}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                        <Typography variant="body2" color="text.secondary" sx={{ minWidth: 80, textTransform: 'capitalize' }}>
+                                                            {period}
+                                                        </Typography>
+                                                        <Box sx={{ flex: 1, display: 'flex', gap: 0.5 }}>
+                                                            {values.map((value, index) => (
+                                                                <Box
+                                                                    key={index}
+                                                                    sx={{
+                                                                        flex: 1,
+                                                                        height: 24,
+                                                                        bgcolor: 'primary.main',
+                                                                        opacity: 0.1 + (0.9 * value),
+                                                                        borderRadius: 0.5
+                                                                    }}
+                                                                />
+                                                            ))}
+                                                        </Box>
+                                                        <Typography variant="body2">
+                                                            {(values[values.length - 1] * 100).toFixed(0)}%
+                                                        </Typography>
+                                                    </Box>
+                                                </Grid>
+                                            ))}
+                                        </Grid>
+                                    </Box>
+
+                                    <Divider sx={{ my: 2 }} />
+
+                                    {/* Industry Comparison */}
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <Box>
+                                            <Typography variant="body2" color="text.secondary">
+                                                Industry Average
+                                            </Typography>
+                                            <Typography variant="h6">
+                                                {(data?.metadata?.analysis?.costPerformanceMetrics?.industryComparison?.benchmarks[type]?.industry * 100).toFixed(0)}%
+                                            </Typography>
+                                        </Box>
+                                        <Box sx={{ textAlign: 'right' }}>
+                                            <Typography variant="body2" color="text.secondary">
+                                                Best in Class
+                                            </Typography>
+                                            <Typography variant="h6" color="success.main">
+                                                {(data?.metadata?.analysis?.costPerformanceMetrics?.industryComparison?.benchmarks[type]?.bestInClass * 100).toFixed(0)}%
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    ))}
+                </Grid>
+
+                {/* Optimization Recommendations */}
+                <Card sx={{ mt: 3 }}>
+                    <CardContent>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                            <TrendingDownIcon color="primary" />
+                            <Typography variant="h6">
+                                Cost-Performance Optimization Opportunities
+                            </Typography>
+                        </Box>
+                        
+                        <Grid container spacing={2}>
+                            {data?.metadata?.analysis?.costPerformanceMetrics?.recommendations.map((rec, index) => (
+                                <Grid item xs={12} md={4} key={index}>
+                                    <Box sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
+                                        <Typography variant="subtitle1" gutterBottom>
+                                            {rec.type}
+                                        </Typography>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                            <Typography variant="body2" color="text.secondary">
+                                                Potential Savings
+                                            </Typography>
+                                            <Typography variant="body1" color="success.main">
+                                                ${rec.potentialSavings.toFixed(2)}
+                                            </Typography>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                            <Typography variant="body2" color="text.secondary">
+                                                ROI
+                                            </Typography>
+                                            <Typography variant="body1">
+                                                {rec.roi}x
+                                            </Typography>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                                            <Chip
+                                                label={`Impact: ${rec.performanceImpact}`}
+                                                color={rec.performanceImpact === 'Positive' ? 'success' : 'warning'}
+                                                size="small"
+                                            />
+                                            <Chip
+                                                label={`${rec.implementationComplexity} Complexity`}
+                                                variant="outlined"
+                                                size="small"
+                                            />
+                                        </Box>
+                                    </Box>
+                                </Grid>
+                            ))}
+                        </Grid>
+
+                        {/* Leading Practices */}
+                        <Box sx={{ mt: 3 }}>
+                            <Typography variant="subtitle1" gutterBottom>
+                                Industry Leading Practices
+                            </Typography>
+                            <Grid container spacing={2}>
+                                {data?.metadata?.analysis?.costPerformanceMetrics?.industryComparison?.leadingPractices.map((practice, index) => (
+                                    <Grid item xs={12} md={4} key={index}>
+                                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                            <CheckCircleOutlineIcon color="success" />
+                                            <Typography variant="body2">
+                                                {practice}
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        </Box>
+                    </CardContent>
+                </Card>
             </Box>
 
             {/* Filters Section */}

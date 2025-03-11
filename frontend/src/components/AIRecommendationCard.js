@@ -32,6 +32,9 @@ import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import SpeedIcon from '@mui/icons-material/Speed';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import SettingsIcon from '@mui/icons-material/Settings';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 import { styled } from '@mui/material/styles';
 
 const ExpandMore = styled((props) => {
@@ -64,6 +67,15 @@ const BenchmarkProgress = styled(LinearProgress)(({ theme, value, optimal, indus
             value >= industry ? theme.palette.warning.main :
             theme.palette.error.main
     }
+}));
+
+const DetailBox = styled(Box)(({ theme }) => ({
+    backgroundColor: theme.palette.background.default,
+    borderRadius: theme.shape.borderRadius,
+    padding: theme.spacing(1.5),
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(1)
 }));
 
 const AIRecommendationCard = ({ recommendation, onApply, isApplying }) => {
@@ -263,20 +275,21 @@ const AIRecommendationCard = ({ recommendation, onApply, isApplying }) => {
                                 <MetricBox>
                                     {/* Resource Specifications */}
                                     <Box sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle2" gutterBottom>
+                                        <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <SettingsIcon color="primary" fontSize="small" />
                                             Resource Specifications
                                         </Typography>
                                         <Grid container spacing={2}>
                                             {Object.entries(recommendation.metrics?.performance?.resourceSpecific || {}).map(([key, value]) => (
-                                                <Grid item xs={6} key={key}>
-                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                <Grid item xs={6} md={3} key={key}>
+                                                    <DetailBox>
                                                         <Typography variant="body2" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
                                                             {key.replace(/([A-Z])/g, ' $1').trim()}
                                                         </Typography>
-                                                        <Typography variant="body2">
-                                                            {value}
+                                                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                                                            {value.toString()}
                                                         </Typography>
-                                                    </Box>
+                                                    </DetailBox>
                                                 </Grid>
                                             ))}
                                         </Grid>
@@ -284,16 +297,17 @@ const AIRecommendationCard = ({ recommendation, onApply, isApplying }) => {
 
                                     <Divider sx={{ my: 2 }} />
 
-                                    {/* Benchmark Comparisons */}
-                                    <Typography variant="subtitle2" gutterBottom>
-                                        Performance Benchmarks
+                                    {/* Detailed Benchmarks */}
+                                    <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <AssessmentIcon color="primary" fontSize="small" />
+                                        Performance Metrics
                                     </Typography>
                                     <Grid container spacing={3}>
                                         {Object.entries(recommendation.metrics?.performance?.benchmarks || {}).map(([metric, data]) => (
                                             <Grid item xs={12} key={metric}>
-                                                <Box sx={{ mb: 2 }}>
+                                                <Box sx={{ mb: 3 }}>
                                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                                        <Typography variant="body2" sx={{ textTransform: 'uppercase' }}>
+                                                        <Typography variant="subtitle2" sx={{ textTransform: 'uppercase' }}>
                                                             {metric}
                                                         </Typography>
                                                         <Box sx={{ display: 'flex', gap: 2 }}>
@@ -321,6 +335,22 @@ const AIRecommendationCard = ({ recommendation, onApply, isApplying }) => {
                                                         optimal={data.optimal}
                                                         industry={data.industry}
                                                     />
+                                                    
+                                                    {/* Detailed Metrics */}
+                                                    <Grid container spacing={2} sx={{ mt: 1 }}>
+                                                        {Object.entries(data.details || {}).map(([key, value]) => (
+                                                            <Grid item xs={6} md={3} key={key}>
+                                                                <DetailBox>
+                                                                    <Typography variant="body2" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
+                                                                        {key.replace(/([A-Z])/g, ' $1').trim()}
+                                                                    </Typography>
+                                                                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                                                                        {value.toString()}
+                                                                    </Typography>
+                                                                </DetailBox>
+                                                            </Grid>
+                                                        ))}
+                                                    </Grid>
                                                 </Box>
                                             </Grid>
                                         ))}
@@ -328,81 +358,47 @@ const AIRecommendationCard = ({ recommendation, onApply, isApplying }) => {
 
                                     <Divider sx={{ my: 2 }} />
 
-                                    {/* Industry Comparison */}
-                                    <Box>
-                                        <Typography variant="subtitle2" gutterBottom>
-                                            Industry Analysis
-                                        </Typography>
-                                        <Grid container spacing={2}>
-                                            <Grid item xs={12}>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                                                    <CompareArrowsIcon color="primary" />
-                                                    <Typography variant="body2">
-                                                        {recommendation.benchmarkAnalysis?.summary}
+                                    {/* Workload Patterns */}
+                                    <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <ScheduleIcon color="primary" fontSize="small" />
+                                        Workload Patterns
+                                    </Typography>
+                                    <Grid container spacing={2}>
+                                        {Object.entries(recommendation.benchmarkAnalysis?.industryComparison?.workloadPatterns || {}).map(([key, value]) => (
+                                            <Grid item xs={6} md={3} key={key}>
+                                                <DetailBox>
+                                                    <Typography variant="body2" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
+                                                        {key.replace(/([A-Z])/g, ' $1').trim()}
                                                     </Typography>
-                                                </Box>
-                                            </Grid>
-                                            <Grid item xs={12} md={6}>
-                                                <MetricBox>
-                                                    <Typography variant="body2" color="text.secondary">
-                                                        Industry Percentile
+                                                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                                                        {value}
                                                     </Typography>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <Typography variant="h6">
-                                                            {recommendation.benchmarkAnalysis?.industryComparison?.percentile}th
-                                                        </Typography>
-                                                        <Typography variant="body2" color="text.secondary">
-                                                            percentile
-                                                        </Typography>
-                                                    </Box>
-                                                </MetricBox>
+                                                </DetailBox>
                                             </Grid>
-                                            <Grid item xs={12} md={6}>
-                                                <MetricBox>
-                                                    <Typography variant="body2" color="text.secondary">
-                                                        Efficiency Score
-                                                    </Typography>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <Typography variant="h6">
-                                                            {(recommendation.benchmarkAnalysis?.industryComparison?.efficiencyScore * 100).toFixed(0)}%
-                                                        </Typography>
-                                                        <Chip
-                                                            size="small"
-                                                            label={recommendation.benchmarkAnalysis?.industryComparison?.similarWorkloads}
-                                                            color="primary"
-                                                            variant="outlined"
-                                                        />
-                                                    </Box>
-                                                </MetricBox>
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
+                                        ))}
+                                    </Grid>
 
                                     <Divider sx={{ my: 2 }} />
 
-                                    {/* Potential Improvements */}
-                                    <Box>
-                                        <Typography variant="subtitle2" gutterBottom>
-                                            Expected Impact
-                                        </Typography>
-                                        <Grid container spacing={2}>
-                                            {Object.entries(recommendation.benchmarkAnalysis?.potentialImprovements || {}).map(([category, impact]) => (
-                                                <Grid item xs={12} key={category}>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <BarChartIcon color="primary" />
-                                                        <Box>
-                                                            <Typography variant="body2" sx={{ textTransform: 'capitalize' }}>
-                                                                {category}
-                                                            </Typography>
-                                                            <Typography variant="body2" color="text.secondary">
-                                                                {impact}
-                                                            </Typography>
-                                                        </Box>
-                                                    </Box>
-                                                </Grid>
-                                            ))}
-                                        </Grid>
-                                    </Box>
+                                    {/* Resource Health */}
+                                    <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <SpeedIcon color="primary" fontSize="small" />
+                                        Resource Health
+                                    </Typography>
+                                    <Grid container spacing={2}>
+                                        {Object.entries(recommendation.benchmarkAnalysis?.resourceHealth || {}).map(([key, value]) => (
+                                            <Grid item xs={6} md={3} key={key}>
+                                                <DetailBox>
+                                                    <Typography variant="body2" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
+                                                        {key.replace(/([A-Z])/g, ' $1').trim()}
+                                                    </Typography>
+                                                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                                                        {value?.toString() || 'N/A'}
+                                                    </Typography>
+                                                </DetailBox>
+                                            </Grid>
+                                        ))}
+                                    </Grid>
                                 </MetricBox>
                             </Grid>
                         </Grid>
