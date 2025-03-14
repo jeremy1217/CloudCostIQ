@@ -30,9 +30,18 @@ export function AuthProvider({ children }) {
             // Set up axios with the token
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             
-            // Fetch user info (optional)
-            const response = await axios.get(`${API_BASE_URL}/auth/me`);
-            setUser(response.data);
+            // Fetch user info from backend
+            try {
+              const response = await axios.get(`${API_BASE_URL}/auth/me`);
+              setUser(response.data);
+            } catch (err) {
+              console.error('Error fetching user info:', err);
+              // Fallback to token data if API call fails
+              setUser({ 
+                username: decoded.sub,
+                roles: decoded.roles || [] 
+              });
+            }
           }
         } catch (err) {
           console.error('Error validating token:', err);
@@ -77,7 +86,10 @@ export function AuthProvider({ children }) {
       
       // Decode token to get user info
       const decoded = jwtDecode(access_token);
-      setUser({ username: decoded.sub });
+      setUser({ 
+        username: decoded.sub,
+        roles: decoded.roles || [] 
+      });
       
       // Redirect to the dashboard
       navigate('/');

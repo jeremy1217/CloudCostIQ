@@ -1,5 +1,6 @@
 from sqlalchemy import text
 from backend.database.db import engine
+from backend.auth.utils import get_password_hash
 
 def create_admin_direct():
     """Create admin role and user directly with SQL"""
@@ -11,9 +12,8 @@ def create_admin_direct():
         ON CONFLICT (name) DO NOTHING
         """))
         
-        # Create admin user with bcrypt hashed password
-        # This is a sample bcrypt hash for 'adminpassword' - you should generate a fresh one
-        hashed_pw = '$2b$12$CoDzwPE3vFZkUn7Es1hxVOOxm4vcDjBMdW5VkHyeA2Hx8BRiQQYkq'
+        # Create admin user with properly hashed password
+        hashed_pw = get_password_hash('adminpassword')
         conn.execute(text("""
         INSERT INTO users (username, email, full_name, hashed_password, is_active) 
         VALUES ('admin', 'admin@example.com', 'Admin User', :hashed_pw, true)
