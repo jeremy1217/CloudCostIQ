@@ -95,7 +95,7 @@ const Navbar = ({ onDrawerToggle }) => {
                         <Button 
                             color="inherit" 
                             component={Link} 
-                            to="/"
+                            to="/app"
                         >
                             Dashboard
                         </Button>
@@ -115,21 +115,21 @@ const Navbar = ({ onDrawerToggle }) => {
                         >
                             <MenuItem 
                                 component={Link} 
-                                to="/costs/by-service" 
+                                to="/app/costs/by-service" 
                                 onClick={handleCostsMenuClose}
                             >
                                 By Service
                             </MenuItem>
                             <MenuItem 
                                 component={Link} 
-                                to="/costs/by-provider" 
+                                to="/app/costs/by-provider" 
                                 onClick={handleCostsMenuClose}
                             >
                                 By Provider
                             </MenuItem>
                             <MenuItem 
                                 component={Link} 
-                                to="/costs/attribution" 
+                                to="/app/costs/attribution" 
                                 onClick={handleCostsMenuClose}
                             >
                                 Cost Attribution
@@ -139,28 +139,28 @@ const Navbar = ({ onDrawerToggle }) => {
                         <Button 
                             color="inherit" 
                             component={Link} 
-                            to="/insights"
+                            to="/app/insights"
                         >
                             Insights
                         </Button>
                         <Button 
                             color="inherit" 
                             component={Link} 
-                            to="/optimize"
+                            to="/app/optimize"
                         >
                             Optimize
                         </Button>
                         <Button 
                             color="inherit" 
                             component={Link} 
-                            to="/multi-cloud"
+                            to="/app/multi-cloud"
                         >
                             Multi-Cloud
                         </Button>
                         <Button 
                             color="inherit" 
                             component={Link} 
-                            to="/ai-dashboard"
+                            to="/app/ai-dashboard"
                             sx={{ 
                                 backgroundColor: 'rgba(255,255,255,0.15)', 
                                 '&:hover': { backgroundColor: 'rgba(255,255,255,0.25)' }
@@ -191,7 +191,7 @@ const Navbar = ({ onDrawerToggle }) => {
                                     size="large"
                                     aria-label="settings"
                                     color="inherit"
-                                    onClick={() => navigate('/settings')}
+                                    onClick={() => navigate('/app/settings')}
                                 >
                                     <SettingsIcon />
                                 </IconButton>
@@ -258,27 +258,54 @@ const Navbar = ({ onDrawerToggle }) => {
                     vertical: 'top',
                     horizontal: 'right',
                 }}
-                open={Boolean(userAnchorEl)}
+                open={openUserMenu}
                 onClose={handleUserMenuClose}
-                sx={{
-                    '& .MuiPaper-root': {
-                        backgroundColor: 'background.paper',
-                        boxShadow: theme.shadows[3],
-                        minWidth: 200,
-                    },
-                }}
             >
-                <Box sx={{ px: 2, py: 1 }}>
-                    <Typography variant="subtitle2" color="text.secondary">
-                        Signed in as
-                    </Typography>
-                    <Typography variant="body1" fontWeight="medium">
-                        {user?.email}
-                    </Typography>
-                </Box>
-                <MenuItem onClick={() => handleNavigate('/profile')}>Profile</MenuItem>
-                <MenuItem onClick={() => handleNavigate('/api-keys')}>API Keys</MenuItem>
-                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                <MenuItem onClick={() => handleNavigate('/app/profile')}>
+                    <ListItemIcon>
+                        <AccountCircleIcon fontSize="small" />
+                    </ListItemIcon>
+                    Profile
+                </MenuItem>
+                
+                <MenuItem onClick={() => handleNavigate('/app/api-keys')}>
+                    <ListItemIcon>
+                        <VpnKeyIcon fontSize="small" />
+                    </ListItemIcon>
+                    API Keys
+                </MenuItem>
+
+                {isAdmin && (
+                    <>
+                        <Divider />
+                        <MenuItem onClick={() => handleNavigate('/app/admin')}>
+                            <ListItemIcon>
+                                <AdminPanelSettingsIcon fontSize="small" />
+                            </ListItemIcon>
+                            Admin Dashboard
+                        </MenuItem>
+                        <MenuItem onClick={() => handleNavigate('/app/admin/cloud-connections')}>
+                            <ListItemIcon>
+                                <CloudIcon fontSize="small" />
+                            </ListItemIcon>
+                            Cloud Connections
+                        </MenuItem>
+                        <MenuItem onClick={() => handleNavigate('/app/admin/connection-health')}>
+                            <ListItemIcon>
+                                <MonitorHeartIcon fontSize="small" />
+                            </ListItemIcon>
+                            Connection Health
+                        </MenuItem>
+                    </>
+                )}
+                
+                <Divider />
+                <MenuItem onClick={handleLogout}>
+                    <ListItemIcon>
+                        <ExitToAppIcon fontSize="small" />
+                    </ListItemIcon>
+                    Logout
+                </MenuItem>
             </Menu>
 
             {/* Notifications Menu */}

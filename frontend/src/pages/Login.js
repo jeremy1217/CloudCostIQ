@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Container,
   Box,
@@ -22,6 +22,7 @@ const Login = () => {
   const { login, loading, error } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [networkError, setNetworkError] = useState(null);
+  const navigate = useNavigate();
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -34,7 +35,11 @@ const Login = () => {
   const onSubmit = async (data) => {
     setNetworkError(null);
     try {
-      await login(data.username, data.password);
+      const success = await login(data.username, data.password);
+      if (success) {
+        // Redirect to the application dashboard after direct login
+        navigate('/app');
+      }
     } catch (err) {
       setNetworkError('Network error. Please check your connection and try again.');
     }

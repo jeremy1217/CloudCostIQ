@@ -29,6 +29,8 @@ import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import GroupIcon from '@mui/icons-material/Group';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import { useAuth } from '../context/AuthContext';
 
 const DRAWER_WIDTH = 280;
@@ -42,7 +44,8 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [openMenus, setOpenMenus] = useState({
     costs: true,
-    admin: true
+    admin: true,
+    settings: true
   });
 
   const isAdmin = user?.roles?.includes('admin');
@@ -67,14 +70,19 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
     }
   };
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => {
+    // Remove /app prefix for comparison since location.pathname includes it
+    const currentPath = location.pathname;
+    const normalizedPath = path.replace('/app', '');
+    return currentPath === path || (currentPath === normalizedPath && path.startsWith('/app'));
+  };
 
   const navigationItems = [
     {
       type: 'item',
       title: 'Dashboard',
       icon: <DashboardIcon />,
-      path: '/',
+      path: '/app',
     },
     {
       type: 'group',
@@ -82,34 +90,44 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
       title: 'Cost Management',
       icon: <StorageIcon />,
       items: [
-        { title: 'By Service', path: '/costs/by-service', icon: <CloudIcon /> },
-        { title: 'By Provider', path: '/costs/by-provider', icon: <CompareArrowsIcon /> },
-        { title: 'Attribution', path: '/costs/attribution', icon: <TrendingUpIcon /> },
+        { title: 'By Service', path: '/app/costs/by-service', icon: <CloudIcon /> },
+        { title: 'By Provider', path: '/app/costs/by-provider', icon: <CompareArrowsIcon /> },
+        { title: 'Attribution', path: '/app/costs/attribution', icon: <TrendingUpIcon /> },
       ],
     },
     {
       type: 'item',
       title: 'Insights',
       icon: <InsightsIcon />,
-      path: '/insights',
+      path: '/app/insights',
     },
     {
       type: 'item',
       title: 'Optimize',
       icon: <TrendingUpIcon />,
-      path: '/optimize',
+      path: '/app/optimize',
     },
     {
       type: 'item',
       title: 'AI Dashboard',
       icon: <SmartToyIcon />,
-      path: '/ai-dashboard',
+      path: '/app/ai-dashboard',
     },
     {
       type: 'item',
       title: 'Multi-Cloud',
       icon: <CompareArrowsIcon />,
-      path: '/multi-cloud',
+      path: '/app/multi-cloud',
+    },
+    {
+      type: 'group',
+      id: 'settings',
+      title: 'User Settings',
+      icon: <AccountCircleIcon />,
+      items: [
+        { title: 'Profile', path: '/app/profile', icon: <AccountCircleIcon /> },
+        { title: 'API Keys', path: '/app/api-keys', icon: <VpnKeyIcon /> },
+      ],
     },
   ];
 
@@ -120,10 +138,10 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
       title: 'Administration',
       icon: <AdminPanelSettingsIcon />,
       items: [
-        { title: 'Dashboard', path: '/admin', icon: <DashboardIcon /> },
-        { title: 'Users', path: '/admin/users', icon: <GroupIcon /> },
-        { title: 'Cloud Connections', path: '/admin/cloud-connections', icon: <CloudIcon /> },
-        { title: 'Connection Health', path: '/admin/connection-health', icon: <MonitorHeartIcon /> },
+        { title: 'Dashboard', path: '/app/admin', icon: <DashboardIcon /> },
+        { title: 'Users', path: '/app/admin/users', icon: <GroupIcon /> },
+        { title: 'Cloud Connections', path: '/app/admin/cloud-connections', icon: <CloudIcon /> },
+        { title: 'Connection Health', path: '/app/admin/connection-health', icon: <MonitorHeartIcon /> },
       ],
     });
   }

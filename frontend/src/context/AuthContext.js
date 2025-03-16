@@ -91,9 +91,6 @@ export function AuthProvider({ children }) {
         roles: decoded.roles || [] 
       });
       
-      // Redirect to the dashboard
-      navigate('/');
-      
       return true;
     } catch (err) {
       console.error('Login error:', err);
@@ -116,7 +113,12 @@ export function AuthProvider({ children }) {
       );
       
       // Auto login after successful registration
-      await login(userData.username, userData.password);
+      const loginSuccess = await login(userData.username, userData.password);
+      
+      if (loginSuccess) {
+        // Redirect to user profile page after successful registration and login
+        navigate('/app/profile');
+      }
       
       return true;
     } catch (err) {

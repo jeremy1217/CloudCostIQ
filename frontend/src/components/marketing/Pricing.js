@@ -10,40 +10,77 @@ const Pricing = () => {
 
     const plans = [
         {
-            name: 'Starter',
-            description: 'Perfect for small teams getting started with cloud cost management',
-            price: '$99',
+            name: 'Standard',
+            description: 'Perfect for small to medium businesses starting with cloud cost optimization',
+            price: '$299',
             period: '/month',
             features: [
-                'Up to 3 cloud accounts',
-                'Basic cost analytics',
-                'Email support'
+                'Up to 5 cloud accounts',
+                'Basic cost analytics dashboard',
+                'Costs by service breakdown',
+                'Costs by provider analysis',
+                'Basic cost optimization recommendations',
+                'Monthly cost reports (PDF)',
+                'Email support (48h response)',
+                'Basic AI insights',
+                'Read-only API access',
+                '30-day data retention',
+                '✕ Cost attribution',
+                '✕ Multi-cloud comparison',
+                '✕ Custom dashboards',
+                '✕ Advanced AI features'
             ],
             isPopular: false
         },
         {
             name: 'Professional',
-            description: 'For growing teams with multiple cloud providers',
-            price: '$299',
+            description: 'For growing organizations with complex cloud infrastructure',
+            price: '$799',
             period: '/month',
             features: [
-                'Up to 10 cloud accounts',
-                'Advanced analytics',
-                'Priority support',
-                'Custom reports'
+                'Up to 15 cloud accounts',
+                'Advanced cost analytics dashboard',
+                'Detailed service cost analysis',
+                'Cross-provider cost analysis',
+                'Real-time optimization alerts',
+                'Custom reports & dashboards',
+                'Priority support (24h response)',
+                'Advanced AI recommendations',
+                'Full API access',
+                'Cost attribution tools',
+                'Multi-cloud comparison',
+                '90-day data retention',
+                'Slack/Teams integration',
+                '✕ Custom AI model training',
+                '✕ On-premise deployment',
+                '✕ White-labeling'
             ],
             isPopular: true
         },
         {
             name: 'Enterprise',
-            description: 'For large organizations with complex cloud infrastructure',
+            description: 'Custom solutions for large enterprises with mission-critical needs',
             price: 'Custom',
             period: '',
             features: [
                 'Unlimited cloud accounts',
-                'Custom integrations',
+                'Enterprise analytics suite',
+                'Custom dashboard builder',
+                'Advanced cost modeling',
+                'Predictive optimization',
+                'Custom report templates',
                 '24/7 dedicated support',
-                'On-premise deployment'
+                'Custom AI model training',
+                'Full API access with higher limits',
+                'Advanced cost attribution',
+                'Enhanced multi-cloud tools',
+                'Unlimited data retention',
+                'Custom integrations',
+                'On-premise deployment option',
+                'White-labeling available',
+                'MSP/Reseller options',
+                'Dedicated success manager',
+                'Quarterly business reviews'
             ],
             isPopular: false
         }
