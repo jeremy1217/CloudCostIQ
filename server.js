@@ -1,122 +1,269 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const session = require('express-session');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// In-memory store for demo purposes (replace with a database in production)
+const accounts = new Map();
+const cloudConnections = new Map();
+const costData = new Map();
+
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(session({
+    secret: 'your-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: process.env.NODE_ENV === 'production' }
+}));
+
+// Serve static files from the React app build directory
+app.use(express.static(path.join(__dirname, 'frontend/build')));
 
 // Serve static files from the public directory
-app.use(express.static('public'));
+app.use('/public', express.static(path.join(__dirname, 'frontend/public')));
 
-// Handle subdomain routing for demo purposes
-app.get('/:subdomain/dashboard', (req, res) => {
-    const { subdomain } = req.params;
-    res.send(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>${subdomain} Dashboard - CloudCostIQ</title>
-            <link rel="stylesheet" href="/css/tailwind.min.css">
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-            <script src="/js/dashboard.js" defer></script>
-            <style>
-                .gradient-bg {
-                    background: linear-gradient(90deg, #4f46e5 0%, #7e3af2 100%);
-                }
-                .modal {
-                    display: none;
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background-color: rgba(0, 0, 0, 0.5);
-                    z-index: 1000;
-                }
-                .modal.show {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-            </style>
-        </head>
-        <body class="bg-gray-100">
-            <div class="min-h-screen">
-                <nav class="bg-white shadow-sm">
-                    <div class="max-w-7xl mx-auto px-4 py-3">
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center">
-                                <img src="/images/logo.png" alt="CloudCostIQ" class="h-8">
-                                <span class="ml-2 text-gray-700">| ${subdomain}</span>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                <span class="text-sm text-gray-600">Demo Account</span>
-                                <button class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-                                    Setup Cloud Integration
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </nav>
-                
-                <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                    <div class="px-4 py-6 sm:px-0">
-                        <div class="gradient-bg rounded-lg p-6 text-white">
-                            <h1 class="text-2xl font-bold">Welcome to Your CloudCostIQ Dashboard</h1>
-                            <p class="mt-2">This is a demo environment. To get started, connect your cloud provider accounts.</p>
-                        </div>
-                        
-                        <div class="mt-8 grid gap-6 grid-cols-1 md:grid-cols-3">
-                            <!-- AWS Integration Card -->
-                            <div class="provider-card bg-white rounded-lg shadow p-6">
-                                <div class="flex items-center justify-between">
-                                    <img src="/images/aws-logo.png" alt="AWS" class="h-8">
-                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm status-badge">Not Connected</span>
-                                </div>
-                                <button data-provider="aws" class="mt-4 w-full px-4 py-2 border border-indigo-600 text-indigo-600 rounded-md hover:bg-indigo-50">
-                                    <i class="fas fa-plug mr-2"></i>Connect AWS
-                                </button>
-                            </div>
-                            
-                            <!-- Azure Integration Card -->
-                            <div class="provider-card bg-white rounded-lg shadow p-6">
-                                <div class="flex items-center justify-between">
-                                    <img src="/images/azure-logo.png" alt="Azure" class="h-8">
-                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm status-badge">Not Connected</span>
-                                </div>
-                                <button data-provider="azure" class="mt-4 w-full px-4 py-2 border border-indigo-600 text-indigo-600 rounded-md hover:bg-indigo-50">
-                                    <i class="fas fa-plug mr-2"></i>Connect Azure
-                                </button>
-                            </div>
-                            
-                            <!-- GCP Integration Card -->
-                            <div class="provider-card bg-white rounded-lg shadow p-6">
-                                <div class="flex items-center justify-between">
-                                    <img src="/images/gcp-logo.png" alt="GCP" class="h-8">
-                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm status-badge">Not Connected</span>
-                                </div>
-                                <button data-provider="gcp" class="mt-4 w-full px-4 py-2 border border-indigo-600 text-indigo-600 rounded-md hover:bg-indigo-50">
-                                    <i class="fas fa-plug mr-2"></i>Connect GCP
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </main>
-            </div>
-        </body>
-        </html>
-    `);
+// Authentication middleware
+function requireAuth(req, res, next) {
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Authentication required' });
+    }
+    next();
+}
+
+// Registration endpoint
+app.post('/api/register', (req, res) => {
+    console.log('Registration request received:', {
+        body: req.body,
+        contentType: req.get('Content-Type')
+    });
+    
+    try {
+        // Ensure we have a request body
+        if (!req.body || Object.keys(req.body).length === 0) {
+            console.error('Empty request body received');
+            return res.status(400).json({
+                error: 'No data received. Please ensure you\'re sending JSON data.'
+            });
+        }
+
+        const { name, email, company, plan, password } = req.body;
+        
+        // Log the extracted data
+        console.log('Processing registration for:', { name, email, company, plan });
+        
+        // Validate required fields
+        if (!name || !email || !company || !plan || !password) {
+            const missingFields = ['name', 'email', 'company', 'plan', 'password']
+                .filter(field => !req.body[field]);
+            console.error('Missing required fields:', missingFields);
+            
+            return res.status(400).json({
+                error: `Missing required fields: ${missingFields.join(', ')}`
+            });
+        }
+        
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                error: 'Invalid email format'
+            });
+        }
+        
+        // Create subdomain from company name
+        const subdomain = company.toLowerCase()
+            .replace(/[^a-z0-9]/g, '') // Remove special characters
+            .substring(0, 63); // Max length for subdomains
+        
+        console.log('Generated subdomain:', subdomain);
+        
+        // Check if subdomain is available
+        if (accounts.has(subdomain)) {
+            return res.status(400).json({
+                error: 'Company name already registered. Please choose a different name.'
+            });
+        }
+        
+        // Store account info (replace with database in production)
+        accounts.set(subdomain, {
+            name,
+            email,
+            company,
+            plan,
+            password: password, // In production, hash the password
+            created: new Date(),
+            status: 'active'
+        });
+        
+        // Set session data
+        req.session.user = {
+            subdomain,
+            name,
+            email,
+            plan
+        };
+        
+        // Log successful registration
+        console.log('Registration successful for subdomain:', subdomain);
+        
+        // Set proper content type header
+        res.setHeader('Content-Type', 'application/json');
+        res.status(200).json({
+            success: true,
+            subdomain,
+            redirectUrl: `/${subdomain}/dashboard`
+        });
+    } catch (error) {
+        console.error('Registration error:', error);
+        res.status(500).json({
+            error: 'An error occurred during registration. Please try again.'
+        });
+    }
 });
 
-// Catch-all route to serve index.html for all other routes
+// Cloud provider connection endpoint
+app.post('/api/connect/cloud-provider', requireAuth, (req, res) => {
+    try {
+        const { provider, credentials } = req.body;
+        const { subdomain } = req.session.user;
+        
+        // Validate provider
+        if (!['aws', 'azure', 'gcp'].includes(provider)) {
+            return res.status(400).json({
+                error: 'Invalid cloud provider'
+            });
+        }
+        
+        // Validate credentials (implement proper validation for each provider)
+        if (!validateCredentials(provider, credentials)) {
+            return res.status(400).json({
+                error: 'Invalid credentials'
+            });
+        }
+        
+        // Store connection info
+        if (!cloudConnections.has(subdomain)) {
+            cloudConnections.set(subdomain, new Map());
+        }
+        
+        cloudConnections.get(subdomain).set(provider, {
+            credentials,
+            status: 'connected',
+            lastSync: new Date()
+        });
+        
+        // Initialize cost data storage
+        if (!costData.has(subdomain)) {
+            costData.set(subdomain, {
+                totalCost: 0,
+                serviceCosts: {},
+                dailyCosts: [],
+                lastUpdate: new Date()
+            });
+        }
+        
+        res.json({
+            success: true,
+            message: `Successfully connected to ${provider.toUpperCase()}`
+        });
+    } catch (error) {
+        console.error('Cloud provider connection error:', error);
+        res.status(500).json({
+            error: 'Failed to connect to cloud provider'
+        });
+    }
+});
+
+// Cost data endpoint
+app.get('/api/costs/summary', requireAuth, (req, res) => {
+    try {
+        const { subdomain } = req.session.user;
+        const accountCosts = costData.get(subdomain) || {
+            totalCost: 0,
+            costChangePercent: 0,
+            potentialSavings: 0,
+            serviceCosts: {},
+            dailyCosts: []
+        };
+        
+        // In production, fetch real data from cloud providers
+        // For demo, generate some sample data
+        if (accountCosts.totalCost === 0) {
+            accountCosts.totalCost = Math.random() * 10000;
+            accountCosts.costChangePercent = (Math.random() * 20) - 10;
+            accountCosts.potentialSavings = accountCosts.totalCost * 0.2;
+            
+            // Generate sample service costs
+            accountCosts.serviceCosts = {
+                'Compute': accountCosts.totalCost * 0.4,
+                'Storage': accountCosts.totalCost * 0.3,
+                'Network': accountCosts.totalCost * 0.2,
+                'Other': accountCosts.totalCost * 0.1
+            };
+            
+            // Generate sample daily costs
+            const days = 30;
+            accountCosts.dailyCosts = Array.from({ length: days }, (_, i) => ({
+                date: new Date(Date.now() - (days - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                cost: accountCosts.totalCost / days * (0.8 + Math.random() * 0.4)
+            }));
+            
+            costData.set(subdomain, accountCosts);
+        }
+        
+        res.json(accountCosts);
+    } catch (error) {
+        console.error('Cost data error:', error);
+        res.status(500).json({
+            error: 'Failed to fetch cost data'
+        });
+    }
+});
+
+// Serve dashboard for subdomains
+app.get('/:subdomain/dashboard', (req, res) => {
+    const { subdomain } = req.params;
+    
+    // Check if subdomain exists
+    if (!accounts.has(subdomain)) {
+        return res.status(404).sendFile(path.join(__dirname, 'frontend/public', '404.html'));
+    }
+    
+    // In production, verify session and ownership
+    res.sendFile(path.join(__dirname, 'frontend/public', 'dashboard.html'));
+});
+
+// Serve marketing site
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend/public', 'marketing.html'));
+});
+
+// Utility functions
+function validateCredentials(provider, credentials) {
+    // Implement proper validation for each provider
+    // This is a simplified example
+    switch (provider) {
+        case 'aws':
+            return credentials.accessKeyId && credentials.secretAccessKey;
+        case 'azure':
+            return credentials.tenantId && credentials.clientId && credentials.clientSecret;
+        case 'gcp':
+            return credentials.projectId && credentials.keyFile;
+        default:
+            return false;
+    }
+}
+
+// Catch all routes and return the React app
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
 });
 
 // Start server
