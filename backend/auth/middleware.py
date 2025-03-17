@@ -3,6 +3,10 @@ from fastapi import HTTPException, Depends, Request
 from backend.auth.dependencies import get_current_user
 from backend.api.feature_restrictions import FEATURE_REQUIREMENTS, PlanLevel, get_feature_level
 from typing import List, Union
+from backend.config import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 def require_feature(feature_name: str):
     """Decorator to check if the user's plan includes a specific feature"""
@@ -160,4 +164,53 @@ def check_export_access(format: str, current_user):
         raise HTTPException(
             status_code=403,
             detail=f"Your plan does not support export to {format} format"
-        ) 
+        )
+
+def require_admin(func):
+    """Decorator to restrict endpoint access to admin users only"""
+    @wraps(func)
+    async def wrapper(request: Request, current_user=Depends(get_current_user), *args, **kwargs):
+        # Check for admin role
+        if not current_user.roles or 'admin' not in current_user.roles:
+            raise HTTPException(
+                status_code=403,
+                detail="This endpoint requires administrator privileges"
+            )
+            
+        # Ensure user is not a customer
+        if getattr(current_user, 'type', None) == 'customer':
+            # Log unauthorized access attempt
+            logger.warning(
+                'Customer attempted to access admin endpoint',
+                extra={
+                    'user_id': current_user.id,
+                    'endpoint': request.url.path,
+                    'method': request.method,
+                    'ip': request.client.host
+                }
+            )
+            raise HTTPException(
+                status_code=403,
+                detail="Customers are not allowed to access administrative features"
+            )
+            
+        # Check if admin access is enabled for this environment
+        if not settings.ADMIN_ACCESS_ENABLED:
+            raise HTTPException(
+                status_code=403,
+                detail="Administrative access is currently disabled"
+            )
+
+        # Rate limit admin endpoints
+        rate_key = f"admin_rate_limit:{current_user.id}"
+        current_requests = await request.app.state.redis.incr(rate_key)
+        if current_requests == 1:
+            await request.app.state.redis.expire(rate_key, 60)  # Reset after 1 minute
+        if current_requests > settings.ADMIN_RATE_LIMIT:
+            raise HTTPException(
+                status_code=429,
+                detail="Too many admin requests. Please try again later."
+            )
+
+        return await func(request=request, current_user=current_user, *args, **kwargs)
+    return wrapper 

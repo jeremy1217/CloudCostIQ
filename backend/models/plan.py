@@ -1,18 +1,25 @@
-from sqlalchemy import Column, Integer, String, JSON, Boolean
-from backend.database.base import Base
+from sqlalchemy import Column, Integer, String, Float, JSON, DateTime
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+from backend.database.db import Base
 
-class Plan(Base):
+class PlanModel(Base):
     __tablename__ = "plans"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True)
-    description = Column(String)
-    price = Column(String)
-    period = Column(String)
-    max_cloud_accounts = Column(Integer)
-    data_retention_days = Column(Integer)
-    features = Column(JSON)  # Store detailed feature flags
-    is_popular = Column(Boolean, default=False)
+    name = Column(String, unique=True, index=True)  # standard, professional, enterprise
+    description = Column(String, nullable=True)
+    price = Column(Float)
+    features = Column(JSON, default=dict)
+    limits = Column(JSON, default=dict)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationship with subscriptions
+    subscriptions = relationship("SubscriptionModel", back_populates="plan")
+
+    def __repr__(self):
+        return f"<Plan {self.name}>"
 
     # Define the default plans
     @staticmethod

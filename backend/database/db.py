@@ -9,12 +9,16 @@ from sqlalchemy.orm import sessionmaker
 # Local imports
 from backend.config import settings
 
-# Create engine with PostgreSQL connection string
+# Create SQLAlchemy engine
 engine = create_engine(settings.DATABASE_URL)
+
+# Create SessionLocal class
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Create Base class
 Base = declarative_base()
 
-# Dependency for DB session
+# Dependency to get DB session
 def get_db():
     db = SessionLocal()
     try:

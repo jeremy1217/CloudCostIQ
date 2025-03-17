@@ -36,7 +36,8 @@ def get_password_hash(password):
 
 def get_user(db: Session, username: str):
     try:
-        user = db.query(UserModel).filter(UserModel.username == username).first()
+        # Search by email since we're using email as username
+        user = db.query(UserModel).filter(UserModel.email == username).first()
         if user:
             print(f"Found user: {username}")  # Add logging for debugging
         else:

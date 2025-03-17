@@ -1,37 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button } from '@mui/material';
-import planService from '../services/planService';
+import {
+    Box,
+    Typography,
+    Button,
+    Tooltip,
+    Alert,
+    CircularProgress
+} from '@mui/material';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
-const FeatureGuard = ({ 
-    feature, 
-    minPlanLevel, 
-    children, 
-    fallback = null,
-    showUpgradeButton = true 
+const FeatureGuard = ({
+    feature,
+    minPlanLevel,
+    requiredLevel = 'basic',
+    children,
+    showUpgradeButton = true,
+    fallback,
+    tooltipMessage
 }) => {
     const [hasAccess, setHasAccess] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-    const [currentPlan, setCurrentPlan] = useState(null);
+    const [featureLevel, setFeatureLevel] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const { user, currentPlan } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const checkAccess = async () => {
             try {
-                const plan = await planService.getCurrentPlan();
-                setCurrentPlan(plan);
+                setLoading(true);
                 
-                if (!plan) {
+                // Check if user is authenticated
+                if (!user || !currentPlan) {
                     setHasAccess(false);
+                    setError('Please log in to access this feature');
                     return;
                 }
 
-                // Check feature access if feature name is provided
-                if (feature) {
-                    const featureAccess = await planService.checkFeatureAccess(feature);
-                    setHasAccess(featureAccess);
-                    return;
-                }
-
-                // Check plan level if minPlanLevel is provided
+                // Check plan level if specified
                 if (minPlanLevel) {
                     const planLevels = {
                         'standard': 1,
@@ -39,27 +46,66 @@ const FeatureGuard = ({
                         'enterprise': 3
                     };
                     
-                    const requiredLevel = planLevels[minPlanLevel.toLowerCase()];
-                    const userLevel = planLevels[plan.plan_name.toLowerCase()];
+                    const userPlanLevel = planLevels[currentPlan.name.toLowerCase()] || 0;
+                    const requiredPlanLevel = planLevels[minPlanLevel.toLowerCase()] || 0;
                     
-                    setHasAccess(userLevel >= requiredLevel);
-                    return;
+                    if (userPlanLevel < requiredPlanLevel) {
+                        setHasAccess(false);
+                        setError(`This feature requires ${minPlanLevel} plan or higher`);
+                        return;
+                    }
                 }
 
-                setHasAccess(false);
-            } catch (error) {
-                console.error('Error checking feature access:', error);
+                // Check feature access if specified
+                if (feature) {
+                    const features = currentPlan.features || {};
+                    const featureAccess = features[feature];
+                    
+                    if (!featureAccess) {
+                        setHasAccess(false);
+                        setError(`Your plan does not include access to ${feature}`);
+                        return;
+                    }
+
+                    // Check feature level
+                    const levels = {
+                        'readonly': 1,
+                        'basic': 2,
+                        'advanced': 3,
+                        'full': 4
+                    };
+
+                    const userFeatureLevel = levels[featureAccess] || 0;
+                    const requiredFeatureLevel = levels[requiredLevel] || 0;
+
+                    if (userFeatureLevel < requiredFeatureLevel) {
+                        setHasAccess(false);
+                        setError(`This feature requires ${requiredLevel} access level`);
+                        return;
+                    }
+
+                    setFeatureLevel(featureAccess);
+                }
+
+                setHasAccess(true);
+                setError(null);
+            } catch (err) {
+                setError('Error checking feature access');
                 setHasAccess(false);
             } finally {
-                setIsLoading(false);
+                setLoading(false);
             }
         };
 
         checkAccess();
-    }, [feature, minPlanLevel]);
+    }, [user, currentPlan, feature, minPlanLevel, requiredLevel]);
 
-    if (isLoading) {
-        return null; // Or a loading spinner
+    const handleUpgrade = () => {
+        navigate('/pricing');
+    };
+
+    if (loading) {
+        return <CircularProgress size={20} />;
     }
 
     if (!hasAccess) {
@@ -68,33 +114,35 @@ const FeatureGuard = ({
         }
 
         return (
-            <Box 
-                sx={{ 
-                    p: 3, 
-                    textAlign: 'center',
-                    border: '1px dashed',
-                    borderColor: 'grey.300',
-                    borderRadius: 1,
-                    bgcolor: 'grey.50'
-                }}
-            >
-                <Typography variant="h6" color="text.secondary" gutterBottom>
-                    Feature Not Available
-                </Typography>
-                <Typography variant="body2" color="text.secondary" paragraph>
-                    This feature requires {minPlanLevel || 'a higher'} plan or above.
-                    {currentPlan && ` You are currently on the ${currentPlan.plan_name} plan.`}
-                </Typography>
-                {showUpgradeButton && (
-                    <Button 
-                        variant="contained" 
-                        color="primary"
-                        onClick={() => window.location.href = '/app/settings/subscription'}
-                    >
-                        Upgrade Plan
-                    </Button>
-                )}
+            <Box sx={{ p: 2 }}>
+                <Alert 
+                    severity="info"
+                    action={
+                        showUpgradeButton && (
+                            <Button
+                                color="primary"
+                                size="small"
+                                onClick={handleUpgrade}
+                            >
+                                Upgrade Plan
+                            </Button>
+                        )
+                    }
+                >
+                    {error || 'You do not have access to this feature'}
+                </Alert>
             </Box>
+        );
+    }
+
+    if (tooltipMessage && featureLevel) {
+        return (
+            <Tooltip 
+                title={`${tooltipMessage} (Current access level: ${featureLevel})`}
+                arrow
+            >
+                <Box>{children}</Box>
+            </Tooltip>
         );
     }
 
