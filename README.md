@@ -15,7 +15,7 @@ The application follows a full-stack architecture:
 
 - **Backend**: Python with FastAPI
 - **Frontend**: React with Material-UI
-- **Database**: SQLite (can be easily switched to PostgreSQL or other SQL databases)
+- **Database**: PostgreSQL (recommended for production)
 - **AI/ML**: Scikit-learn for anomaly detection and forecasting
 
 ## Getting Started

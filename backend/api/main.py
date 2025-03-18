@@ -24,7 +24,7 @@ app = FastAPI(title="CloudCostIQ API")
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, set specific origins
+    allow_origins=["http://localhost:3000"],  # React frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -43,13 +43,21 @@ app.include_router(costs_router, dependencies=[Depends(get_current_active_user)]
 app.include_router(insights_router, dependencies=[Depends(get_current_active_user)])
 
 # Add admin-only routes with role-based protection
-admin_router = APIRouter()
+from backend.api.admin import router as admin_router
 app.include_router(
     admin_router,
-    prefix="/admin",
     dependencies=[Depends(has_role(["admin"]))],
     tags=["admin"]
 )
+
+# Add resource routes
+from backend.api.routes import auth, costs, insights, optimizations, attribution, resource_routes
+app.include_router(auth.router)
+app.include_router(costs.router)
+app.include_router(insights.router)
+app.include_router(optimizations.router)
+app.include_router(attribution.router)
+app.include_router(resource_routes.router)
 
 # Root endpoint
 @app.get("/")

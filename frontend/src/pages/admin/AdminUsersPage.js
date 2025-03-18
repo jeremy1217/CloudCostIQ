@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -27,7 +27,40 @@ import {
   Delete as DeleteIcon,
   Add as AddIcon,
 } from '@mui/icons-material';
-import { mockUsers } from '../../services/mockData';
+
+// Mock data that matches our user model
+const mockUsers = [
+  {
+    id: 1,
+    email: 'admin@cloudcostiq.com',
+    type: 'staff',
+    role_names: ['admin'],
+    is_active: true,
+    created_at: '2024-03-18T00:00:00Z',
+    last_login: '2024-03-18T12:00:00Z',
+    first_name: 'Admin',
+    last_name: 'User',
+    company: 'CloudCostIQ',
+    phone: '+1 (555) 123-4567',
+    preferences: {},
+    two_factor_enabled: false
+  },
+  {
+    id: 2,
+    email: 'user@example.com',
+    type: 'customer',
+    role_names: ['user'],
+    is_active: true,
+    created_at: '2024-03-17T00:00:00Z',
+    last_login: '2024-03-18T10:00:00Z',
+    first_name: 'Regular',
+    last_name: 'User',
+    company: 'Example Corp',
+    phone: '+1 (555) 987-6543',
+    preferences: {},
+    two_factor_enabled: false
+  }
+];
 
 const AdminUsersPage = () => {
   const [page, setPage] = useState(0);
@@ -104,10 +137,11 @@ const AdminUsersPage = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Username</TableCell>
               <TableCell>Email</TableCell>
-              <TableCell>Full Name</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Type</TableCell>
               <TableCell>Roles</TableCell>
+              <TableCell>Company</TableCell>
               <TableCell>Created At</TableCell>
               <TableCell>Last Login</TableCell>
               <TableCell>Actions</TableCell>
@@ -118,11 +152,17 @@ const AdminUsersPage = () => {
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell>{user.username}</TableCell>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.full_name}</TableCell>
+                  <TableCell>{`${user.first_name} ${user.last_name}`}</TableCell>
                   <TableCell>
-                    {user.roles.map((role, index) => (
+                    <Chip
+                      label={user.type}
+                      size="small"
+                      color={user.type === 'staff' ? 'primary' : 'default'}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    {user.role_names.map((role, index) => (
                       <Chip
                         key={index}
                         label={role}
@@ -131,6 +171,7 @@ const AdminUsersPage = () => {
                       />
                     ))}
                   </TableCell>
+                  <TableCell>{user.company}</TableCell>
                   <TableCell>{formatDate(user.created_at)}</TableCell>
                   <TableCell>{formatDate(user.last_login)}</TableCell>
                   <TableCell>
@@ -170,25 +211,39 @@ const AdminUsersPage = () => {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
             <TextField
               fullWidth
-              label="Username"
-              defaultValue={selectedUser?.username}
-            />
-            <TextField
-              fullWidth
               label="Email"
               type="email"
               defaultValue={selectedUser?.email}
             />
             <TextField
               fullWidth
-              label="Full Name"
-              defaultValue={selectedUser?.full_name}
+              label="First Name"
+              defaultValue={selectedUser?.first_name}
+            />
+            <TextField
+              fullWidth
+              label="Last Name"
+              defaultValue={selectedUser?.last_name}
+            />
+            <TextField
+              fullWidth
+              label="Company"
+              defaultValue={selectedUser?.company}
             />
             <TextField
               fullWidth
               select
+              label="Type"
+              defaultValue={selectedUser?.type || 'customer'}
+            >
+              <MenuItem value="staff">Staff</MenuItem>
+              <MenuItem value="customer">Customer</MenuItem>
+            </TextField>
+            <TextField
+              fullWidth
+              select
               label="Roles"
-              defaultValue={selectedUser?.roles || []}
+              defaultValue={selectedUser?.role_names || []}
               SelectProps={{
                 multiple: true,
                 renderValue: (selected) => (

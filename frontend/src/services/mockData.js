@@ -25,18 +25,42 @@ export const generateDateRange = (daysCount, startFromToday = true) => {
   // Generate historical cost data
   export const getMockHistoricalCostData = (days = 30) => {
     const data = [];
-    const dates = generateDateRange(days, false);
-    
-    // Generate mock data with a realistic pattern
-    // Base cost with some random variation and a slight upward trend
-    dates.forEach((date, index) => {
-      const cost = 100 + (index * 2) + (Math.random() * 20 - 10);
-      data.push({
-        date,
-        cost: parseFloat(cost.toFixed(2))
+    const today = new Date();
+    const providers = ['AWS', 'Azure', 'GCP'];
+    const services = {
+      AWS: ['EC2', 'S3', 'RDS', 'Lambda'],
+      Azure: ['VM', 'Blob Storage', 'SQL Database', 'Functions'],
+      GCP: ['Compute Engine', 'Cloud Storage', 'Cloud SQL', 'Cloud Functions']
+    };
+
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+
+      providers.forEach(provider => {
+        services[provider].forEach(service => {
+          // Base cost with some random variation and a slight upward trend
+          const baseCost = 100 + (days - i) * 2;
+          const variation = (Math.random() * 40) - 20; // ±20 variation
+          const cost = parseFloat((baseCost + variation).toFixed(2));
+
+          data.push({
+            date: dateStr,
+            provider,
+            service,
+            cost,
+            region: 'us-east-1',
+            account: `${provider.toLowerCase()}-account-1`,
+            tags: {
+              environment: 'production',
+              team: 'platform'
+            }
+          });
+        });
       });
-    });
-    
+    }
+
     return data;
   };
   

@@ -10,8 +10,9 @@ from sqlalchemy.orm import Session
 # Local imports
 from backend.database.db import get_db
 from backend.models.resource import CloudResource, ResourceTag, resource_tag_association
+from backend.schemas.resource import ResourceResponse
 
-router = APIRouter(prefix="/resources", tags=["Resources"])
+router = APIRouter(prefix="/api/resources", tags=["resources"])
 
 # Request and Response Models
 class TagBase(BaseModel):
@@ -70,38 +71,35 @@ async def get_resources(
     service: Optional[str] = None,
     resource_type: Optional[str] = None,
     status: Optional[str] = None,
-    tag_key: Optional[str] = None,
-    tag_value: Optional[str] = None,
-    skip: int = 0,
-    limit: int = 100,
     db: Session = Depends(get_db)
 ):
     """
     Get cloud resources with optional filtering.
     """
-    query = db.query(CloudResource)
-    
-    # Apply filters
-    if provider:
-        query = query.filter(CloudResource.provider == provider)
-    if service:
-        query = query.filter(CloudResource.service == service)
-    if resource_type:
-        query = query.filter(CloudResource.resource_type == resource_type)
-    if status:
-        query = query.filter(CloudResource.status == status)
-    
-    # Filter by tags if specified
-    if tag_key:
-        query = query.join(CloudResource.tags).filter(ResourceTag.key == tag_key)
-        if tag_value:
-            query = query.filter(ResourceTag.value == tag_value)
-    
-    # Apply pagination
-    total = query.count()
-    resources = query.order_by(CloudResource.updated_at.desc()).offset(skip).limit(limit).all()
-    
-    return resources
+    try:
+        query = db.query(CloudResource)
+        
+        # Apply filters
+        if provider:
+            query = query.filter(CloudResource.provider == provider)
+        if service:
+            query = query.filter(CloudResource.service == service)
+        if resource_type:
+            query = query.filter(CloudResource.resource_type == resource_type)
+        if status:
+            query = query.filter(CloudResource.status == status)
+        
+        # Get all resources
+        resources = query.all()
+        
+        # Convert to response format
+        return [resource.to_dict() for resource in resources]
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error fetching cloud resources: {str(e)}"
+        )
 
 @router.get("/{resource_id}", response_model=ResourceResponse)
 async def get_resource(

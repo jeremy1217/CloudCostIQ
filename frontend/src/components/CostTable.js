@@ -10,12 +10,23 @@ const CostTable = () => {
     const fetchCosts = async () => {
         setIsLoading(true);
         try {
-            const data = await api.getCloudCosts();
-            setCosts(data);
+            const response = await api.getCloudCosts();
+            if (!response || !response.costs) {
+                throw new Error('Invalid cost data structure');
+            }
+            setCosts(response.costs);
             setError(null);
         } catch (err) {
             console.error("Error fetching cost data:", err);
             setError('Failed to load cost data. Please try again later.');
+            // Set fallback mock data
+            setCosts([
+                { provider: 'AWS', service: 'EC2', cost: 120.50, date: '2025-02-20' },
+                { provider: 'Azure', service: 'VM', cost: 98.75, date: '2025-02-21' },
+                { provider: 'GCP', service: 'Compute Engine', cost: 85.20, date: '2025-02-22' },
+                { provider: 'AWS', service: 'S3', cost: 65.30, date: '2025-02-23' },
+                { provider: 'AWS', service: 'RDS', cost: 110.45, date: '2025-02-24' }
+            ]);
         } finally {
             setIsLoading(false);
         }

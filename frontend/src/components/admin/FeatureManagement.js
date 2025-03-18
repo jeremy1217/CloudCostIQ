@@ -45,7 +45,7 @@ const FeatureManagementContent = () => {
 
     const fetchFeatures = async () => {
         try {
-            const response = await fetch('/api/admin/features', {
+            const response = await fetch('/admin/features', {
                 headers: {
                     'Authorization': `Bearer ${user.token}`
                 }
@@ -67,7 +67,7 @@ const FeatureManagementContent = () => {
     const fetchUsageData = async (feature, days) => {
         try {
             const response = await fetch(
-                `/api/admin/features/${feature}/usage?days=${days}`,
+                `/admin/features/${feature}/usage?days=${days}`,
                 {
                     headers: {
                         'Authorization': `Bearer ${user.token}`
@@ -91,7 +91,7 @@ const FeatureManagementContent = () => {
 
     const handleFeatureToggle = async (feature, enabled) => {
         try {
-            const response = await fetch(`/api/admin/features/${feature}/toggle`, {
+            const response = await fetch(`/admin/features/${feature}/toggle`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ const FeatureManagementContent = () => {
 
     const handleLimitUpdate = async (feature, limit) => {
         try {
-            const response = await fetch(`/api/admin/features/${feature}/limit`, {
+            const response = await fetch(`/admin/features/${feature}/limit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

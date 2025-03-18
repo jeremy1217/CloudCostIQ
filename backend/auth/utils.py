@@ -69,6 +69,12 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     else:
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
+    
+    # Add roles to the token data
+    if "user" in to_encode:
+        to_encode["roles"] = to_encode["user"].role_names
+        del to_encode["user"]  # Remove user object as it's not JSON serializable
+    
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 

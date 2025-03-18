@@ -1,69 +1,74 @@
 from enum import Enum
+from typing import Dict, Any
 
-class FeatureLevel(Enum):
-    READ_ONLY = "readonly"
+class PlanFeatures(Enum):
     BASIC = "basic"
-    ADVANCED = "advanced"
-    FULL = "full"
+    PRO = "pro"
+    ENTERPRISE = "enterprise"
 
-class PlanFeatures:
-    STANDARD = {
-        "basic_analytics": FeatureLevel.FULL,
-        "cost_attribution": FeatureLevel.READ_ONLY,
-        "export_formats": ["csv"],
-        "data_retention_days": 30,
-        "cloud_accounts_limit": 3,
-        "api_rate_limit": 1000,
-        "report_generation": FeatureLevel.BASIC
-    }
-    
-    PROFESSIONAL = {
-        **STANDARD,
-        "basic_analytics": FeatureLevel.FULL,
-        "cost_attribution": FeatureLevel.FULL,
-        "advanced_analytics": FeatureLevel.BASIC,
-        "export_formats": ["csv", "excel", "pdf"],
-        "data_retention_days": 90,
-        "cloud_accounts_limit": 10,
-        "api_rate_limit": 10000,
-        "report_generation": FeatureLevel.ADVANCED,
-        "team_management": FeatureLevel.BASIC
-    }
-    
-    ENTERPRISE = {
-        **PROFESSIONAL,
-        "advanced_analytics": FeatureLevel.FULL,
-        "ai_insights": FeatureLevel.FULL,
-        "export_formats": ["csv", "excel", "pdf", "custom"],
-        "data_retention_days": -1,  # Unlimited
-        "cloud_accounts_limit": -1,  # Unlimited
-        "api_rate_limit": -1,       # Unlimited
-        "report_generation": FeatureLevel.FULL,
-        "team_management": FeatureLevel.FULL,
-        "custom_integrations": FeatureLevel.FULL
-    }
-
-# Feature descriptions and requirements
-FEATURE_METADATA = {
-    "basic_analytics": {
-        "description": "Basic cost analysis and reporting",
-        "requirements": [],
-        "upgrade_message": "Upgrade to Professional for advanced analytics features"
+FEATURE_METADATA: Dict[str, Dict[str, Any]] = {
+    "cost_analysis": {
+        "name": "Cost Analysis",
+        "description": "Detailed cost analysis and breakdown",
+        "plans": {
+            PlanFeatures.BASIC: {"enabled": True, "limits": {"months": 3}},
+            PlanFeatures.PRO: {"enabled": True, "limits": {"months": 12}},
+            PlanFeatures.ENTERPRISE: {"enabled": True, "limits": {"months": 36}}
+        }
     },
-    "cost_attribution": {
-        "description": "Cost attribution across teams and projects",
-        "requirements": ["basic_analytics"],
-        "upgrade_message": "Upgrade to Professional for full cost attribution capabilities"
+    "cost_optimization": {
+        "name": "Cost Optimization",
+        "description": "AI-powered cost optimization recommendations",
+        "plans": {
+            PlanFeatures.BASIC: {"enabled": False},
+            PlanFeatures.PRO: {"enabled": True, "limits": {"recommendations_per_month": 10}},
+            PlanFeatures.ENTERPRISE: {"enabled": True, "limits": {"recommendations_per_month": 100}}
+        }
     },
-    "advanced_analytics": {
-        "description": "Advanced cost analysis and optimization",
-        "requirements": ["basic_analytics", "cost_attribution"],
-        "upgrade_message": "Upgrade to Enterprise for full advanced analytics capabilities"
+    "budget_alerts": {
+        "name": "Budget Alerts",
+        "description": "Custom budget alerts and notifications",
+        "plans": {
+            PlanFeatures.BASIC: {"enabled": True, "limits": {"alerts": 3}},
+            PlanFeatures.PRO: {"enabled": True, "limits": {"alerts": 10}},
+            PlanFeatures.ENTERPRISE: {"enabled": True, "limits": {"alerts": 50}}
+        }
     },
-    "ai_insights": {
-        "description": "AI-powered cost insights and predictions",
-        "requirements": ["advanced_analytics"],
-        "upgrade_message": "AI insights are only available in Enterprise plan"
+    "team_collaboration": {
+        "name": "Team Collaboration",
+        "description": "Team sharing and collaboration features",
+        "plans": {
+            PlanFeatures.BASIC: {"enabled": False},
+            PlanFeatures.PRO: {"enabled": True, "limits": {"team_members": 5}},
+            PlanFeatures.ENTERPRISE: {"enabled": True, "limits": {"team_members": 50}}
+        }
+    },
+    "custom_reports": {
+        "name": "Custom Reports",
+        "description": "Create and schedule custom reports",
+        "plans": {
+            PlanFeatures.BASIC: {"enabled": False},
+            PlanFeatures.PRO: {"enabled": True, "limits": {"reports": 5}},
+            PlanFeatures.ENTERPRISE: {"enabled": True, "limits": {"reports": 20}}
+        }
+    },
+    "api_access": {
+        "name": "API Access",
+        "description": "Access to REST API endpoints",
+        "plans": {
+            PlanFeatures.BASIC: {"enabled": False},
+            PlanFeatures.PRO: {"enabled": True, "limits": {"requests_per_day": 1000}},
+            PlanFeatures.ENTERPRISE: {"enabled": True, "limits": {"requests_per_day": 10000}}
+        }
+    },
+    "data_retention": {
+        "name": "Data Retention",
+        "description": "Historical data retention period",
+        "plans": {
+            PlanFeatures.BASIC: {"enabled": True, "limits": {"months": 3}},
+            PlanFeatures.PRO: {"enabled": True, "limits": {"months": 12}},
+            PlanFeatures.ENTERPRISE: {"enabled": True, "limits": {"months": 36}}
+        }
     }
 }
 

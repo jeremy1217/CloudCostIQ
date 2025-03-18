@@ -25,12 +25,22 @@ import {
   CheckCircle as CompletedIcon,
   Pending as PendingIcon,
 } from '@mui/icons-material';
-import { mockRecommendations } from '../services/mockData';
+import { getMockOptimizationRecommendations } from '../services/mockData';
 
 const RecommendationsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRecommendation, setSelectedRecommendation] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [recommendations, setRecommendations] = useState([]);
+
+  // Load recommendations when component mounts
+  React.useEffect(() => {
+    const loadRecommendations = async () => {
+      const data = await getMockOptimizationRecommendations();
+      setRecommendations(data.current_recommendations);
+    };
+    loadRecommendations();
+  }, []);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -80,9 +90,8 @@ const RecommendationsPage = () => {
     }
   };
 
-  const filteredRecommendations = mockRecommendations.filter(rec =>
-    rec.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    rec.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredRecommendations = recommendations.filter(rec =>
+    rec.suggestion.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleOpenDialog = (recommendation) => {

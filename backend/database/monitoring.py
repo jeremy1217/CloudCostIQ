@@ -35,23 +35,23 @@ db_pool_size = Gauge(
 def setup_monitoring(engine: Engine):
     """Set up database monitoring and metrics collection."""
     
-    @event.listens_for(Engine, 'connect')
+    @event.listens_for(engine, 'connect')
     def receive_connect(dbapi_connection, connection_record):
         db_connections.inc()
         logger.info("Database connection established")
 
-    @event.listens_for(Engine, 'checkout')
+    @event.listens_for(engine, 'checkout')
     def receive_checkout(dbapi_connection, connection_record, connection_proxy):
         db_pool_size.set(engine.pool.size())
         logger.debug("Database connection checked out")
 
-    @event.listens_for(Engine, 'checkin')
+    @event.listens_for(engine, 'checkin')
     def receive_checkin(dbapi_connection, connection_record):
         db_connections.dec()
         logger.debug("Database connection checked in")
 
-    @event.listens_for(Session, 'after_cursor_execute')
-    def after_cursor_execute(session, cursor, statement, parameters, context, executemany):
+    @event.listens_for(engine, 'after_cursor_execute')
+    def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
         """Record query execution metrics."""
         query_type = 'write' if statement.lower().startswith(('insert', 'update', 'delete')) else 'read'
         duration = context.execution_options.get('total_time', 0)

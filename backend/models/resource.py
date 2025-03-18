@@ -5,6 +5,7 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, ForeignKey, Table, JSON, Index, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy import JSON
+from sqlalchemy.sql import func
 
 # Local imports
 from backend.database.db import Base
@@ -21,21 +22,24 @@ class CloudResource(Base):
     __tablename__ = "cloud_resources"
 
     id = Column(Integer, primary_key=True, index=True)
-    resource_id = Column(String, nullable=False, index=True, unique=True)  # Cloud provider's resource ID
-    provider = Column(String, nullable=False, index=True)
-    account_id = Column(String, nullable=True, index=True)
-    region = Column(String, nullable=True, index=True)
-    service = Column(String, nullable=False, index=True)
-    resource_type = Column(String, nullable=False, index=True)  # EC2 instance, S3 bucket, etc.
-    name = Column(String, nullable=True, index=True)  # Resource name if available
-    status = Column(String, nullable=True, index=True)  # running, stopped, etc.
-    creation_date = Column(DateTime, nullable=True)
-    last_active = Column(DateTime, nullable=True)  # Last time resource was used
-    attributes = Column(JSON, nullable=True)  # Resource-specific attributes
-    tags = relationship("ResourceTag", secondary=resource_tag_association, back_populates="resources")
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+    resource_id = Column(String, unique=True, index=True)
+    provider = Column(String, index=True)
+    account_id = Column(String, index=True)
+    region = Column(String, index=True)
+    service = Column(String, index=True)
+    resource_type = Column(String, index=True)
+    name = Column(String, index=True)
+    status = Column(String, index=True)
+    creation_date = Column(DateTime(timezone=True))
+    last_active = Column(DateTime(timezone=True))
+    attributes = Column(JSON)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    tags = relationship("ResourceTag", backref="resource", cascade="all, delete-orphan")
+
     def to_dict(self):
         """Convert to dictionary for API responses"""
         return {
@@ -60,21 +64,14 @@ class ResourceTag(Base):
     __tablename__ = "resource_tags"
 
     id = Column(Integer, primary_key=True, index=True)
-    key = Column(String, nullable=False, index=True)
-    value = Column(String, nullable=True, index=True)
-    resources = relationship("CloudResource", secondary=resource_tag_association, back_populates="tags")
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    
-    __table_args__ = (
-        # Composite unique constraint
-        Index('idx_tag_key_value', 'key', 'value', unique=True),
-    )
-    
+    resource_id = Column(Integer, ForeignKey("cloud_resources.id"))
+    key = Column(String, index=True)
+    value = Column(String)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
     def to_dict(self):
-        """Convert to dictionary for API responses"""
         return {
-            "id": self.id,
             "key": self.key,
-            "value": self.value,
-            "created_at": self.created_at.isoformat() if self.created_at else None
+            "value": self.value
         }

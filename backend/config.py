@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     NODE_ENV: str = "development"
     
     # Database Settings
-    DATABASE_URL: str = "sqlite:///./app.db"
+    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/cloudcostiq"
     
     # JWT Settings
     JWT_SECRET_KEY: str = "your-secret-key"

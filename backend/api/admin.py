@@ -1,13 +1,16 @@
 from fastapi import APIRouter, Depends, Request, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from datetime import datetime
 
 from backend.database.db import get_db
-from backend.auth.dependencies import get_current_user
+from backend.auth.utils import get_current_user
 from backend.auth.middleware import require_admin
 from backend.services.feature_tracking import FeatureTrackingService
 from backend.config.feature_config import FEATURE_METADATA, PlanFeatures
+from backend.models.user import UserModel
+from backend.schemas.user import UserResponse
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -49,8 +52,8 @@ async def list_features(
 @require_admin
 async def get_feature_usage(
     feature: str,
-    days: int = 30,
     request: Request,
+    days: int = 30,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
 ):

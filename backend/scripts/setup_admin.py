@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from backend.database.db import get_db
-from backend.models.user import User
+from backend.models.user import UserModel
+from backend.models.role import RoleModel
 import argparse
 import logging
 import sys
@@ -11,7 +12,7 @@ def setup_admin_user(db: Session, email: str):
     """Set up or verify admin user access"""
     try:
         # Find user by email
-        user = db.query(User).filter(User.email == email).first()
+        user = db.query(UserModel).filter(UserModel.email == email).first()
         
         if not user:
             logger.error(f"No user found with email: {email}")
@@ -20,11 +21,16 @@ def setup_admin_user(db: Session, email: str):
         # Update user type and roles
         user.type = 'staff'  # Ensure user is not marked as customer
         
+        # Get or create admin role
+        admin_role = db.query(RoleModel).filter(RoleModel.name == 'admin').first()
+        if not admin_role:
+            admin_role = RoleModel(name='admin', description='Administrator role')
+            db.add(admin_role)
+            db.flush()
+        
         # Add admin role if not present
-        if not user.roles:
-            user.roles = ['admin']
-        elif 'admin' not in user.roles:
-            user.roles.append('admin')
+        if admin_role not in user.roles:
+            user.roles.append(admin_role)
             
         # Ensure user has an active account
         user.is_active = True
@@ -34,7 +40,7 @@ def setup_admin_user(db: Session, email: str):
         
         logger.info(f"Successfully set up admin access for user: {email}")
         logger.info(f"User type: {user.type}")
-        logger.info(f"User roles: {user.roles}")
+        logger.info(f"User roles: {[role.name for role in user.roles]}")
         
         return True
         
@@ -46,14 +52,14 @@ def setup_admin_user(db: Session, email: str):
 def verify_admin_access(db: Session, email: str):
     """Verify that the user has proper admin access"""
     try:
-        user = db.query(User).filter(User.email == email).first()
+        user = db.query(UserModel).filter(UserModel.email == email).first()
         
         if not user:
             logger.error(f"No user found with email: {email}")
             return False
             
         # Check all required conditions
-        has_admin_role = user.roles and 'admin' in user.roles
+        has_admin_role = any(role.name == 'admin' for role in user.roles)
         is_staff = user.type == 'staff'
         is_active = user.is_active
         

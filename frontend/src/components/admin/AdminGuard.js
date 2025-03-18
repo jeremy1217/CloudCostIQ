@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { Alert } from '@mui/material';
 
 const AdminGuard = ({ children }) => {
@@ -21,7 +21,7 @@ const AdminGuard = ({ children }) => {
         });
 
         return (
-            <Navigate to="/" replace />
+            <Navigate to="/unauthorized" replace />
         );
     }
 

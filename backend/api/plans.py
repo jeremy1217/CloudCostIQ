@@ -4,7 +4,7 @@ from typing import List
 from datetime import datetime, timedelta
 
 from backend.database.db import get_db
-from backend.auth.dependencies import get_current_user
+from backend.auth.utils import get_current_user
 from backend.models.plan import Plan
 from backend.models.user import UserModel, SubscriptionModel
 from backend.auth.middleware import require_feature, require_plan_level

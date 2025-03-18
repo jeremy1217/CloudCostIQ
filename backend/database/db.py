@@ -1,7 +1,6 @@
 # Standard library imports
 from datetime import datetime
 import logging
-from prometheus_client import Counter, Histogram
 
 # Third-party imports
 from sqlalchemy import create_engine, event
@@ -11,15 +10,12 @@ from sqlalchemy.pool import QueuePool
 
 # Local imports
 from backend.config import settings
+from backend.database.monitoring import setup_monitoring, log_db_error
 
 # Configure logging
 logging.basicConfig()
 logger = logging.getLogger('sqlalchemy.engine')
 logger.setLevel(logging.INFO)
-
-# Prometheus metrics
-db_query_time = Histogram('db_query_duration_seconds', 'Database query duration in seconds')
-db_errors = Counter('db_errors_total', 'Total number of database errors')
 
 # Create SQLAlchemy engine with connection pooling
 engine = create_engine(
@@ -31,6 +27,9 @@ engine = create_engine(
     pool_recycle=1800,  # Recycle connections after 30 minutes
     pool_pre_ping=True  # Enable connection health checks
 )
+
+# Set up monitoring
+setup_monitoring(engine)
 
 # Create SessionLocal class
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -47,19 +46,12 @@ def check_db_health():
         return True
     except Exception as e:
         logger.error(f"Database health check failed: {e}")
-        db_errors.inc()
+        log_db_error(e, 'health_check')
         return False
-
-# Query performance monitoring
-@event.listens_for(Session, 'after_cursor_execute')
-def after_cursor_execute(session, cursor, statement, parameters, context, executemany):
-    total = cursor.rowcount
-    if total > 1000:  # Log slow queries
-        logger.warning(f"Large query executed: {total} rows affected")
-    db_query_time.observe(context.execution_options.get('total_time', 0))
 
 # Dependency to get DB session
 def get_db():
+    """Get database session."""
     db = SessionLocal()
     try:
         yield db

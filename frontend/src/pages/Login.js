@@ -35,10 +35,10 @@ const Login = () => {
   const onSubmit = async (data) => {
     setNetworkError(null);
     try {
-      const success = await login(data.username, data.password);
+      const success = await login(data.email, data.password);
       if (success) {
         // Redirect to the application dashboard after direct login
-        navigate('/app');
+        navigate('/app/dashboard');
       }
     } catch (err) {
       setNetworkError('Network error. Please check your connection and try again.');
@@ -64,14 +64,20 @@ const Login = () => {
               margin="normal"
               required
               fullWidth
-              id="username"
-              label="Username"
-              autoComplete="username"
+              id="email"
+              label="Email"
+              autoComplete="email"
               autoFocus
               disabled={loading}
-              {...register('username', { required: 'Username is required' })}
-              error={!!errors.username}
-              helperText={errors.username?.message}
+              {...register('email', { 
+                required: 'Email is required',
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: 'Invalid email address'
+                }
+              })}
+              error={!!errors.email}
+              helperText={errors.email?.message}
             />
             <TextField
               margin="normal"

@@ -1,9 +1,45 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Grid, Paper } from '@mui/material';
 import { TrendingUp, TrendingDown } from '@mui/icons-material';
-import { mockDashboardData } from '../services/mockData';
+import { getMockHistoricalCostData, getMockOptimizationRecommendations } from '../services/mockData';
 
 const DashboardPage = () => {
+  const [dashboardData, setDashboardData] = useState({
+    total_costs: { current: 0, previous: 0, change: 0 },
+    cost_savings: { current: 0, previous: 0, change: 0 },
+    active_resources: { current: 0, previous: 0, change: 0 },
+    optimization_score: { current: 0, previous: 0, change: 0 }
+  });
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      // Get historical cost data
+      const historicalData = await getMockHistoricalCostData(30);
+      const currentCosts = historicalData.slice(-1)[0].cost;
+      const previousCosts = historicalData.slice(-2)[0].cost;
+      const costChange = currentCosts - previousCosts;
+
+      // Get optimization recommendations
+      const recommendations = await getMockOptimizationRecommendations();
+      const totalSavings = recommendations.current_recommendations.reduce((sum, rec) => sum + rec.savings, 0);
+
+      // Calculate active resources (simplified)
+      const activeResources = historicalData.length;
+
+      // Calculate optimization score (simplified)
+      const optimizationScore = Math.min(100, (totalSavings / currentCosts) * 100);
+
+      setDashboardData({
+        total_costs: { current: currentCosts, previous: previousCosts, change: costChange },
+        cost_savings: { current: totalSavings, previous: totalSavings * 0.9, change: totalSavings * 0.1 },
+        active_resources: { current: activeResources, previous: activeResources - 1, change: 1 },
+        optimization_score: { current: optimizationScore, previous: optimizationScore - 5, change: 5 }
+      });
+    };
+
+    loadDashboardData();
+  }, []);
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -46,34 +82,34 @@ const DashboardPage = () => {
         <Grid item xs={12} md={6} lg={3}>
           {renderMetricCard(
             'Total Cloud Costs',
-            mockDashboardData.total_costs.current,
-            mockDashboardData.total_costs.previous,
-            mockDashboardData.total_costs.change
+            dashboardData.total_costs.current,
+            dashboardData.total_costs.previous,
+            dashboardData.total_costs.change
           )}
         </Grid>
         <Grid item xs={12} md={6} lg={3}>
           {renderMetricCard(
             'Cost Savings',
-            mockDashboardData.cost_savings.current,
-            mockDashboardData.cost_savings.previous,
-            mockDashboardData.cost_savings.change
+            dashboardData.cost_savings.current,
+            dashboardData.cost_savings.previous,
+            dashboardData.cost_savings.change
           )}
         </Grid>
         <Grid item xs={12} md={6} lg={3}>
           {renderMetricCard(
             'Active Resources',
-            mockDashboardData.active_resources.current,
-            mockDashboardData.active_resources.previous,
-            mockDashboardData.active_resources.change,
+            dashboardData.active_resources.current,
+            dashboardData.active_resources.previous,
+            dashboardData.active_resources.change,
             (value) => value.toFixed(0)
           )}
         </Grid>
         <Grid item xs={12} md={6} lg={3}>
           {renderMetricCard(
             'Optimization Score',
-            mockDashboardData.optimization_score.current,
-            mockDashboardData.optimization_score.previous,
-            mockDashboardData.optimization_score.change,
+            dashboardData.optimization_score.current,
+            dashboardData.optimization_score.previous,
+            dashboardData.optimization_score.change,
             formatPercentage
           )}
         </Grid>

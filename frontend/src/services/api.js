@@ -9,7 +9,7 @@ import {
   getMockCombinedInsights
 } from "./mockData";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+const API_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
 
 // Create an Axios instance with default config
 const apiClient = axios.create({
@@ -18,6 +18,15 @@ const apiClient = axios.create({
     "Content-Type": "application/json",
   },
   timeout: 10000 // 10 second timeout
+});
+
+// Add request interceptor for authentication
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 // Add response interceptor for error handling
@@ -44,22 +53,24 @@ export const getCloudCosts = async () => {
   try {
     // First try to get real data from API
     try {
-      const response = await apiClient.get("/costs/mock-costs");
+      const response = await apiClient.get("/api/costs/mock-costs");
       return response.data;
     } catch (apiError) {
       console.log("Using mock cloud costs data");
-      // Fall back to mock data
-      return [
-        { provider: "AWS", service: "EC2", cost: 120.50, date: "2025-02-20" },
-        { provider: "Azure", service: "VM", cost: 98.75, date: "2025-02-21" },
-        { provider: "GCP", service: "Compute Engine", cost: 85.20, date: "2025-02-22" },
-        { provider: "AWS", service: "S3", cost: 65.30, date: "2025-02-23" },
-        { provider: "AWS", service: "RDS", cost: 110.45, date: "2025-02-24" }
-      ];
+      // Fall back to mock data with proper structure
+      const mockData = getMockHistoricalCostData(30);
+      return {
+        costs: mockData,
+        total_cost: mockData.reduce((sum, item) => sum + item.cost, 0),
+        date_range: {
+          start: mockData[0].date,
+          end: mockData[mockData.length - 1].date
+        }
+      };
     }
   } catch (error) {
     console.error("Error fetching cloud costs:", error);
-    return [];
+    return { costs: [], total_cost: 0, date_range: { start: null, end: null } };
   }
 };
 
@@ -407,11 +418,56 @@ export const getServiceMapping = async (sourceProvider, targetProvider) => {
   }
 };
 
+// Cloud resources API functions
+export const getCloudResourcesData = async () => {
+  try {
+    const response = await apiClient.get("/api/resources");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching cloud resources data:", error);
+    // Return mock data for development
+    return {
+      resources: [
+        {
+          id: "i-abc123",
+          provider: "AWS",
+          service: "EC2",
+          resource_type: "Instance",
+          name: "web-server-1",
+          status: "running",
+          cost: 120.50
+        },
+        {
+          id: "vol-xyz789",
+          provider: "AWS",
+          service: "EBS",
+          resource_type: "Volume",
+          name: "data-volume-1",
+          status: "in-use",
+          cost: 45.30
+        },
+        {
+          id: "s3-bucket-123",
+          provider: "AWS",
+          service: "S3",
+          resource_type: "Bucket",
+          name: "data-storage",
+          status: "active",
+          cost: 25.75
+        }
+      ]
+    };
+  }
+};
+
 // Update the default export to include the new functions
 const api = {
   // Cost data functions
   getCloudCosts,
   getCostBreakdown,
+  
+  // Cloud resources functions
+  getCloudResourcesData,
   
   // AI insights functions
   getCostPredictions,

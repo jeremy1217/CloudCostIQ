@@ -8,6 +8,7 @@ import Sidebar from "./components/Sidebar";
 import ErrorBoundary from "./components/ErrorBoundary";
 import LoadingIndicator from "./components/LoadingIndicator";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminGuard from "./components/admin/AdminGuard";
 import { AuthProvider } from "./context/AuthContext";
 import ConnectionHealthPage from './pages/admin/ConnectionHealthPage';
 import theme from './theme';
@@ -60,61 +61,86 @@ function App() {
             <ThemeProvider theme={theme}>
                 <CssBaseline />
                 <ErrorBoundary>
-                    <AuthProvider>
-                        <Router>
-                            <Box sx={{ display: 'flex' }}>
-                                <Navbar
-                                    drawerWidth={DRAWER_WIDTH}
-                                    onDrawerToggle={handleDrawerToggle}
+                    <Router>
+                        <AuthProvider>
+                            <Routes>
+                                {/* Public routes */}
+                                <Route path="/" element={<Marketing />} />
+                                <Route path="/login" element={<Login />} />
+                                <Route path="/register" element={<Register />} />
+                                <Route path="/unauthorized" element={<Unauthorized />} />
+
+                                {/* Protected routes */}
+                                <Route
+                                    path="/app/*"
+                                    element={
+                                        <ProtectedRoute>
+                                            <Box sx={{ display: 'flex' }}>
+                                                <Navbar
+                                                    drawerWidth={DRAWER_WIDTH}
+                                                    onDrawerToggle={handleDrawerToggle}
+                                                />
+                                                <Sidebar
+                                                    drawerWidth={DRAWER_WIDTH}
+                                                    mobileOpen={mobileOpen}
+                                                    onDrawerToggle={handleDrawerToggle}
+                                                    onNavItemHover={{
+                                                        dashboard: preloadComponent(Dashboard),
+                                                        costsByService: preloadComponent(CostsByService),
+                                                        costsByProvider: preloadComponent(CostsByProvider),
+                                                        costAttribution: preloadComponent(CostAttribution),
+                                                        insights: preloadComponent(Insights),
+                                                        optimize: preloadComponent(Optimize),
+                                                        enhancedAI: preloadComponent(EnhancedAIDashboard),
+                                                        multiCloud: preloadComponent(MultiCloudComparisonPage),
+                                                        userProfile: preloadComponent(UserProfile),
+                                                        apiKeys: preloadComponent(ApiKeyManagement),
+                                                        dataViz: preloadComponent(DataVisualizationDemo),
+                                                    }}
+                                                />
+                                                <Box
+                                                    component="main"
+                                                    sx={{
+                                                        flexGrow: 1,
+                                                        p: 3,
+                                                        width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
+                                                        ml: { sm: `${DRAWER_WIDTH}px` },
+                                                    }}
+                                                >
+                                                    <Suspense fallback={<LoadingIndicator />}>
+                                                        <Routes>
+                                                            <Route path="/" element={<Dashboard />} />
+                                                            <Route path="/dashboard" element={<Dashboard />} />
+                                                            <Route path="/costs/by-service" element={<CostsByService />} />
+                                                            <Route path="/costs/by-provider" element={<CostsByProvider />} />
+                                                            <Route path="/costs/attribution" element={<CostAttribution />} />
+                                                            <Route path="/insights" element={<Insights />} />
+                                                            <Route path="/optimize" element={<Optimize />} />
+                                                            <Route path="/ai-dashboard" element={<EnhancedAIDashboard />} />
+                                                            <Route path="/multi-cloud" element={<MultiCloudComparisonPage />} />
+                                                            <Route path="/profile" element={<UserProfile />} />
+                                                            <Route path="/api-keys" element={<ApiKeyManagement />} />
+                                                            <Route path="/data-viz" element={<DataVisualizationDemo />} />
+                                                            
+                                                            {/* Admin routes */}
+                                                            <Route
+                                                                path="/admin/*"
+                                                                element={
+                                                                    <AdminGuard>
+                                                                        <AdminRoutes />
+                                                                    </AdminGuard>
+                                                                }
+                                                            />
+                                                        </Routes>
+                                                    </Suspense>
+                                                </Box>
+                                            </Box>
+                                        </ProtectedRoute>
+                                    }
                                 />
-                                <Sidebar
-                                    drawerWidth={DRAWER_WIDTH}
-                                    mobileOpen={mobileOpen}
-                                    onDrawerToggle={handleDrawerToggle}
-                                    onNavItemHover={{
-                                        dashboard: preloadComponent(Dashboard),
-                                        costsByService: preloadComponent(CostsByService),
-                                        costsByProvider: preloadComponent(CostsByProvider),
-                                        costAttribution: preloadComponent(CostAttribution),
-                                        insights: preloadComponent(Insights),
-                                        optimize: preloadComponent(Optimize),
-                                        enhancedAI: preloadComponent(EnhancedAIDashboard),
-                                        multiCloud: preloadComponent(MultiCloudComparisonPage),
-                                        userProfile: preloadComponent(UserProfile),
-                                        apiKeys: preloadComponent(ApiKeyManagement),
-                                        dataViz: preloadComponent(DataVisualizationDemo),
-                                    }}
-                                />
-                                <Box
-                                    component="main"
-                                    sx={{
-                                        flexGrow: 1,
-                                        p: 3,
-                                        width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
-                                        ml: { sm: `${DRAWER_WIDTH}px` },
-                                    }}
-                                >
-                                    <Suspense fallback={<LoadingIndicator />}>
-                                        <Routes>
-                                            <Route path="/" element={<Marketing />} />
-                                            <Route path="/login" element={<Login />} />
-                                            <Route path="/register" element={<Register />} />
-                                            <Route path="/unauthorized" element={<Unauthorized />} />
-                                            <Route
-                                                path="/dashboard"
-                                                element={
-                                                    <ProtectedRoute>
-                                                        <Dashboard />
-                                                    </ProtectedRoute>
-                                                }
-                                            />
-                                            {/* Add other routes similarly */}
-                                        </Routes>
-                                    </Suspense>
-                                </Box>
-                            </Box>
-                        </Router>
-                    </AuthProvider>
+                            </Routes>
+                        </AuthProvider>
+                    </Router>
                 </ErrorBoundary>
                 {process.env.NODE_ENV === 'development' && <ReactQueryDevtools />}
             </ThemeProvider>

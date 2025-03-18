@@ -38,7 +38,7 @@ export function AuthProvider({ children }) {
               console.error('Error fetching user info:', err);
               // Fallback to token data if API call fails
               setUser({ 
-                username: decoded.sub,
+                email: decoded.sub,
                 roles: decoded.roles || [] 
               });
             }
@@ -56,14 +56,14 @@ export function AuthProvider({ children }) {
   }, []);
 
   // Login function
-  const login = async (username, password) => {
+  const login = async (email, password) => {
     setLoading(true);
     setError(null);
     
     try {
       // Use URLSearchParams for proper form encoding
       const formData = new URLSearchParams();
-      formData.append('username', username);
+      formData.append('username', email); // Backend expects 'username' field
       formData.append('password', password);
 
       const response = await axios.post(
@@ -87,7 +87,7 @@ export function AuthProvider({ children }) {
       // Decode token to get user info
       const decoded = jwtDecode(access_token);
       setUser({ 
-        username: decoded.sub,
+        email: decoded.sub,
         roles: decoded.roles || [] 
       });
       
@@ -113,7 +113,7 @@ export function AuthProvider({ children }) {
       );
       
       // Auto login after successful registration
-      const loginSuccess = await login(userData.username, userData.password);
+      const loginSuccess = await login(userData.email, userData.password);
       
       if (loginSuccess) {
         // Redirect to user profile page after successful registration and login

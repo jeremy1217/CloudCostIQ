@@ -10,10 +10,14 @@ const ServiceBreakdownWidget = ({ limit = 5 }) => {
         // Fetch services data using the API service, which already uses the mock data service
         const fetchData = async () => {
             try {
-                const costData = await getCloudCosts();
+                const response = await getCloudCosts();
                 
+                if (!response || !response.costs) {
+                    throw new Error('Invalid cost data structure');
+                }
+
                 // Process the data
-                const serviceSummary = costData.reduce((acc, item) => {
+                const serviceSummary = response.costs.reduce((acc, item) => {
                     // Group by service
                     if (!acc[item.service]) {
                         acc[item.service] = 0;
@@ -35,7 +39,8 @@ const ServiceBreakdownWidget = ({ limit = 5 }) => {
                     .slice(0, limit)
                     .map(item => ({
                         ...item,
-                        percentage: (item.cost / total) * 100
+                        percentage: (item.cost / total) * 100,
+                        cost: parseFloat(item.cost.toFixed(2))
                     }));
                 
                 setServices(formattedServices);
