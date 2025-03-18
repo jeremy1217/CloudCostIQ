@@ -1,38 +1,43 @@
 import React from 'react';
 import { Box, CircularProgress, Typography, Fade } from '@mui/material';
 
-const LoadingIndicator = ({ message = 'Loading...', size = 40 }) => {
+const LoadingIndicator = ({ message = 'Loading...', fullScreen = false }) => {
   return (
-    <Fade in={true} style={{ transitionDelay: '300ms' }}>
+    <Fade in timeout={500}>
       <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        gap={2}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          ...(fullScreen && {
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            bgcolor: 'background.paper',
+            zIndex: 9999,
+          }),
+        }}
       >
         <CircularProgress
-          size={size}
+          size={40}
           thickness={4}
           sx={{
             color: 'primary.main',
-            '& .MuiCircularProgress-circle': {
-              strokeLinecap: 'round',
-            },
+            mb: 2,
           }}
         />
         <Typography
           variant="body1"
           color="text.secondary"
           sx={{
-            animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            animation: 'pulse 1.5s infinite',
             '@keyframes pulse': {
-              '0%, 100%': {
-                opacity: 1,
-              },
-              '50%': {
-                opacity: 0.5,
-              },
+              '0%': { opacity: 1 },
+              '50%': { opacity: 0.5 },
+              '100%': { opacity: 1 },
             },
           }}
         >

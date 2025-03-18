@@ -8,7 +8,7 @@ const CloudConnectionsPage = () => {
   const { user } = useAuth();
 
   // Redirect if user is not an admin
-  if (!user || user.role !== 'admin') {
+  if (!user || !user.roles?.includes('admin')) {
     return <Navigate to="/unauthorized" replace />;
   }
 

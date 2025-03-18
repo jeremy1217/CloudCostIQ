@@ -6,11 +6,11 @@ export const bypassAuthForDevelopment = () => {
     if (process.env.NODE_ENV !== 'development') return;
     
     // Create a mock JWT token for local testing
-    const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwidXNlcm5hbWUiOiJhZG1pblVzZXIiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwicm9sZXMiOlsidXNlciIsImFkbWluIl0sImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoxNjgwODgzNjAwfQ.LUE0VxTMpvwjB3f3ZBKpLDxy4pRlgjIV-iQEJD8JWog';
+    const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbi51c2VyIiwidXNlcm5hbWUiOiJhZG1pbi51c2VyIiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInJvbGVzIjpbInVzZXIiLCJhZG1pbiJdLCJpYXQiOjE3MTA2NTI4MDAsImV4cCI6MTc0MjE4ODgwMH0.8X5Q8Z9Y2Z9Y2Z9Y2Z9Y2Z9Y2Z9Y2Z9Y2Z9Y2Z9Y2Z9Y';
     
     // Only set if no token exists
     if (!localStorage.getItem('auth_token')) {
-      console.log('Setting development auth token for testing');
-      localStorage.setItem('auth_token', mockToken);
+        console.log('Setting development auth token for testing');
+        localStorage.setItem('auth_token', mockToken);
     }
-  };
+};

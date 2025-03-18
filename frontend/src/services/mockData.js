@@ -368,3 +368,115 @@ export const generateDateRange = (daysCount, startFromToday = true) => {
       }
     };
   };
+
+export const mockAdminDashboardData = {
+    total_users: 156,
+    active_connections: 12,
+    system_health: {
+        status: 'Healthy',
+        cpu: {
+            usage: 45,
+            status: 'normal'
+        },
+        memory: {
+            usage: 62,
+            status: 'normal'
+        },
+        disk: {
+            usage: 78,
+            status: 'warning'
+        },
+        active_connections: {
+            count: 234,
+            status: 'normal'
+        }
+    },
+    last_backup: new Date().toISOString(),
+    recent_alerts: [
+        {
+            id: 1,
+            type: 'warning',
+            message: 'High CPU usage detected',
+            timestamp: new Date(Date.now() - 3600000).toISOString()
+        },
+        {
+            id: 2,
+            type: 'info',
+            message: 'Backup completed successfully',
+            timestamp: new Date(Date.now() - 7200000).toISOString()
+        }
+    ]
+};
+
+export const mockUsers = [
+    {
+        id: 1,
+        username: 'john.doe',
+        email: 'john.doe@example.com',
+        full_name: 'John Doe',
+        roles: ['user', 'admin'],
+        created_at: '2024-01-15T08:00:00Z',
+        last_login: '2024-03-14T09:30:00Z',
+        status: 'active'
+    },
+    {
+        id: 2,
+        username: 'jane.smith',
+        email: 'jane.smith@example.com',
+        full_name: 'Jane Smith',
+        roles: ['user'],
+        created_at: '2024-01-20T10:15:00Z',
+        last_login: '2024-03-13T16:45:00Z',
+        status: 'active'
+    },
+    {
+        id: 3,
+        username: 'mike.wilson',
+        email: 'mike.wilson@example.com',
+        full_name: 'Mike Wilson',
+        roles: ['user', 'manager'],
+        created_at: '2024-02-01T11:30:00Z',
+        last_login: '2024-03-14T11:20:00Z',
+        status: 'active'
+    },
+    {
+        id: 4,
+        username: 'sarah.johnson',
+        email: 'sarah.johnson@example.com',
+        full_name: 'Sarah Johnson',
+        roles: ['user'],
+        created_at: '2024-02-10T09:45:00Z',
+        last_login: '2024-03-12T14:15:00Z',
+        status: 'active'
+    },
+    {
+        id: 5,
+        username: 'david.brown',
+        email: 'david.brown@example.com',
+        full_name: 'David Brown',
+        roles: ['user', 'admin'],
+        created_at: '2024-02-15T13:20:00Z',
+        last_login: '2024-03-14T08:30:00Z',
+        status: 'active'
+    },
+    {
+        id: 6,
+        username: 'emily.davis',
+        email: 'emily.davis@example.com',
+        full_name: 'Emily Davis',
+        roles: ['user'],
+        created_at: '2024-02-20T15:10:00Z',
+        last_login: '2024-03-13T10:45:00Z',
+        status: 'inactive'
+    },
+    {
+        id: 7,
+        username: 'alex.turner',
+        email: 'alex.turner@example.com',
+        full_name: 'Alex Turner',
+        roles: ['user', 'manager'],
+        created_at: '2024-02-25T14:30:00Z',
+        last_login: '2024-03-14T13:20:00Z',
+        status: 'active'
+    }
+];
