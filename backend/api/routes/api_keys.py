@@ -5,7 +5,7 @@ import json
 
 # Third-party imports
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 import secrets
 
@@ -15,7 +15,7 @@ from backend.auth.utils import get_current_active_user, get_password_hash, verif
 from backend.database.db import get_db
 from backend.models.models import UserModel, ApiKeyModel
 from backend.services.api_key_service import APIKeyService
-from backend.utils.encryption import encrypt_data, decrypt_data
+from backend.utils.encryption import encrypt_value, decrypt_value
 
 router = APIRouter(prefix="/api-keys", tags=["api-keys"])
 
@@ -32,8 +32,7 @@ class ApiKeyResponse(BaseModel):
     created_at: str
     is_active: bool
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ApiKeyList(BaseModel):
     id: int
@@ -43,8 +42,7 @@ class ApiKeyList(BaseModel):
     is_active: bool
     last_used: Optional[str] = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 def get_provider_credentials(api_key_id: int, db: Session) -> Optional[Dict]:
     """
@@ -57,7 +55,7 @@ def get_provider_credentials(api_key_id: int, db: Session) -> Optional[Dict]:
         return None
     
     # Decrypt the credentials
-    decrypted_json = decrypt_data(api_key.encrypted_credentials)
+    decrypted_json = decrypt_value(api_key.encrypted_credentials)
     if not decrypted_json:
         return None
         
@@ -78,7 +76,7 @@ async def create_api_key(
     # Encrypt the provider credentials
     encrypted_credentials = None
     if api_key.credentials:
-        encrypted_credentials = encrypt_data(json.dumps(api_key.credentials))
+        encrypted_credentials = encrypt_value(json.dumps(api_key.credentials))
     
     # Create a new API key entry
     now = datetime.utcnow().isoformat()

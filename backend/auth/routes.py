@@ -44,9 +44,9 @@ async def login_for_access_token(
     
     logger.info(f"Login successful for user: {form_data.username}")
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    # Include roles in the token data
+    # Include roles in the token data and use email as sub
     token_data = {
-        "sub": user.username,
+        "sub": user.email,  # Use email instead of username
         "roles": [role.name for role in user.roles]
     }
     access_token = create_access_token(
@@ -60,17 +60,12 @@ async def get_current_user_info(current_user: UserModel = Depends(get_current_ac
     return {
         "id": current_user.id,
         "email": current_user.email,
-        "first_name": current_user.first_name,
-        "last_name": current_user.last_name,
-        "type": current_user.type,
-        "role_names": current_user.role_names,
+        "username": current_user.username,
+        "full_name": current_user.full_name,
         "is_active": current_user.is_active,
-        "created_at": current_user.created_at,
-        "updated_at": current_user.updated_at,
-        "company": current_user.company,
-        "phone": current_user.phone,
-        "preferences": current_user.preferences,
-        "two_factor_enabled": current_user.two_factor_enabled
+        "roles": [role.name for role in current_user.roles],
+        "created_at": current_user.created_at.isoformat() if current_user.created_at else None,
+        "updated_at": current_user.updated_at.isoformat() if current_user.updated_at else None
     }
 
 @router.post("/register", response_model=User)

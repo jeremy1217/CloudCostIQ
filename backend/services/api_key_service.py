@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 # Local imports
 from backend.models.models import ApiKeyModel
-from backend.utils.encryption import encrypt_data, decrypt_data
+from backend.utils.encryption import encrypt_value, decrypt_value
 
 class APIKeyService:
     def __init__(self, db: Session):
@@ -22,7 +22,7 @@ class APIKeyService:
         user_id: int
     ) -> ApiKeyModel:
         """Create a new API key"""
-        encrypted_creds = encrypt_data(str(credentials))
+        encrypted_creds = encrypt_value(str(credentials))
         now = datetime.utcnow()
         
         api_key = ApiKeyModel(
@@ -72,7 +72,7 @@ class APIKeyService:
         if is_active is not None:
             api_key.is_active = is_active
         if credentials is not None:
-            api_key.encrypted_credentials = encrypt_data(str(credentials))
+            api_key.encrypted_credentials = encrypt_value(str(credentials))
         
         api_key.last_used = datetime.utcnow()
         self.db.commit()
@@ -94,6 +94,6 @@ class APIKeyService:
         if not api_key.encrypted_credentials:
             return None
         try:
-            return eval(decrypt_data(api_key.encrypted_credentials))
+            return eval(decrypt_value(api_key.encrypted_credentials))
         except:
             return None 

@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 # Standard library imports
 from datetime import datetime
 import logging
@@ -7,8 +10,6 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import QueuePool
-from .models import metadata
-from .base import Base
 
 # Local imports
 from backend.config import settings
@@ -19,12 +20,15 @@ logging.basicConfig()
 logger = logging.getLogger('sqlalchemy.engine')
 logger.setLevel(logging.INFO)
 
-SQLALCHEMY_DATABASE_URL = "sqlite:////Users/jhamel/Documents/GitHub/CloudCostIQ/cloudcostiq.db"
+# Use PostgreSQL URL from settings
+SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
 
 # Create SQLAlchemy engine with connection pooling
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False}  # SQLite specific
+    poolclass=QueuePool,
+    pool_size=5,
+    max_overflow=10
 )
 
 # Set up monitoring
@@ -34,7 +38,7 @@ setup_monitoring(engine)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Create Base class
-Base = declarative_base(metadata=metadata)
+Base = declarative_base()
 
 # Database health check function
 def check_db_health():

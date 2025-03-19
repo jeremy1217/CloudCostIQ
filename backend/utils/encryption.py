@@ -5,30 +5,35 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import os
 
-# Generate a key for encryption
-def get_encryption_key() -> bytes:
-    """Get or generate an encryption key"""
-    # In production, this should be stored securely and retrieved from environment variables
-    key = os.getenv('ENCRYPTION_KEY')
-    if not key:
-        # Generate a key if none exists
-        salt = os.urandom(16)
-        kdf = PBKDF2HMAC(
-            algorithm=hashes.SHA256(),
-            length=32,
-            salt=salt,
-            iterations=100000,
-        )
-        key = base64.urlsafe_b64encode(kdf.derive(b"default_secret"))
-        os.environ['ENCRYPTION_KEY'] = key.decode()
-    return key.encode() if isinstance(key, str) else key
+def get_encryption_key():
+    """Get or generate encryption key."""
+    key_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'encryption.key')
+    
+    if os.path.exists(key_path):
+        with open(key_path, 'rb') as key_file:
+            return key_file.read()
+    else:
+        # Generate a new key
+        key = Fernet.generate_key()
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(key_path), exist_ok=True)
+        # Save the key
+        with open(key_path, 'wb') as key_file:
+            key_file.write(key)
+        return key
 
-def encrypt_data(data: str) -> str:
-    """Encrypt data using Fernet"""
+def encrypt_value(value: str) -> str:
+    """Encrypt a string value."""
+    if not value:
+        return value
+    
     f = Fernet(get_encryption_key())
-    return f.encrypt(data.encode()).decode()
+    return f.encrypt(value.encode()).decode()
 
-def decrypt_data(encrypted_data: str) -> str:
-    """Decrypt data using Fernet"""
+def decrypt_value(encrypted_value: str) -> str:
+    """Decrypt an encrypted string value."""
+    if not encrypted_value:
+        return encrypted_value
+    
     f = Fernet(get_encryption_key())
-    return f.decrypt(encrypted_data.encode()).decode()
+    return f.decrypt(encrypted_value.encode()).decode()

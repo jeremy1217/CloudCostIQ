@@ -27,12 +27,15 @@ const CostAttribution = () => {
       setLoading(true);
       setError(null);
       try {
+        if (!api) {
+          throw new Error('API service not initialized');
+        }
         const [attribution, untagged] = await Promise.all([
           api.getCostAttribution(attributionType, timeRange),
           api.getUntaggedResources()
         ]);
-        setAttributionData(attribution);
-        setUntaggedResources(untagged);
+        setAttributionData(attribution || []);
+        setUntaggedResources(untagged || []);
       } catch (err) {
         setError('Failed to fetch cost attribution data');
         console.error('Error:', err);

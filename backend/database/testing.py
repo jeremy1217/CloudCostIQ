@@ -11,10 +11,9 @@ from .models import User, Role, ApiKey, CloudConnection
 
 class TestDatabase:
     def __init__(self):
-        # Use SQLite in-memory database for testing
+        # Use PostgreSQL test database
         self.engine = create_engine(
-            'sqlite:///:memory:',
-            connect_args={'check_same_thread': False},
+            'postgresql://postgres:postgres@localhost:5432/cloudcostiq_test',
             poolclass=StaticPool
         )
         self.TestingSessionLocal = sessionmaker(

@@ -1,34 +1,29 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Table, Index, CheckConstraint, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from .base import Base, metadata
-
-# Create metadata instance
-metadata = metadata
+from .db import Base
+from backend.utils.encryption import encrypt_value, decrypt_value
 
 # Custom types for encrypted fields
 class EncryptedString(String):
     """Custom type for encrypted string fields"""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._key = None  # Encryption key will be set from settings
 
     def process_bind_param(self, value, dialect):
         if value is None:
             return None
-        # TODO: Implement encryption
-        return value
+        return encrypt_value(value)
 
     def process_result_value(self, value, dialect):
         if value is None:
             return None
-        # TODO: Implement decryption
-        return value
+        return decrypt_value(value)
 
 # Association table for user roles
 user_role_association = Table(
     'user_role_association',
-    metadata,
+    Base.metadata,
     Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE')),
     Column('role_id', Integer, ForeignKey('roles.id', ondelete='CASCADE'))
 )
@@ -42,7 +37,12 @@ class Role(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True, nullable=False)
     description = Column(String, nullable=True)
-    users = relationship("User", secondary=user_role_association, back_populates="roles")
+    users = relationship(
+        "User",
+        secondary=user_role_association,
+        back_populates="roles",
+        overlaps="roles,users"
+    )
 
 class User(Base):
     __tablename__ = "users"
@@ -60,7 +60,24 @@ class User(Base):
     is_active = Column(Boolean, default=True, index=True)
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    roles = relationship("Role", secondary=user_role_association, back_populates="users")
+    
+    # Relationships
+    roles = relationship(
+        "Role",
+        secondary=user_role_association,
+        back_populates="users",
+        overlaps="roles,users"
+    )
+    api_keys = relationship(
+        "ApiKey",
+        back_populates="user",
+        overlaps="api_keys,user"
+    )
+    cloud_connections = relationship(
+        "CloudConnection",
+        back_populates="user",
+        overlaps="cloud_connections,user"
+    )
 
 class ApiKey(Base):
     __tablename__ = "api_keys"
@@ -80,7 +97,11 @@ class ApiKey(Base):
     
     # User relationship
     user_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'))
-    user = relationship("User", backref="api_keys")
+    user = relationship(
+        "User",
+        back_populates="api_keys",
+        overlaps="api_keys,user"
+    )
 
 class CloudConnection(Base):
     __tablename__ = "cloud_connections"
@@ -98,4 +119,8 @@ class CloudConnection(Base):
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    user = relationship("User", backref="cloud_connections") 
+    user = relationship(
+        "User",
+        back_populates="cloud_connections",
+        overlaps="cloud_connections,user"
+    ) 

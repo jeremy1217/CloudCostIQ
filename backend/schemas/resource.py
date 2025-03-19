@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional, List, Dict
 from datetime import datetime
+from . import BaseConfig
 
 class ResourceTag(BaseModel):
     key: str
@@ -23,5 +24,4 @@ class ResourceResponse(BaseModel):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True 
+    model_config = BaseConfig 

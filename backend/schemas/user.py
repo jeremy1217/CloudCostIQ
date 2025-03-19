@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime
+from . import BaseConfig
 
 class UserBase(BaseModel):
     email: EmailStr
@@ -25,8 +26,7 @@ class UserResponse(UserBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = BaseConfig
 
 class UserInDB(UserResponse):
     hashed_password: str 

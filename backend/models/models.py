@@ -19,6 +19,8 @@ class RoleModel(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
     description = Column(String)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
     users = relationship("UserModel", secondary=user_role_association, back_populates="roles")
 
 class UserModel(Base):
@@ -86,6 +88,7 @@ class CloudCost(Base):
     provider = Column(String, nullable=False, index=True)  # AWS, Azure, GCP
     service = Column(String, nullable=False, index=True)  # EC2, S3, etc.
     cost = Column(Integer, nullable=False)  # Cost in cents
+    timestamp = Column(DateTime, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'))
     user = relationship("UserModel", backref="cloud_costs")
 

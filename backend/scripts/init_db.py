@@ -204,15 +204,4 @@ def init_database():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    
-    # Delete the SQLite database file if it exists
-    if settings.DATABASE_URL.startswith('sqlite:///'):
-        db_path = settings.DATABASE_URL.replace('sqlite:///', '')
-        if os.path.exists(db_path):
-            try:
-                os.remove(db_path)
-                logger.info(f"Deleted existing database file: {db_path}")
-            except Exception as e:
-                logger.error(f"Error deleting database file: {str(e)}")
-    
     init_database() 

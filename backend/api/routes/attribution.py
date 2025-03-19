@@ -11,7 +11,7 @@ from backend.models.cloud_cost import CloudCost
 
 router = APIRouter()
 
-@router.get("/attribution/by-service")
+@router.get("/by-service")
 async def get_attribution_by_service(
     time_range: Optional[str] = "month",
     db: Session = Depends(get_db)
@@ -31,7 +31,7 @@ async def get_attribution_by_service(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting attribution data: {str(e)}")
 
-@router.get("/attribution/by-team")
+@router.get("/by-team")
 async def get_attribution_by_team(
     time_range: Optional[str] = "month",
     db: Session = Depends(get_db)
@@ -50,7 +50,7 @@ async def get_attribution_by_team(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting attribution data: {str(e)}")
 
-@router.get("/attribution/by-environment")
+@router.get("/by-environment")
 async def get_attribution_by_environment(
     time_range: Optional[str] = "month",
     db: Session = Depends(get_db)
@@ -69,7 +69,7 @@ async def get_attribution_by_environment(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting attribution data: {str(e)}")
 
-@router.get("/attribution/untagged")
+@router.get("/untagged")
 async def get_untagged_resources(
     db: Session = Depends(get_db)
 ):

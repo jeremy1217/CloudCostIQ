@@ -6,6 +6,7 @@ import { ArrowForward, Check, Warning, Info, Savings,
          CompareArrows, MoveToInbox, Cached } from '@mui/icons-material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, 
          Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import api from '../services/api';
 
 // Custom tab panel component
 function TabPanel(props) {
@@ -72,114 +73,35 @@ const MultiCloudComparison = () => {
 
   // Fetch initial data on component mount
   useEffect(() => {
-    // For demo purposes, use mock data instead of API calls
-    setComparisonData(getMockComparisonData());
-    setServiceMapping(getMockServiceMapping());
+    fetchComparisonData();
+    fetchServiceMapping();
   }, []);
 
-  // Mock data function for demonstration
-  const getMockComparisonData = () => {
-    return {
-      serviceComparison: [
-        {
-          serviceCategory: "Compute",
-          awsCost: 4500,
-          gcpCost: 3800,
-          azureCost: 4200
-        },
-        {
-          serviceCategory: "Storage",
-          awsCost: 2100,
-          gcpCost: 2300,
-          azureCost: 1900
-        },
-        {
-          serviceCategory: "Database",
-          awsCost: 1800,
-          gcpCost: 1600,
-          azureCost: 1900
-        },
-        {
-          serviceCategory: "Networking",
-          awsCost: 1300,
-          gcpCost: 1000,
-          azureCost: 1300
-        }
-      ],
-      totalCosts: {
-        aws: 9700,
-        gcp: 8700,
-        azure: 9300
-      },
-      lowestCostProvider: "GCP",
-      potentialSavings: 1000,
-      potentialAnnualSavings: 12000
-    };
-  };
-
-  // Mock service mapping data
-  const getMockServiceMapping = () => {
-    return [
-      {
-        serviceType: "Compute",
-        aws: "EC2",
-        gcp: "Compute Engine",
-        azure: "Virtual Machines"
-      },
-      {
-        serviceType: "Object Storage",
-        aws: "S3",
-        gcp: "Cloud Storage",
-        azure: "Blob Storage"
-      },
-      {
-        serviceType: "Relational Database",
-        aws: "RDS",
-        gcp: "Cloud SQL",
-        azure: "Azure SQL"
-      },
-      {
-        serviceType: "NoSQL Database",
-        aws: "DynamoDB",
-        gcp: "Firestore",
-        azure: "Cosmos DB"
-      },
-      {
-        serviceType: "Serverless Computing",
-        aws: "Lambda",
-        gcp: "Cloud Functions",
-        azure: "Azure Functions"
-      }
-    ];
-  };
-
-  // Fetch comparison data - Using mock data instead of actual API call
+  // Fetch comparison data
   const fetchComparisonData = async () => {
     try {
       setLoading(true);
       setError(null);
-      
-      // Simulated API call
-      setTimeout(() => {
-        setComparisonData(getMockComparisonData());
-        setLoading(false);
-      }, 500);
-      
+      const data = await api.getProviderComparison();
+      if (!data) {
+        throw new Error('Failed to fetch comparison data');
+      }
+      setComparisonData(data);
     } catch (err) {
-      setError('Failed to fetch comparison data. Please try again.');
-      setLoading(false);
       console.error('Error fetching comparison data:', err);
+      setError('Failed to load comparison data. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   // Fetch service mapping
   const fetchServiceMapping = async () => {
     try {
-      // Simulated API call
-      setTimeout(() => {
-        setServiceMapping(getMockServiceMapping());
-      }, 300);
-      
+      const data = await api.getServiceMapping();
+      if (data) {
+        setServiceMapping(data);
+      }
     } catch (err) {
       console.error('Error fetching service mapping:', err);
     }
@@ -190,234 +112,35 @@ const MultiCloudComparison = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      // Simulated API call with mock data
-      setTimeout(() => {
-        setMigrationData(getMockMigrationData());
-        setLoading(false);
-      }, 800);
-      
+      const data = await api.getProviderComparison();
+      if (!data) {
+        throw new Error('Failed to fetch migration data');
+      }
+      setMigrationData(data);
     } catch (err) {
-      setError('Failed to fetch migration data. Please try again.');
-      setLoading(false);
       console.error('Error fetching migration data:', err);
+      setError('Failed to load migration data. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
-
-  // Mock migration data
-  const getMockMigrationData = () => {
-    return {
-      oneTimeCosts: {
-        dataTransfer: 5000 * 0.05, // $0.05 per GB
-        labor: 10 * 4 * 150 + 3 * 8 * 150 + 40 * 150, // compute hrs + db hrs + base hrs, at $150/hr
-        tools: 2000,
-        training: 5000,
-        total: 5000 * 0.05 + (10 * 4 * 150 + 3 * 8 * 150 + 40 * 150) + 2000 + 5000
-      },
-      monthlyCosts: {
-        current: 9700, // Using the mock comparison total for AWS
-        projected: 8700 * 0.85, // Using the mock comparison total for GCP with a 15% discount
-        savings: 9700 - (8700 * 0.85)
-      },
-      breakEvenMonths: 7.3, // Calculated based on one-time costs and monthly savings
-      roi: {
-        oneYearRoi: 35,
-        threeYearRoi: 186,
-        fiveYearRoi: 337,
-        threeYearSavings: (9700 - (8700 * 0.85)) * 36 - (5000 * 0.05 + (10 * 4 * 150 + 3 * 8 * 150 + 40 * 150) + 2000 + 5000)
-      },
-      complexityAssessment: [
-        {
-          resourceType: "Compute",
-          complexity: "Medium",
-          estimatedEffort: "40 hours",
-          keyConsiderations: "Instance types, OS compatibility, application dependencies"
-        },
-        {
-          resourceType: "Storage",
-          complexity: "Low",
-          estimatedEffort: "5 days",
-          keyConsiderations: "Data transfer time, format compatibility, access patterns"
-        },
-        {
-          resourceType: "Database",
-          complexity: "High",
-          estimatedEffort: "24 hours",
-          keyConsiderations: "Schema compatibility, data migration, minimal downtime strategy"
-        },
-        {
-          resourceType: "Networking",
-          complexity: "Medium",
-          estimatedEffort: "3 days",
-          keyConsiderations: "IP addressing, security groups, load balancer configuration"
-        }
-      ],
-      cumulativeCostComparison: generateCumulativeCostData(),
-      recommendedStrategy: {
-        phases: [
-          {
-            title: "Assessment and Planning",
-            description: "Inventory all resources, map to target services, and develop a detailed migration plan.",
-            duration: "2-4 weeks"
-          },
-          {
-            title: "Proof of Concept",
-            description: "Migrate a small, non-critical workload to validate the approach and identify challenges.",
-            duration: "2-3 weeks"
-          },
-          {
-            title: "Database Migration",
-            description: "Migrate databases with minimal downtime using replication and staged cutover.",
-            duration: "3-6 weeks"
-          },
-          {
-            title: "Application Migration",
-            description: "Migrate application servers and reconfigure networking.",
-            duration: "4-8 weeks"
-          },
-          {
-            title: "Storage Migration",
-            description: "Transfer data to the target cloud storage services.",
-            duration: "2-4 weeks"
-          },
-          {
-            title: "Testing and Optimization",
-            description: "Comprehensive testing and performance optimization in the new environment.",
-            duration: "2-3 weeks"
-          },
-          {
-            title: "Decommissioning",
-            description: "Gradually decommission resources in the source cloud as migration completes.",
-            duration: "2-4 weeks"
-          }
-        ]
-      }
-    };
-  };
-
-  // Helper function to generate cumulative cost data
-  function generateCumulativeCostData() {
-    const currentMonthlyCost = 9700;
-    const projectedMonthlyCost = 8700 * 0.85;
-    const oneTimeCost = 5000 * 0.05 + (10 * 4 * 150 + 3 * 8 * 150 + 40 * 150) + 2000 + 5000;
-    const breakEvenMonth = 7.3;
-    
-    const data = [];
-    
-    for (let month = 1; month <= 36; month++) {
-      const currentCost = currentMonthlyCost * month;
-      const projectedCost = oneTimeCost + (projectedMonthlyCost * month);
-      
-      // Mark the break-even point
-      let breakEvenPoint = null;
-      if (month - 1 < breakEvenMonth && month >= breakEvenMonth) {
-        breakEvenPoint = projectedCost;
-      }
-      
-      data.push({
-        month,
-        currentCost,
-        projectedCost,
-        breakEvenPoint
-      });
-    }
-    
-    return data;
-  }
 
   // Fetch optimization data
   const fetchOptimizationData = async () => {
     try {
       setLoading(true);
       setError(null);
-      
-      // Simulated API call with mock data
-      setTimeout(() => {
-        setOptimizationData(getMockOptimizationData());
-        setLoading(false);
-      }, 700);
-      
-    } catch (err) {
-      setError('Failed to fetch optimization data. Please try again.');
-      setLoading(false);
-      console.error('Error fetching optimization data:', err);
-    }
-  };
-
-  // Mock optimization data
-  const getMockOptimizationData = () => {
-    return {
-      currentMonthlyCost: 10000,
-      optimizedMonthlyCost: 8850,
-      totalMonthlySavings: 1150,
-      currentDistribution: [
-        {provider: "AWS", value: 4200},
-        {provider: "GCP", value: 3100},
-        {provider: "Azure", value: 2700}
-      ],
-      optimizedDistribution: [
-        {provider: "AWS", value: 1800},
-        {provider: "GCP", value: 5200},
-        {provider: "Azure", value: 1850}
-      ],
-      opportunities: [
-        {
-          id: "opt-001",
-          name: "Move Compute Workloads to GCP",
-          description: "Migrate compute-intensive workloads from AWS to GCP for cost savings.",
-          currentProvider: "AWS",
-          recommendedProvider: "GCP",
-          monthlySavings: 450,
-          complexity: "Medium"
-        },
-        {
-          id: "opt-002",
-          name: "Utilize Azure Storage",
-          description: "Move cold storage data to Azure Blob Storage for better pricing.",
-          currentProvider: "AWS",
-          recommendedProvider: "Azure",
-          monthlySavings: 350,
-          complexity: "Low"
-        },
-        {
-          id: "opt-003",
-          name: "Database Migration to GCP",
-          description: "Move databases from AWS RDS to GCP Cloud SQL for cost optimization.",
-          currentProvider: "AWS",
-          recommendedProvider: "GCP",
-          monthlySavings: 350,
-          complexity: "High"
-        }
-      ],
-      implementationConsiderations: {
-        benefits: [
-          "Cost optimization by leveraging strengths of each provider",
-          "Reduced vendor lock-in and dependency",
-          "Improved resilience and disaster recovery capabilities",
-          "Access to best-in-class services from each provider"
-        ],
-        challenges: [
-          "Increased operational complexity",
-          "Need for multi-cloud expertise and tools",
-          "Data transfer costs between providers",
-          "Consistent security and governance across providers"
-        ],
-        recommendedTools: [
-          {
-            name: "Terraform",
-            description: "Infrastructure as Code tool for multi-cloud deployments"
-          },
-          {
-            name: "Kubernetes",
-            description: "Container orchestration platform that works across clouds"
-          },
-          {
-            name: "Multi-Cloud Management Platform",
-            description: "Centralized dashboard for managing resources across providers"
-          }
-        ]
+      const data = await api.getOptimizationOpportunities();
+      if (!data) {
+        throw new Error('Failed to fetch optimization data');
       }
-    };
+      setOptimizationData(data);
+    } catch (err) {
+      console.error('Error fetching optimization data:', err);
+      setError('Failed to load optimization data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Update resource configuration
@@ -436,17 +159,16 @@ const MultiCloudComparison = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      // Simulated API call with mock data
-      setTimeout(() => {
-        setMigrationData(getMockMigrationData());
-        setLoading(false);
-      }, 800);
-      
+      const data = await api.getMigrationAnalysis(sourceProvider, targetProvider);
+      if (!data) {
+        throw new Error('Failed to analyze migration');
+      }
+      setMigrationData(data);
     } catch (err) {
-      setError('Failed to analyze migration. Please try again.');
-      setLoading(false);
       console.error('Error analyzing migration:', err);
+      setError('Failed to analyze migration. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -14,19 +14,23 @@ from backend.services.multi_cloud_service import MultiCloudService
 from backend.api.routes.costs import router as costs_router
 from backend.api.routes.insights import router as insights_router
 from backend.api.routes.ai_routes import router as ai_router
+from backend.api.routes.resource_routes import router as resources_router
+from backend.api.routes.attribution import router as attribution_router
 from backend.auth.models import User
 from backend.auth.utils import get_current_active_user, has_role
 from backend.auth.utils import get_current_user
 
 app = FastAPI(title="CloudCostIQ API")
 
-# Configure CORS
+# Configure CORS - Move this before any router includes
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # Frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=3600,  # Cache preflight requests for 1 hour
 )
 
 # Add auth routers first
@@ -38,9 +42,11 @@ from backend.api.routes.api_keys import router as api_keys_router
 app.include_router(api_keys_router)
 
 # Add existing routers with auth protection
-app.include_router(costs_router, prefix="/costs", dependencies=[Depends(get_current_active_user)])
+app.include_router(costs_router, dependencies=[Depends(get_current_active_user)])
 app.include_router(insights_router, prefix="/insights", dependencies=[Depends(get_current_active_user)])
-app.include_router(ai_router, prefix="/ai", dependencies=[Depends(get_current_active_user)])
+app.include_router(ai_router, dependencies=[Depends(get_current_active_user)])
+app.include_router(resources_router, dependencies=[Depends(get_current_active_user)])
+app.include_router(attribution_router, prefix="/attribution", dependencies=[Depends(get_current_active_user)])
 
 # Add admin-only routes with role-based protection
 from backend.api.admin import router as admin_router
@@ -49,11 +55,6 @@ app.include_router(
     dependencies=[Depends(has_role(["admin"]))],
     tags=["admin"]
 )
-
-# Root endpoint
-@app.get("/")
-async def root():
-    return {"message": "Welcome to CloudCostIQ API"}
 
 # Create router for multi-cloud endpoints
 multi_cloud_router = APIRouter(
@@ -93,7 +94,7 @@ multi_cloud_service = MultiCloudService()
 
 @multi_cloud_router.get("/comparison")
 async def get_provider_comparison(current_user: User = Depends(get_current_user)):
-    """Compare costs across cloud providers"""
+    """Get cost comparison data across cloud providers"""
     try:
         comparison_data = multi_cloud_service.get_provider_comparison(current_user.id)
         return comparison_data
@@ -122,13 +123,13 @@ async def analyze_migration(
 ):
     """Analyze migration costs between providers"""
     try:
-        migration_data = multi_cloud_service.analyze_migration(
+        analysis = multi_cloud_service.analyze_migration(
             current_user.id,
             request.sourceProvider,
             request.targetProvider,
             request.resources.dict()
         )
-        return migration_data
+        return analysis
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -143,17 +144,13 @@ async def generate_migration_plan(
 ):
     """Generate a detailed migration plan"""
     try:
-        plan_data = multi_cloud_service.generate_migration_plan(
+        plan = multi_cloud_service.generate_migration_plan(
             current_user.id,
             request.sourceProvider,
             request.targetProvider,
             request.resources.dict()
         )
-        
-        # In a real implementation, we might generate a PDF and store it
-        # background_tasks.add_task(generate_and_store_pdf, plan_data, current_user.id)
-        
-        return plan_data
+        return plan
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -164,8 +161,8 @@ async def generate_migration_plan(
 async def get_optimization_opportunities(current_user: User = Depends(get_current_user)):
     """Get cross-cloud optimization opportunities"""
     try:
-        optimization_data = multi_cloud_service.get_optimization_opportunities(current_user.id)
-        return optimization_data
+        opportunities = multi_cloud_service.get_optimization_opportunities(current_user.id)
+        return opportunities
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -179,11 +176,8 @@ async def get_optimization_details(
 ):
     """Get details for a specific optimization opportunity"""
     try:
-        optimization_details = multi_cloud_service.get_optimization_details(
-            current_user.id,
-            opportunity_id
-        )
-        return optimization_details
+        details = multi_cloud_service.get_optimization_details(current_user.id, opportunity_id)
+        return details
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -193,17 +187,26 @@ async def get_optimization_details(
 @multi_cloud_router.get("/provider-costs/{provider}")
 async def get_provider_cost_details(
     provider: str,
-    time_range: TimeRange,
+    time_range: str,
     current_user: User = Depends(get_current_user)
 ):
     """Get detailed costs for a specific provider"""
     try:
-        provider_costs = multi_cloud_service.get_provider_cost_details(
+        # Parse the time_range JSON string
+        time_range_data = json.loads(time_range)
+        time_range_obj = TimeRange(**time_range_data)
+        
+        cost_details = multi_cloud_service.get_provider_cost_details(
             current_user.id,
             provider,
-            time_range.dict()
+            time_range_obj.dict()
         )
-        return provider_costs
+        return cost_details
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Invalid time_range format. Expected a JSON string."
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -236,23 +239,8 @@ async def generate_optimization_report(
 ):
     """Generate optimization report in the specified format"""
     try:
-        # In a real implementation, we would generate a PDF/Excel report here
-        report_data = multi_cloud_service.generate_optimization_report(
-            current_user.id,
-            format
-        )
-        
-        # This would return a file download
-        # content = report_data["content"]
-        # filename = report_data["filename"]
-        # return Response(
-        #     content=content,
-        #     media_type="application/pdf" if format == "pdf" else "application/vnd.ms-excel",
-        #     headers={"Content-Disposition": f"attachment; filename={filename}"}
-        # )
-        
-        # For demonstration, just return a success message
-        return {"message": "Report generated successfully", "timestamp": datetime.now().isoformat()}
+        report = multi_cloud_service.generate_optimization_report(current_user.id, format)
+        return report
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -279,3 +267,8 @@ async def apply_optimization_plan(
 
 # Add the multi-cloud router to the main app
 app.include_router(multi_cloud_router)
+
+# Root endpoint
+@app.get("/")
+async def root():
+    return {"message": "Welcome to CloudCostIQ API"}

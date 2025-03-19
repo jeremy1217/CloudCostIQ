@@ -38,7 +38,7 @@ class CloudResource(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
-    tags = relationship("ResourceTag", backref="resource", cascade="all, delete-orphan")
+    tags = relationship("ResourceTag", secondary=resource_tag_association, backref="resources")
 
     def to_dict(self):
         """Convert to dictionary for API responses"""
@@ -64,7 +64,6 @@ class ResourceTag(Base):
     __tablename__ = "resource_tags"
 
     id = Column(Integer, primary_key=True, index=True)
-    resource_id = Column(Integer, ForeignKey("cloud_resources.id"))
     key = Column(String, index=True)
     value = Column(String)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -72,6 +71,9 @@ class ResourceTag(Base):
 
     def to_dict(self):
         return {
+            "id": self.id,
             "key": self.key,
-            "value": self.value
+            "value": self.value,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None
         }

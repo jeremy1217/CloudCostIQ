@@ -22,6 +22,7 @@ class TagBase(BaseModel):
 class TagResponse(TagBase):
     id: int
     created_at: str
+    updated_at: str
 
     class Config:
         from_attributes = True
@@ -44,6 +45,7 @@ class ResourceUpdate(BaseModel):
     status: Optional[str] = None
     attributes: Optional[Dict[str, Any]] = None
     last_active: Optional[datetime] = None
+    tags: Optional[List[TagBase]] = None
 
 class ResourceResponse(BaseModel):
     id: int
@@ -91,9 +93,7 @@ async def get_resources(
         
         # Get all resources
         resources = query.all()
-        
-        # Convert to response format
-        return [resource.to_dict() for resource in resources]
+        return resources
         
     except Exception as e:
         raise HTTPException(
@@ -195,6 +195,28 @@ async def update_resource(
         db_resource.attributes = resource_update.attributes
     if resource_update.last_active is not None:
         db_resource.last_active = resource_update.last_active
+    
+    # Update tags if provided
+    if resource_update.tags is not None:
+        # Clear existing tags
+        db_resource.tags = []
+        
+        # Add new tags
+        for tag_data in resource_update.tags:
+            # Check if tag already exists
+            tag = db.query(ResourceTag).filter(
+                ResourceTag.key == tag_data.key,
+                ResourceTag.value == tag_data.value
+            ).first()
+            
+            if not tag:
+                # Create new tag
+                tag = ResourceTag(key=tag_data.key, value=tag_data.value)
+                db.add(tag)
+                db.flush()  # Flush to get the id
+            
+            # Add tag to resource
+            db_resource.tags.append(tag)
     
     # Update the updated_at timestamp
     db_resource.updated_at = datetime.now()
@@ -299,13 +321,10 @@ async def add_tag_to_resource(
         # Create new tag
         db_tag = ResourceTag(key=tag.key, value=tag.value)
         db.add(db_tag)
-        db.flush()
+        db.flush()  # Flush to get the id
     
-    # Check if the resource already has this tag
-    if db_tag not in db_resource.tags:
-        # Add tag to resource
-        db_resource.tags.append(db_tag)
-    
+    # Add tag to resource
+    db_resource.tags.append(db_tag)
     db.commit()
     db.refresh(db_resource)
     return db_resource
@@ -335,11 +354,10 @@ async def remove_tag_from_resource(
             detail=f"Tag with ID {tag_id} not found"
         )
     
-    # Check if the resource has this tag
+    # Remove tag from resource
     if db_tag in db_resource.tags:
-        # Remove tag from resource
         db_resource.tags.remove(db_tag)
+        db.commit()
+        db.refresh(db_resource)
     
-    db.commit()
-    db.refresh(db_resource)
     return db_resource

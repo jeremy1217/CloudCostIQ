@@ -58,8 +58,28 @@ const api = {
     try {
       // First try to get real data from API
       try {
-        const response = await apiClient.get("/api/costs/mock-costs");
-        return response.data;
+        const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        const endDate = new Date().toISOString();
+        const response = await apiClient.get("/multi-cloud/provider-costs/AWS", {
+          params: {
+            time_range: JSON.stringify({
+              startDate,
+              endDate,
+              granularity: "DAILY"
+            })
+          }
+        });
+        return {
+          costs: response.data.costByDate.map(item => ({
+            date: item.date,
+            cost: item.totalCost
+          })),
+          total_cost: response.data.totalCost,
+          date_range: {
+            start: response.data.timeRange.startDate,
+            end: response.data.timeRange.endDate
+          }
+        };
       } catch (apiError) {
         console.log("Using mock cloud costs data");
         // Fall back to mock data with proper structure
@@ -83,8 +103,19 @@ const api = {
     try {
       // First try to get real data from API
       try {
-        const response = await apiClient.get("/insights/cost-breakdown");
-        return response.data.cost_breakdown || [];
+        const response = await apiClient.post("/multi-cloud/service-cost-breakdown", {
+          providers: ["AWS", "GCP", "Azure"],
+          timeRange: {
+            startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+            endDate: new Date().toISOString(),
+            granularity: "MONTHLY"
+          }
+        });
+        return response.data.serviceBreakdown.map(item => ({
+          provider: Object.keys(item.providerCosts)[0],
+          service: item.service,
+          cost: item.totalCost
+        }));
       } catch (apiError) {
         console.log("Using mock cost breakdown data");
         // Fall back to mock data
@@ -325,64 +356,26 @@ const api = {
   },
 
   // Multi-Cloud Comparison API functions
-  getProviderComparison: async (timeRange = 'month', serviceCategory = 'all') => {
+  getProviderComparison: async () => {
     try {
-      const response = await apiClient.get('/multi-cloud/comparison', {
-        params: { timeRange, serviceCategory }
-      });
+      const response = await apiClient.get("/multi-cloud/comparison");
       return response.data;
     } catch (error) {
-      console.error('Error fetching provider comparison:', error);
-      // For demo, fallback to mock data
-      return {
-        serviceComparison: [
-          {
-            serviceCategory: "Compute",
-            awsCost: 4500,
-            gcpCost: 3800,
-            azureCost: 4200
-          },
-          {
-            serviceCategory: "Storage",
-            awsCost: 2100,
-            gcpCost: 2300,
-            azureCost: 1900
-          },
-          {
-            serviceCategory: "Database",
-            awsCost: 1800,
-            gcpCost: 1600,
-            azureCost: 1900
-          },
-          {
-            serviceCategory: "Networking",
-            awsCost: 1300,
-            gcpCost: 1000,
-            azureCost: 1300
-          }
-        ],
-        totalCosts: {
-          aws: 9700,
-          gcp: 8700,
-          azure: 9300
-        },
-        lowestCostProvider: "GCP",
-        potentialSavings: 1000,
-        potentialAnnualSavings: 12000
-      };
+      console.error("Error fetching provider comparison:", error);
+      throw error;
     }
   },
 
-  getMigrationAnalysis: async (sourceProvider = 'AWS', targetProvider = 'Azure') => {
+  getMigrationAnalysis: async (sourceProvider, targetProvider) => {
     try {
-      const response = await apiClient.get('/multi-cloud/migration-analysis', {
-        params: { sourceProvider, targetProvider }
+      const response = await apiClient.post("/multi-cloud/migration-analysis", {
+        source_provider: sourceProvider,
+        target_provider: targetProvider
       });
       return response.data;
     } catch (error) {
-      console.error('Error fetching migration analysis:', error);
-      // Mock data fallback would go here
-      return {};
+      console.error("Error analyzing migration:", error);
+      throw error;
     }
   },
 
@@ -411,15 +404,23 @@ const api = {
     }
   },
 
-  getServiceMapping: async (sourceProvider, targetProvider) => {
+  getServiceMapping: async () => {
     try {
-      const response = await apiClient.get('/multi-cloud/service-mapping', {
-        params: { sourceProvider, targetProvider }
-      });
+      const response = await apiClient.get("/multi-cloud/service-mapping");
       return response.data;
     } catch (error) {
-      console.error('Error fetching service mapping:', error);
+      console.error("Error fetching service mapping:", error);
       return [];
+    }
+  },
+
+  getOptimizationOpportunities: async () => {
+    try {
+      const response = await apiClient.get("/multi-cloud/optimizations");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching optimization opportunities:", error);
+      return null;
     }
   },
 

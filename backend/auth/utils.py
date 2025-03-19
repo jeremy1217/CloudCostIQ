@@ -33,7 +33,13 @@ def verify_password(plain_password, hashed_password):
         logger.debug(f"Verifying password for user")
         logger.debug(f"Plain password: {plain_password}")
         logger.debug(f"Hashed password from DB: {hashed_password}")
-        result = bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+        # Convert plain password to bytes if it's not already
+        if isinstance(plain_password, str):
+            plain_password = plain_password.encode('utf-8')
+        # Convert hashed password to bytes if it's not already
+        if isinstance(hashed_password, str):
+            hashed_password = hashed_password.encode('utf-8')
+        result = bcrypt.checkpw(plain_password, hashed_password)
         logger.debug(f"Password verification result: {result}")
         return result
     except Exception as e:
@@ -41,8 +47,11 @@ def verify_password(plain_password, hashed_password):
         return False
 
 def get_password_hash(password):
+    # Convert password to bytes if it's not already
+    if isinstance(password, str):
+        password = password.encode('utf-8')
     salt = bcrypt.gensalt()
-    return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
+    return bcrypt.hashpw(password, salt).decode('utf-8')
 
 def get_user(db: Session, username: str):
     try:
