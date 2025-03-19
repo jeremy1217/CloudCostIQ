@@ -13,7 +13,7 @@ from backend.auth.utils import (
     get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES
 )
 from backend.database.db import get_db
-from backend.models.user import UserModel, RoleModel
+from backend.models.models import UserModel, RoleModel
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 

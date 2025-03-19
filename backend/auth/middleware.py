@@ -1,11 +1,16 @@
 from functools import wraps
 from fastapi import HTTPException, Depends, Request
-from backend.auth.utils import get_current_user
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from jose import jwt
+from sqlalchemy.orm import Session
+
+from backend.database.db import SessionLocal
+from backend.models.models import UserModel
+from backend.auth.utils import SECRET_KEY, ALGORITHM, get_current_user
 from backend.api.feature_restrictions import FEATURE_REQUIREMENTS, PlanLevel, get_feature_level
 from typing import List, Union
 from backend.config import settings
 import logging
-from backend.models.user import UserModel
 
 logger = logging.getLogger(__name__)
 

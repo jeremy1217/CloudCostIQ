@@ -12,7 +12,7 @@ import {
   FormControl,
   InputLabel
 } from '@mui/material';
-import { getCostAttribution, getUntaggedResources } from '../services/api';
+import api from '../services/api';
 
 const CostAttribution = () => {
   const [attributionData, setAttributionData] = useState([]);
@@ -28,8 +28,8 @@ const CostAttribution = () => {
       setError(null);
       try {
         const [attribution, untagged] = await Promise.all([
-          getCostAttribution(attributionType, timeRange),
-          getUntaggedResources()
+          api.getCostAttribution(attributionType, timeRange),
+          api.getUntaggedResources()
         ]);
         setAttributionData(attribution);
         setUntaggedResources(untagged);

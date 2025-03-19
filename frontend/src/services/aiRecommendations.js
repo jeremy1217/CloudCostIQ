@@ -10,7 +10,7 @@ const AI_MODELS = {
 class AIRecommendationsService {
     async generateRecommendations(cloudData) {
         try {
-            const response = await api.post('/ai/recommendations/generate', {
+            const response = await api.client.post('/ai/recommendations/generate', {
                 cloudData,
                 models: [AI_MODELS.COST_OPTIMIZATION]
             });
@@ -24,7 +24,7 @@ class AIRecommendationsService {
 
     async analyzeResource(resourceData) {
         try {
-            const response = await api.post('/ai/recommendations/analyze', {
+            const response = await api.client.post('/ai/recommendations/analyze', {
                 resourceData
             });
             return response.data;
@@ -451,4 +451,5 @@ class AIRecommendationsService {
     }
 }
 
-export default new AIRecommendationsService(); 
+const aiRecommendationsService = new AIRecommendationsService();
+export default aiRecommendationsService; 

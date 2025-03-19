@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { getCloudCosts } from "../services/api";
+import api from "../services/api";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const CostChart = () => {
     const [chartData, setChartData] = useState([]);
 
     useEffect(() => {
-        getCloudCosts().then(response => {
+        api.getCloudCosts().then(response => {
             if (!response || !response.costs) {
                 console.error('Invalid cost data structure:', response);
                 return;

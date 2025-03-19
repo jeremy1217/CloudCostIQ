@@ -228,9 +228,40 @@ def detect_anomalies(*args, **kwargs):
 def optimize_costs(*args, **kwargs):
     return ai_engine.optimize_costs(*args, **kwargs)
     
-def get_ai_status():
-    return ai_engine.get_ai_status()
-    
-def enable_enhanced_ai(enable=True):
-    ai_engine.enable_enhanced_capabilities(enable)
+def get_ai_status() -> Dict[str, Any]:
+    """Get current AI capabilities status"""
+    return {
+        "enhanced_ai_enabled": ENABLE_ENHANCED_AI,
+        "capabilities": {
+            "forecasting": {
+                "algorithms": ["linear", "arima", "exp_smoothing", "random_forest", "auto"],
+                "max_forecast_days": 365,
+                "min_data_points": 5
+            },
+            "anomaly_detection": {
+                "methods": ["zscore", "isolation_forest", "dbscan", "seasonal_decompose", "ensemble"],
+                "root_cause_analysis": True
+            },
+            "optimization": {
+                "categories": [
+                    "instance_rightsizing",
+                    "reserved_instances",
+                    "storage_optimization",
+                    "idle_resources",
+                    "licensing_optimization"
+                ]
+            }
+        },
+        "version": "1.0.0",
+        "last_updated": datetime.now().strftime("%Y-%m-%d")
+    }
+
+def enable_enhanced_ai(enable: bool) -> Dict[str, Any]:
+    """Enable or disable enhanced AI capabilities"""
+    global ENABLE_ENHANCED_AI
+    ENABLE_ENHANCED_AI = enable
+    # Reinitialize the AI engine with new settings
+    global ai_engine
+    ai_engine = CloudCostIQ_AI(enable_enhanced_ai=enable)
+    return get_ai_status()
 

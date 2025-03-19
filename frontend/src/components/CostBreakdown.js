@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Container, Typography, Paper, Box, Button } from "@mui/material";
 import { Bar } from "react-chartjs-2";
 import "chart.js/auto";
-import { getCostBreakdown } from "../services/api";
+import api from '../services/api';
 import LoadingIndicator from "./LoadingIndicator";
 
 const CostBreakdown = () => {
@@ -14,7 +14,7 @@ const CostBreakdown = () => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const data = await getCostBreakdown();
+                const data = await api.getCostBreakdown();
                 setCostData(data);
                 setError(null);
             } catch (err) {

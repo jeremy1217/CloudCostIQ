@@ -13,10 +13,9 @@ from backend.services.multi_cloud_service import MultiCloudService
 # Local imports
 from backend.api.routes.costs import router as costs_router
 from backend.api.routes.insights import router as insights_router
-from backend.auth.models import User  # Import User from auth.models instead of models.user
+from backend.api.routes.ai_routes import router as ai_router
+from backend.auth.models import User
 from backend.auth.utils import get_current_active_user, has_role
-
-# Import auth dependencies
 from backend.auth.utils import get_current_user
 
 app = FastAPI(title="CloudCostIQ API")
@@ -24,23 +23,24 @@ app = FastAPI(title="CloudCostIQ API")
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # React frontend URL
+    allow_origins=["http://localhost:3000"],  # Frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Add auth routers
+# Add auth routers first
 from backend.auth.routes import router as auth_router
-app.include_router(auth_router)
+app.include_router(auth_router, prefix="/auth", tags=["auth"])
 
 # Add API keys router
 from backend.api.routes.api_keys import router as api_keys_router
 app.include_router(api_keys_router)
 
 # Add existing routers with auth protection
-app.include_router(costs_router, dependencies=[Depends(get_current_active_user)])
-app.include_router(insights_router, dependencies=[Depends(get_current_active_user)])
+app.include_router(costs_router, prefix="/costs", dependencies=[Depends(get_current_active_user)])
+app.include_router(insights_router, prefix="/insights", dependencies=[Depends(get_current_active_user)])
+app.include_router(ai_router, prefix="/ai", dependencies=[Depends(get_current_active_user)])
 
 # Add admin-only routes with role-based protection
 from backend.api.admin import router as admin_router
@@ -49,15 +49,6 @@ app.include_router(
     dependencies=[Depends(has_role(["admin"]))],
     tags=["admin"]
 )
-
-# Add resource routes
-from backend.api.routes import auth, costs, insights, optimizations, attribution, resource_routes
-app.include_router(auth.router)
-app.include_router(costs.router)
-app.include_router(insights.router)
-app.include_router(optimizations.router)
-app.include_router(attribution.router)
-app.include_router(resource_routes.router)
 
 # Root endpoint
 @app.get("/")

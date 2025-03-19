@@ -1,35 +1,48 @@
 # Standard library imports
-from datetime import timedelta
+from datetime import datetime, timedelta
+import logging
+from typing import List, Optional
 
 # Third-party imports
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 # Local imports
-from backend.auth.models import Token, User, UserCreate
+from backend.auth.models import Token, User, UserCreate, UserUpdate
 from backend.auth.utils import (
     authenticate_user, create_access_token, 
     get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES,
-    get_current_user
+    get_current_active_user
 )
 from backend.database.db import get_db
-from backend.models.user import UserModel, RoleModel
+from backend.models.models import UserModel, RoleModel
 
-router = APIRouter(prefix="/auth", tags=["authentication"])
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+router = APIRouter(tags=["authentication"])
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
+    logger.info(f"Login attempt for user: {form_data.username}")
+    logger.debug(f"Request headers: {request.headers}")
+    
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
+        logger.warning(f"Login failed for user: {form_data.username}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
+    logger.info(f"Login successful for user: {form_data.username}")
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     # Include roles in the token data
     token_data = {
@@ -41,17 +54,24 @@ async def login_for_access_token(
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.get("/me", response_model=User)
-async def get_current_user_info(current_user: UserModel = Depends(get_current_user)):
-    """Get information about the currently authenticated user."""
-    return User(
-        id=current_user.id,
-        email=current_user.email,
-        username=current_user.username,
-        full_name=current_user.full_name,
-        is_active=current_user.is_active,
-        roles=[role.name for role in current_user.roles]
-    )
+@router.get("/me")
+async def get_current_user_info(current_user: UserModel = Depends(get_current_active_user)):
+    """Get current user information"""
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "first_name": current_user.first_name,
+        "last_name": current_user.last_name,
+        "type": current_user.type,
+        "role_names": current_user.role_names,
+        "is_active": current_user.is_active,
+        "created_at": current_user.created_at,
+        "updated_at": current_user.updated_at,
+        "company": current_user.company,
+        "phone": current_user.phone,
+        "preferences": current_user.preferences,
+        "two_factor_enabled": current_user.two_factor_enabled
+    }
 
 @router.post("/register", response_model=User)
 async def register_user(user: UserCreate, db: Session = Depends(get_db)):

@@ -10,8 +10,8 @@ from sqlalchemy.orm import Session
 
 # Local imports
 from backend.database.db import SessionLocal
-from backend.models.cloud_cost import CloudCost
-from backend.models.user import ApiKeyModel
+from backend.models.models import ApiKey
+from backend.services.cloud_cost_service import CloudCostService
 from backend.services.cloud_providers.aws_service import AWSService
 from backend.utils.encryption import decrypt_data
 
@@ -40,7 +40,7 @@ def import_all_cloud_costs():
     
     try:
         # Get all active API keys
-        api_keys = db.query(ApiKeyModel).filter(ApiKeyModel.is_active == True).all()
+        api_keys = db.query(ApiKey).filter(ApiKey.is_active == True).all()
         
         for api_key in api_keys:
             # Import costs for this API key
@@ -54,7 +54,7 @@ def import_all_cloud_costs():
 
 def import_costs_for_key(api_key_id: int, db: Session):
     """Import costs for a specific API key"""
-    api_key = db.query(ApiKeyModel).filter(ApiKeyModel.id == api_key_id).first()
+    api_key = db.query(ApiKey).filter(ApiKey.id == api_key_id).first()
     
     if not api_key:
         logger.error(f"API key with ID {api_key_id} not found")
@@ -98,7 +98,7 @@ def import_costs_for_key(api_key_id: int, db: Session):
         
     # Save costs to database
     for cost_data in costs:
-        cloud_cost = CloudCost(
+        cloud_cost = CloudCostService(
             provider=cost_data['provider'],
             service=cost_data['service'],
             cost=cost_data['cost'],

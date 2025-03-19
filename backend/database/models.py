@@ -1,7 +1,10 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Table, Index, CheckConstraint, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from .db import Base, metadata
+from .base import Base, metadata
+
+# Create metadata instance
+metadata = metadata
 
 # Custom types for encrypted fields
 class EncryptedString(String):
@@ -27,15 +30,13 @@ user_role_association = Table(
     'user_role_association',
     metadata,
     Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE')),
-    Column('role_id', Integer, ForeignKey('roles.id', ondelete='CASCADE')),
-    extend_existing=True
+    Column('role_id', Integer, ForeignKey('roles.id', ondelete='CASCADE'))
 )
 
 class Role(Base):
     __tablename__ = "roles"
     __table_args__ = (
-        {'extend_existing': True},
-        UniqueConstraint('name', name='uq_role_name')
+        UniqueConstraint('name', name='uq_role_name'),
     )
 
     id = Column(Integer, primary_key=True, index=True)
@@ -46,7 +47,6 @@ class Role(Base):
 class User(Base):
     __tablename__ = "users"
     __table_args__ = (
-        {'extend_existing': True},
         Index('idx_user_email_username', 'email', 'username'),
         UniqueConstraint('email', name='uq_user_email'),
         UniqueConstraint('username', name='uq_user_username')
@@ -65,8 +65,7 @@ class User(Base):
 class ApiKey(Base):
     __tablename__ = "api_keys"
     __table_args__ = (
-        {'extend_existing': True},
-        Index('idx_active_api_keys', 'is_active').where(is_active == True),
+        Index('idx_active_api_keys', 'is_active'),
         CheckConstraint("provider IN ('aws', 'azure', 'gcp')", name='valid_provider')
     )
 
@@ -86,9 +85,8 @@ class ApiKey(Base):
 class CloudConnection(Base):
     __tablename__ = "cloud_connections"
     __table_args__ = (
-        {'extend_existing': True},
         CheckConstraint("provider IN ('aws', 'azure', 'gcp')", name='valid_cloud_provider'),
-        Index('idx_active_connections', 'is_active').where(is_active == True)
+        Index('idx_active_connections', 'is_active')
     )
 
     id = Column(Integer, primary_key=True, index=True)

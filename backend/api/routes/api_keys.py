@@ -13,7 +13,8 @@ import secrets
 from backend.auth.models import User
 from backend.auth.utils import get_current_active_user, get_password_hash, verify_password
 from backend.database.db import get_db
-from backend.models.user import ApiKeyModel
+from backend.models.models import UserModel, ApiKeyModel
+from backend.services.api_key_service import APIKeyService
 from backend.utils.encryption import encrypt_data, decrypt_data
 
 router = APIRouter(prefix="/api-keys", tags=["api-keys"])

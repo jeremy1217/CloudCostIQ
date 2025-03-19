@@ -9,7 +9,7 @@ from backend.auth.utils import get_current_user
 from backend.auth.middleware import require_admin
 from backend.services.feature_tracking import FeatureTrackingService
 from backend.config.feature_config import FEATURE_METADATA, PlanFeatures
-from backend.models.user import UserModel
+from backend.models.models import UserModel, FeatureConfig, AuditLog
 from backend.schemas.user import UserResponse
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])

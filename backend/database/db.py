@@ -7,6 +7,8 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import QueuePool
+from .models import metadata
+from .base import Base
 
 # Local imports
 from backend.config import settings
@@ -17,15 +19,12 @@ logging.basicConfig()
 logger = logging.getLogger('sqlalchemy.engine')
 logger.setLevel(logging.INFO)
 
+SQLALCHEMY_DATABASE_URL = "sqlite:////Users/jhamel/Documents/GitHub/CloudCostIQ/cloudcostiq.db"
+
 # Create SQLAlchemy engine with connection pooling
 engine = create_engine(
-    settings.DATABASE_URL,
-    poolclass=QueuePool,
-    pool_size=20,
-    max_overflow=10,
-    pool_timeout=30,
-    pool_recycle=1800,  # Recycle connections after 30 minutes
-    pool_pre_ping=True  # Enable connection health checks
+    SQLALCHEMY_DATABASE_URL,
+    connect_args={"check_same_thread": False}  # SQLite specific
 )
 
 # Set up monitoring
@@ -35,7 +34,7 @@ setup_monitoring(engine)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Create Base class
-Base = declarative_base()
+Base = declarative_base(metadata=metadata)
 
 # Database health check function
 def check_db_health():

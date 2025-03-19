@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import { getCloudCosts } from '../services/api';
+import api from '../services/api';
 import { useEffect, useState } from 'react';
 
 const ServiceBreakdownWidget = ({ limit = 5 }) => {
@@ -10,7 +10,7 @@ const ServiceBreakdownWidget = ({ limit = 5 }) => {
         // Fetch services data using the API service, which already uses the mock data service
         const fetchData = async () => {
             try {
-                const response = await getCloudCosts();
+                const response = await api.getCloudCosts();
                 
                 if (!response || !response.costs) {
                     throw new Error('Invalid cost data structure');
