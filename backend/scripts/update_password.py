@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import bcrypt
-from backend.models.user import UserModel
+from backend.models.models import UserModel
 from backend.config import settings
 
 # Create database connection
@@ -26,7 +26,7 @@ def update_password():
         user.hashed_password = hashed_password
         db.commit()
         print("Password updated successfully")
-        print(f"New hash: {hashed_password}")
+        print(f"New password: {password}")
     except Exception as e:
         print(f"Error: {e}")
         db.rollback()

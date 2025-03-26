@@ -9,7 +9,7 @@ from sqlalchemy.orm import relationship
 from backend.database.db import Base
 
 class CloudCost(Base):
-    __tablename__ = "cloud_cost"
+    __tablename__ = "cloud_costs"
 
     id = Column(Integer, primary_key=True, index=True)
     provider = Column(String, nullable=False)
@@ -21,3 +21,4 @@ class CloudCost(Base):
     
     # User relationship
     user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    user = relationship("UserModel", backref="cloud_costs")

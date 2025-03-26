@@ -216,3 +216,68 @@ def populate_db_with_mock_data(db_session, days: int = 30, models=None):
     
     # Commit changes
     db_session.commit()
+
+def getMockCombinedInsights(params: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Generate mock combined insights data including forecasts, anomalies, and optimizations
+    
+    Args:
+        params: Dictionary containing parameters like days and forecast_days
+        
+    Returns:
+        Dictionary containing mock combined insights data
+    """
+    days = params.get("days", 30)
+    forecast_days = params.get("forecast_days", 14)
+    
+    # Generate mock cost data
+    cost_data = generate_mock_costs(days=days)
+    
+    # Calculate total cost
+    total_cost = sum(item["cost"] for item in cost_data)
+    
+    # Generate mock forecast data
+    today = datetime.date.today()
+    forecast_data = []
+    for i in range(forecast_days):
+        date = today + datetime.timedelta(days=i)
+        forecast_data.append({
+            "date": date.strftime("%Y-%m-%d"),
+            "predicted_cost": round(total_cost * (1 + random.uniform(-0.1, 0.1)), 2)
+        })
+    
+    # Generate mock anomalies
+    anomalies = []
+    for cost in cost_data:
+        if random.random() < 0.05:  # 5% chance of anomaly
+            anomalies.append({
+                "date": cost["date"],
+                "service": cost["service"],
+                "provider": cost["provider"],
+                "cost": cost["cost"],
+                "expected_cost": round(cost["cost"] * 0.7, 2),
+                "severity": random.choice(["high", "medium", "low"])
+            })
+    
+    # Generate mock optimizations
+    optimizations = generate_mock_recommendations(count=5)
+    total_savings = sum(opt["savings"] for opt in optimizations)
+    
+    return {
+        "forecast": forecast_data,
+        "anomalies": anomalies,
+        "optimizations": optimizations,
+        "summary": {
+            "total_cost": round(total_cost, 2),
+            "anomaly_count": len(anomalies),
+            "forecast_total": round(sum(item["predicted_cost"] for item in forecast_data), 2),
+            "potential_savings": round(total_savings, 2),
+            "days_analyzed": days,
+            "days_forecasted": forecast_days
+        },
+        "ai_metadata": {
+            "forecast_algorithm": "prophet",
+            "anomaly_method": "isolation_forest",
+            "optimization_categories": len(set(rec.get("category", "") for rec in optimizations))
+        }
+    }

@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
               setUser(response.data);
             } catch (err) {
               console.error('Error fetching user info:', err);
-              // Fallback to token data if API call fails
+              // If /auth/me fails, just use the token data
               setUser({ 
                 email: decoded.sub,
                 roles: decoded.roles || [] 

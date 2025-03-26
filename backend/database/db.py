@@ -40,6 +40,10 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Create Base class
 Base = declarative_base()
 
+# Import models to ensure they are registered with Base
+from backend.models.models import RoleModel, UserModel
+from backend.models.cloud_cost import CloudCost
+
 # Database health check function
 def check_db_health():
     try:

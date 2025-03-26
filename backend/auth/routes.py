@@ -52,21 +52,28 @@ async def login_for_access_token(
     access_token = create_access_token(
         data=token_data, expires_delta=access_token_expires
     )
+    db.commit()  # Commit the transaction
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/me")
 async def get_current_user_info(current_user: UserModel = Depends(get_current_active_user)):
     """Get current user information"""
-    return {
-        "id": current_user.id,
-        "email": current_user.email,
-        "username": current_user.username,
-        "full_name": current_user.full_name,
-        "is_active": current_user.is_active,
-        "roles": [role.name for role in current_user.roles],
-        "created_at": current_user.created_at.isoformat() if current_user.created_at else None,
-        "updated_at": current_user.updated_at.isoformat() if current_user.updated_at else None
-    }
+    try:
+        return {
+            "id": current_user.id,
+            "email": current_user.email,
+            "first_name": current_user.first_name,
+            "last_name": current_user.last_name,
+            "company": current_user.company,
+            "phone": current_user.phone,
+            "is_active": current_user.is_active,
+            "roles": [role.name for role in current_user.roles],
+            "created_at": current_user.created_at.isoformat() if current_user.created_at else None,
+            "updated_at": current_user.updated_at.isoformat() if current_user.updated_at else None
+        }
+    finally:
+        # Commit the transaction after reading user data
+        current_user._sa_instance_state.session.commit()
 
 @router.post("/register", response_model=User)
 async def register_user(user: UserCreate, db: Session = Depends(get_db)):
@@ -96,30 +103,38 @@ async def register_user(user: UserCreate, db: Session = Depends(get_db)):
         )
     
     # Check if user already exists
-    db_user = db.query(UserModel).filter(
-        (UserModel.email == user.email) | (UserModel.username == user.username)
-    ).first()
+    db_user = db.query(UserModel).filter(UserModel.email == user.email).first()
     if db_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email or username already registered"
+            detail="Email already registered"
         )
     
     # Create new user
+    now = datetime.utcnow()
     hashed_password = get_password_hash(user.password)
     db_user = UserModel(
         email=user.email,
-        username=user.username,
-        full_name=user.full_name,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        company=user.company,
+        phone=user.phone,
         hashed_password=hashed_password,
-        is_active=True
+        is_active=True,
+        created_at=now,
+        updated_at=now
     )
     
     # Assign default role (typically 'user')
     default_role = db.query(RoleModel).filter(RoleModel.name == "user").first()
     if not default_role:
         # Create the role if it doesn't exist
-        default_role = RoleModel(name="user", description="Regular user")
+        default_role = RoleModel(
+            name="user",
+            description="Regular user",
+            created_at=now,
+            updated_at=now
+        )
         db.add(default_role)
         db.flush()
     
@@ -133,8 +148,10 @@ async def register_user(user: UserCreate, db: Session = Depends(get_db)):
     return User(
         id=db_user.id,
         email=db_user.email,
-        username=db_user.username,
-        full_name=db_user.full_name,
+        first_name=db_user.first_name,
+        last_name=db_user.last_name,
+        company=db_user.company,
+        phone=db_user.phone,
         is_active=db_user.is_active,
         roles=[role.name for role in db_user.roles]
     )

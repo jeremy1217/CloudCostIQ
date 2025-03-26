@@ -21,11 +21,14 @@ class TagBase(BaseModel):
 
 class TagResponse(TagBase):
     id: int
-    created_at: str
-    updated_at: str
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
+        json_encoders = {
+            datetime: lambda v: v.isoformat() if v else None
+        }
 
 class ResourceCreate(BaseModel):
     resource_id: str
@@ -57,15 +60,19 @@ class ResourceResponse(BaseModel):
     resource_type: str
     name: Optional[str] = None
     status: Optional[str] = None
-    creation_date: Optional[str] = None
-    last_active: Optional[str] = None
+    creation_date: Optional[datetime] = None
+    last_active: Optional[datetime] = None
     attributes: Optional[Dict[str, Any]] = None
     tags: List[TagResponse] = []
-    created_at: str
-    updated_at: str
+    is_active: bool = True
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
+        json_encoders = {
+            datetime: lambda v: v.isoformat() if v else None
+        }
 
 @router.get("/", response_model=List[ResourceResponse])
 async def get_resources(
@@ -93,9 +100,11 @@ async def get_resources(
         
         # Get all resources
         resources = query.all()
+        db.commit()
         return resources
         
     except Exception as e:
+        db.rollback()
         raise HTTPException(
             status_code=500,
             detail=f"Error fetching cloud resources: {str(e)}"

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { API_BASE_URL } from '../config';
 import {
   getMockHistoricalCostData,
   getMockForecastData,
@@ -9,11 +10,9 @@ import {
   getMockCombinedInsights
 } from "./mockData";
 
-const API_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
-
 // Create an Axios instance with default config
 const apiClient = axios.create({
-  baseURL: API_URL,
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -58,38 +57,31 @@ const api = {
     try {
       // First try to get real data from API
       try {
-        const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-        const endDate = new Date().toISOString();
-        const response = await apiClient.get("/multi-cloud/provider-costs/AWS", {
-          params: {
-            time_range: JSON.stringify({
-              startDate,
-              endDate,
-              granularity: "DAILY"
-            })
-          }
-        });
+        const response = await apiClient.get("/api/costs/mock-costs");
+        
+        // The backend already returns data in the correct format
         return {
-          costs: response.data.costByDate.map(item => ({
-            date: item.date,
-            cost: item.totalCost
-          })),
-          total_cost: response.data.totalCost,
-          date_range: {
-            start: response.data.timeRange.startDate,
-            end: response.data.timeRange.endDate
-          }
+          costs: response.data.costs,
+          total_cost: response.data.total_cost,
+          date_range: response.data.date_range
         };
       } catch (apiError) {
         console.log("Using mock cloud costs data");
         // Fall back to mock data with proper structure
-        const mockData = getMockHistoricalCostData(30);
+        const mockData = [
+          { provider: "AWS", service: "EC2", cost: 120.50, date: new Date().toISOString().split('T')[0] },
+          { provider: "AWS", service: "S3", cost: 65.30, date: new Date().toISOString().split('T')[0] },
+          { provider: "AWS", service: "RDS", cost: 110.45, date: new Date().toISOString().split('T')[0] },
+          { provider: "Azure", service: "VM", cost: 98.75, date: new Date().toISOString().split('T')[0] },
+          { provider: "GCP", service: "Compute Engine", cost: 85.20, date: new Date().toISOString().split('T')[0] }
+        ];
+
         return {
           costs: mockData,
           total_cost: mockData.reduce((sum, item) => sum + item.cost, 0),
           date_range: {
-            start: mockData[0].date,
-            end: mockData[mockData.length - 1].date
+            start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            end: new Date().toISOString().split('T')[0]
           }
         };
       }
@@ -111,11 +103,19 @@ const api = {
             granularity: "MONTHLY"
           }
         });
-        return response.data.serviceBreakdown.map(item => ({
-          provider: Object.keys(item.providerCosts)[0],
-          service: item.service,
-          cost: item.totalCost
-        }));
+        
+        // Transform the data to match the expected format
+        const transformedData = [];
+        response.data.serviceBreakdown.forEach(item => {
+          Object.entries(item.providerCosts).forEach(([provider, cost]) => {
+            transformedData.push({
+              provider,
+              service: item.service,
+              cost: cost
+            });
+          });
+        });
+        return transformedData;
       } catch (apiError) {
         console.log("Using mock cost breakdown data");
         // Fall back to mock data

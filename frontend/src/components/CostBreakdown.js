@@ -15,6 +15,9 @@ const CostBreakdown = () => {
             try {
                 setLoading(true);
                 const data = await api.getCostBreakdown();
+                if (!data || data.length === 0) {
+                    throw new Error('No cost data available');
+                }
                 setCostData(data);
                 setError(null);
             } catch (err) {
@@ -44,16 +47,6 @@ const CostBreakdown = () => {
                     >
                         Retry
                     </Button>
-                </Box>
-            </Container>
-        );
-    }
-
-    if (!costData || costData.length === 0) {
-        return (
-            <Container>
-                <Box sx={{ p: 3, textAlign: 'center' }}>
-                    <Typography>No cost data available.</Typography>
                 </Box>
             </Container>
         );

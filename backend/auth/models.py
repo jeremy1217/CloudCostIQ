@@ -13,8 +13,10 @@ class TokenData(BaseModel):
 
 class UserBase(BaseModel):
     email: EmailStr
-    username: str
-    full_name: Optional[str] = None
+    first_name: str
+    last_name: str
+    company: Optional[str] = None
+    phone: Optional[str] = None
     is_active: bool = True
 
 class UserCreate(UserBase):
@@ -22,8 +24,10 @@ class UserCreate(UserBase):
 
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
-    username: Optional[str] = None
-    full_name: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    company: Optional[str] = None
+    phone: Optional[str] = None
     is_active: Optional[bool] = None
     password: Optional[str] = None
 

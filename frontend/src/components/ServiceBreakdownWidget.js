@@ -7,7 +7,7 @@ const ServiceBreakdownWidget = ({ limit = 5 }) => {
     const [services, setServices] = useState([]);
     
     useEffect(() => {
-        // Fetch services data using the API service, which already uses the mock data service
+        // Fetch services data using the API service
         const fetchData = async () => {
             try {
                 const response = await api.getCloudCosts();
@@ -18,11 +18,12 @@ const ServiceBreakdownWidget = ({ limit = 5 }) => {
 
                 // Process the data
                 const serviceSummary = response.costs.reduce((acc, item) => {
-                    // Group by service
-                    if (!acc[item.service]) {
-                        acc[item.service] = 0;
+                    // Group by service and provider
+                    const serviceKey = `${item.provider} - ${item.service}`;
+                    if (!acc[serviceKey]) {
+                        acc[serviceKey] = 0;
                     }
-                    acc[item.service] += item.cost;
+                    acc[serviceKey] += item.cost;
                     return acc;
                 }, {});
                 
@@ -49,11 +50,11 @@ const ServiceBreakdownWidget = ({ limit = 5 }) => {
                 
                 // Fallback mock data
                 setServices([
-                    { service: 'EC2', cost: 4587.23, percentage: 36.7 },
-                    { service: 'S3', cost: 2145.67, percentage: 17.2 },
-                    { service: 'RDS', cost: 3256.78, percentage: 26.1 },
-                    { service: 'Lambda', cost: 1234.56, percentage: 9.9 },
-                    { service: 'Other', cost: 1274.43, percentage: 10.1 }
+                    { service: 'AWS - EC2', cost: 4587.23, percentage: 36.7 },
+                    { service: 'AWS - S3', cost: 2145.67, percentage: 17.2 },
+                    { service: 'AWS - RDS', cost: 3256.78, percentage: 26.1 },
+                    { service: 'Azure - VM', cost: 1234.56, percentage: 9.9 },
+                    { service: 'GCP - Compute Engine', cost: 1274.43, percentage: 10.1 }
                 ].slice(0, limit));
             }
         };

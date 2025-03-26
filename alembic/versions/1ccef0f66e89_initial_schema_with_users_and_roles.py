@@ -94,6 +94,7 @@ def upgrade() -> None:
         sa.Column('creation_date', sa.DateTime(), nullable=True),
         sa.Column('last_active', sa.DateTime(), nullable=True),
         sa.Column('attributes', sa.JSON(), nullable=True),
+        sa.Column('is_active', sa.Boolean(), nullable=False, default=True),
         sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
         sa.PrimaryKeyConstraint('id')
@@ -107,6 +108,30 @@ def upgrade() -> None:
     op.create_index(op.f('ix_cloud_resources_resource_type'), 'cloud_resources', ['resource_type'], unique=False)
     op.create_index(op.f('ix_cloud_resources_service'), 'cloud_resources', ['service'], unique=False)
     op.create_index(op.f('ix_cloud_resources_status'), 'cloud_resources', ['status'], unique=False)
+
+    # Create resource_tags table
+    op.create_table(
+        'resource_tags',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('key', sa.String(), nullable=False),
+        sa.Column('value', sa.String(), nullable=False),
+        sa.Column('created_at', sa.DateTime(), nullable=False),
+        sa.Column('updated_at', sa.DateTime(), nullable=False),
+        sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_resource_tags_id'), 'resource_tags', ['id'], unique=False)
+    op.create_index(op.f('ix_resource_tags_key'), 'resource_tags', ['key'], unique=False)
+    op.create_index(op.f('ix_resource_tags_value'), 'resource_tags', ['value'], unique=False)
+
+    # Create resource_tag_association table
+    op.create_table(
+        'resource_tag_association',
+        sa.Column('resource_id', sa.Integer(), nullable=False),
+        sa.Column('tag_id', sa.Integer(), nullable=False),
+        sa.ForeignKeyConstraint(['resource_id'], ['cloud_resources.id'], ),
+        sa.ForeignKeyConstraint(['tag_id'], ['resource_tags.id'], ),
+        sa.UniqueConstraint('resource_id', 'tag_id', name='uq_resource_tag')
+    )
 
     # Create recommendations table
     op.create_table(
@@ -144,6 +169,12 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_cloud_costs_date'), table_name='cloud_costs')
     op.drop_index(op.f('ix_cloud_costs_id'), table_name='cloud_costs')
     op.drop_table('cloud_costs')
+    
+    op.drop_table('resource_tag_association')
+    op.drop_index(op.f('ix_resource_tags_value'), table_name='resource_tags')
+    op.drop_index(op.f('ix_resource_tags_key'), table_name='resource_tags')
+    op.drop_index(op.f('ix_resource_tags_id'), table_name='resource_tags')
+    op.drop_table('resource_tags')
     
     op.drop_table('user_role_association')
     op.drop_index(op.f('ix_users_username'), table_name='users')

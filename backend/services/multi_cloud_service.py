@@ -501,8 +501,16 @@ class MultiCloudService:
         # In a real implementation, this would retrieve actual cost data
         # For demo purposes, we generate sample data
         
-        start_date = datetime.fromisoformat(time_range.get("startDate", "2023-01-01"))
-        end_date = datetime.fromisoformat(time_range.get("endDate", "2023-03-01"))
+        # Use current date as end date if not provided or if future date
+        end_date = datetime.fromisoformat(time_range.get("endDate", datetime.now().isoformat()))
+        if end_date > datetime.now():
+            end_date = datetime.now()
+            
+        # Use 30 days before end date as start date if not provided or if future date
+        start_date = datetime.fromisoformat(time_range.get("startDate", (end_date - timedelta(days=30)).isoformat()))
+        if start_date > end_date:
+            start_date = end_date - timedelta(days=30)
+            
         granularity = time_range.get("granularity", "MONTHLY")
         
         date_points = []
@@ -541,7 +549,7 @@ class MultiCloudService:
         }
         
         # Generate date points with costs
-        cost_by_service = []
+        costs = []
         cost_by_date = []
         
         while current_date <= end_date:
@@ -555,30 +563,32 @@ class MultiCloudService:
             for service, base_cost in services.items():
                 service_cost = base_cost * factor / (30 if granularity == "DAILY" else 1)  # Scale for daily if needed
                 
-                cost_by_service.append({
+                costs.append({
+                    "provider": provider,
                     "service": service,
-                    "date": current_date.isoformat(),
-                    "cost": service_cost
+                    "cost": round(service_cost, 2),
+                    "date": current_date.isoformat()
                 })
             
             # Add total for this date
             cost_by_date.append({
                 "date": current_date.isoformat(),
-                "totalCost": sum(base_cost * factor / (30 if granularity == "DAILY" else 1) for base_cost in services.values())
+                "totalCost": round(sum(base_cost * factor / (30 if granularity == "DAILY" else 1) for base_cost in services.values()), 2)
             })
             
             current_date += delta
         
+        # Calculate total cost
+        total_cost = round(sum(point["totalCost"] for point in cost_by_date), 2)
+        
+        # Format the response to match frontend expectations
         return {
-            "provider": provider,
-            "timeRange": {
-                "startDate": start_date.isoformat(),
-                "endDate": end_date.isoformat(),
-                "granularity": granularity
-            },
-            "costByService": cost_by_service,
-            "costByDate": cost_by_date,
-            "totalCost": sum(point["totalCost"] for point in cost_by_date)
+            "costs": costs,
+            "total_cost": total_cost,
+            "date_range": {
+                "start": start_date.isoformat(),
+                "end": end_date.isoformat()
+            }
         }
     
     def get_service_cost_breakdown(self, user_id: str, providers: List[str], time_range: Dict) -> Dict:

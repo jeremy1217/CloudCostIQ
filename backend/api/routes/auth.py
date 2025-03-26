@@ -10,7 +10,8 @@ from sqlalchemy.orm import Session
 from backend.auth.models import Token, User, UserCreate
 from backend.auth.utils import (
     authenticate_user, create_access_token, 
-    get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES
+    get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES,
+    get_current_active_user
 )
 from backend.database.db import get_db
 from backend.models.models import UserModel, RoleModel
@@ -80,4 +81,15 @@ async def register_user(user: UserCreate, db: Session = Depends(get_db)):
         full_name=db_user.full_name,
         is_active=db_user.is_active,
         roles=[role.name for role in db_user.roles]
+    )
+
+@router.get("/me", response_model=User)
+async def get_current_user_info(current_user: UserModel = Depends(get_current_active_user)):
+    return User(
+        id=current_user.id,
+        email=current_user.email,
+        username=current_user.username,
+        full_name=current_user.full_name,
+        is_active=current_user.is_active,
+        roles=[role.name for role in current_user.roles]
     )
