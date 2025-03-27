@@ -2,6 +2,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import Layout from './components/Layout';
 import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
@@ -20,70 +21,49 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       
-      {/* User Routes */}
-      <Route 
-        path="/dashboard" 
+      {/* Protected Routes */}
+      <Route
+        path="/"
         element={
           <PrivateRoute>
-            <Dashboard />
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Navigate to="/dashboard" />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/profile" element={<UserProfile />} />
+                <Route path="/recommendations" element={<RecommendationsDashboard />} />
+                <Route path="/cost-analysis" element={<CostAnalysisDashboard />} />
+                
+                {/* Admin Routes */}
+                <Route
+                  path="/admin/users"
+                  element={
+                    <AdminRoute>
+                      <UserList />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/users/new"
+                  element={
+                    <AdminRoute>
+                      <UserForm />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/users/:userId"
+                  element={
+                    <AdminRoute>
+                      <UserForm />
+                    </AdminRoute>
+                  }
+                />
+              </Routes>
+            </Layout>
           </PrivateRoute>
-        } 
+        }
       />
-      <Route 
-        path="/profile" 
-        element={
-          <PrivateRoute>
-            <UserProfile />
-          </PrivateRoute>
-        } 
-      />
-      <Route 
-        path="/recommendations" 
-        element={
-          <PrivateRoute>
-            <RecommendationsDashboard />
-          </PrivateRoute>
-        } 
-      />
-      
-      {/* New Cost Analysis Routes */}
-      <Route 
-        path="/cost-analysis" 
-        element={
-          <PrivateRoute>
-            <CostAnalysisDashboard />
-          </PrivateRoute>
-        } 
-      />
-      
-      {/* Admin Routes */}
-      <Route 
-        path="/admin/users" 
-        element={
-          <AdminRoute>
-            <UserList />
-          </AdminRoute>
-        } 
-      />
-      <Route 
-        path="/admin/users/new" 
-        element={
-          <AdminRoute>
-            <UserForm />
-          </AdminRoute>
-        } 
-      />
-      <Route 
-        path="/admin/users/:userId" 
-        element={
-          <AdminRoute>
-            <UserForm />
-          </AdminRoute>
-        } 
-      />
-      
-      {/* Default Route */}
-      <Route path="/" element={<Navigate to="/dashboard" />} />
     </Routes>
   );
 }
