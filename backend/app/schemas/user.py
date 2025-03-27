@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Any  # Add Any to the imports
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
@@ -47,3 +47,10 @@ class UserWithCloudAccounts(User):
 
     class Config:
         orm_mode = True
+
+class TokenData(BaseModel):
+    user_id: Optional[int] = None
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str

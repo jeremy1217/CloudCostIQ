@@ -1,3 +1,4 @@
+# app/core/security.py
 from datetime import datetime, timedelta
 from typing import Any, Optional
 
@@ -9,8 +10,8 @@ SECRET_KEY = "YOUR_SECRET_KEY"  # Replace with a secure secret key
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# Password context for hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Use a more compatible hashing algorithm
+pwd_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 
 def create_access_token(subject: Any, expires_delta: Optional[timedelta] = None) -> str:
     """

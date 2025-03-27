@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from './Layout';
 import { useAuth } from '../context/AuthContext';
-import api from './api';
+import api from '../services/api';
 
 export const getDashboardSummary = async () => {
   try {
