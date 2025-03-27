@@ -14,6 +14,7 @@ class User(Base):
     full_name = Column(String)
     company_name = Column(String)
     is_active = Column(Boolean, default=True)
+    is_admin = Column(Boolean, default=False)  # New field for admin status
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     
     cloud_accounts = relationship("CloudAccount", back_populates="owner")

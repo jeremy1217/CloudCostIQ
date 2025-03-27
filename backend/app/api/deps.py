@@ -10,6 +10,7 @@ from app.schemas.user import TokenData
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
 
+
 def get_current_user(
     db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
 ) -> User:
@@ -40,5 +41,16 @@ def get_current_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Inactive user"
         )
-    
+
     return user
+
+def get_current_admin(current_user: User = Depends(get_current_user)) -> User:
+    """
+    Check if the current user is an admin
+    """
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="The user doesn't have enough privileges",
+        )
+    return current_user
