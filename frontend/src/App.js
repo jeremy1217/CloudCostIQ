@@ -1,4 +1,4 @@
-// src/App.js
+// src/App.js with added routes for cost analysis
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -9,6 +9,7 @@ import UserProfile from './components/profile/UserProfile';
 import UserList from './components/admin/UserList';
 import UserForm from './components/admin/UserForm';
 import RecommendationsDashboard from './components/Recommendations';
+import CostAnalysisDashboard from './components/CostAnalysisDashboard';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
 
@@ -41,6 +42,16 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <RecommendationsDashboard />
+          </PrivateRoute>
+        } 
+      />
+      
+      {/* New Cost Analysis Routes */}
+      <Route 
+        path="/cost-analysis" 
+        element={
+          <PrivateRoute>
+            <CostAnalysisDashboard />
           </PrivateRoute>
         } 
       />
