@@ -1,7 +1,8 @@
+# app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, users  # Import the users router
+from app.api import auth, users, cost_analysis
 
 app = FastAPI(title="CloudCostIQ API")
 
@@ -17,6 +18,7 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(users.router, prefix="/api/users", tags=["users"])
+app.include_router(cost_analysis.router, prefix="/api/costs", tags=["costs"])
 
 @app.get("/")
 async def root():

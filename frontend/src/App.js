@@ -8,6 +8,7 @@ import Dashboard from './components/Dashboard';
 import UserProfile from './components/profile/UserProfile';
 import UserList from './components/admin/UserList';
 import UserForm from './components/admin/UserForm';
+import RecommendationsDashboard from './components/Recommendations';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
 
@@ -32,6 +33,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <UserProfile />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/recommendations" 
+        element={
+          <PrivateRoute>
+            <RecommendationsDashboard />
           </PrivateRoute>
         } 
       />
