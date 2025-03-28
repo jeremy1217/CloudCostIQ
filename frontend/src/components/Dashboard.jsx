@@ -2,57 +2,63 @@
 import React, { useState, useEffect } from 'react';
 import Layout from './Layout';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
-
-export const getDashboardSummary = async () => {
-  try {
-    const response = await api.get('/dashboard/summary');
-    return response.data;
-  } catch (error) {
-    throw error.response.data;
-  }
-};
 
 const Dashboard = () => {
   const { userProfile } = useAuth();
   const [loading, setLoading] = useState(true);
   const [summaryData, setSummaryData] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // Simulate fetching dashboard data
+    // Fetch dashboard data
     const fetchDashboardData = async () => {
-      // In a real app, you would fetch data from your API
-      setTimeout(() => {
-        setSummaryData({
-          totalSpend: 12580.45,
-          spendChange: -8.3,
-          projectedSpend: 15240.12,
-          topServices: [
-            { name: 'EC2', cost: 4536.78 },
-            { name: 'S3', cost: 2387.15 },
-            { name: 'RDS', cost: 1865.92 }
-          ]
-        });
+      try {
+        // In a real app, you would fetch data from your API
+        // For now, we'll use mock data to ensure something displays
+        setTimeout(() => {
+          setSummaryData({
+            totalSpend: 12580.45,
+            spendChange: -8.3,
+            projectedSpend: 15240.12,
+            topServices: [
+              { name: 'EC2', cost: 4536.78 },
+              { name: 'S3', cost: 2387.15 },
+              { name: 'RDS', cost: 1865.92 }
+            ]
+          });
+          setLoading(false);
+        }, 1000);
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError('Failed to load dashboard data. Please try again.');
         setLoading(false);
-      }, 1000);
+      }
     };
 
     fetchDashboardData();
   }, []);
 
+  if (error) {
+    return (
+      <div className="px-4 py-6">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <span className="block sm:inline">{error}</span>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
-      <Layout>
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-        </div>
-      </Layout>
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <h1 className="text-3xl font-bold text-gray-900">Welcome, {userProfile?.full_name}!</h1>
+    <div className="px-4 sm:px-6 lg:px-8">
+      <h1 className="text-3xl font-bold text-gray-900">Welcome, {userProfile?.full_name || 'User'}!</h1>
       
       <div className="mt-8">
         <h2 className="text-xl font-semibold text-gray-900">Cost Summary</h2>
@@ -133,7 +139,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 

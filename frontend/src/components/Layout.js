@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { userProfile, logout } = useAuth();
   const location = useLocation();
 
   const navigation = [
@@ -13,7 +13,7 @@ const Layout = ({ children }) => {
     { name: 'Cost Analysis', href: '/cost-analysis', icon: '💰' },
     { name: 'Recommendations', href: '/recommendations', icon: '💡' },
     { name: 'Profile', href: '/profile', icon: '👤' },
-    ...(user?.isAdmin ? [
+    ...(userProfile?.is_admin ? [
       { name: 'User Management', href: '/admin/users', icon: '👥' }
     ] : [])
   ];
@@ -114,10 +114,10 @@ const Layout = ({ children }) => {
             </div>
             <div className="ml-4 flex items-center md:ml-6">
               <div className="flex items-center">
-                <span className="text-sm text-gray-700 mr-4">{user?.email}</span>
+                <span className="text-sm text-gray-700 mr-4">{userProfile?.email}</span>
                 <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
                   <span className="text-primary-600 font-medium">
-                    {user?.email?.[0]?.toUpperCase()}
+                    {userProfile?.email?.[0]?.toUpperCase()}
                   </span>
                 </div>
               </div>
