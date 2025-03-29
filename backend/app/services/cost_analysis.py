@@ -278,3 +278,114 @@ class CostAnalysisService:
             'reserved_instance_recommendations': reserved_instances,
             'total_estimated_savings': total_savings
         }
+def get_cost_breakdown(self, 
+                      start_date: datetime, 
+                      end_date: datetime,
+                      account_id: Optional[int] = None,
+                      service: Optional[str] = None,
+                      tag: Optional[str] = None,
+                      group_by: str = "service") -> List[Dict[str, Any]]:
+    """
+    Get cost breakdown by the specified grouping.
+    Used for pie charts and similar visualizations.
+    """
+    base_query = self.db.query(CostData).filter(
+        CostData.date >= start_date,
+        CostData.date < end_date
+    )
+    
+    # Apply common filters
+    if account_id:
+        base_query = base_query.filter(CostData.cloud_account_id == account_id)
+        
+    if service:
+        base_query = base_query.filter(CostData.service == service)
+        
+    if tag:
+        # Parse tag filter (format: "key:value")
+        try:
+            key, value = tag.split(':', 1)
+            # Filter by tag
+            base_query = base_query.filter(
+                func.json_extract_path_text(CostData.tags, key) == value
+            )
+        except ValueError:
+            # Invalid tag format, ignore filter
+            pass
+    
+    if group_by == "service":
+        # Group by service
+        query = self.db.query(
+            CostData.service.label('group'),
+            func.sum(CostData.cost).label('total_cost')
+        ).filter(
+            CostData.id.in_([c.id for c in base_query])
+        ).group_by(CostData.service).order_by(desc('total_cost'))
+        
+        return query.all()
+    
+    elif group_by == "account":
+        # Group by cloud account
+        query = self.db.query(
+            CloudAccount.name.label('group'),
+            func.sum(CostData.cost).label('total_cost')
+        ).join(
+            CloudAccount, 
+            CostData.cloud_account_id == CloudAccount.id
+        ).filter(
+            CostData.id.in_([c.id for c in base_query])
+        ).group_by(CloudAccount.name).order_by(desc('total_cost'))
+        
+        return query.all()
+    
+    elif group_by == "region":
+        # Group by region tag
+        # This assumes you have a region tag in your tags JSON
+        results = []
+        cost_data = base_query.all()
+        
+        region_costs = {}
+        for cost in cost_data:
+            region = "Unknown"
+            if cost.tags and isinstance(cost.tags, dict):
+                region = cost.tags.get('region', cost.tags.get('aws:region', 'Unknown'))
+            
+            if region not in region_costs:
+                region_costs[region] = 0
+            region_costs[region] += cost.cost
+        
+        for region, total_cost in sorted(region_costs.items(), key=lambda x: x[1], reverse=True):
+            results.append(type('obj', (object,), {
+                'group': region,
+                'total_cost': total_cost
+            }))
+        
+        return results
+    
+    elif group_by == "tag":
+        # Group by tag key (first tag key found)
+        results = []
+        cost_data = base_query.all()
+        
+        tag_costs = {}
+        for cost in cost_data:
+            if not cost.tags or not isinstance(cost.tags, dict) or not cost.tags:
+                tag = "No Tags"
+            else:
+                # Get first tag key
+                tag = next(iter(cost.tags.keys()), "Unknown")
+            
+            if tag not in tag_costs:
+                tag_costs[tag] = 0
+            tag_costs[tag] += cost.cost
+        
+        for tag, total_cost in sorted(tag_costs.items(), key=lambda x: x[1], reverse=True):
+            results.append(type('obj', (object,), {
+                'group': tag,
+                'total_cost': total_cost
+            }))
+        
+        return results
+        
+    # Default fallback
+    return []
