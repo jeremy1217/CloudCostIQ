@@ -38,7 +38,6 @@ const CostAnalysisDashboard = () => {
   };
   
   return (
-    <Layout>
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="sm:flex sm:items-center">
           <div className="sm:flex-auto">
@@ -283,7 +282,6 @@ const CostAnalysisDashboard = () => {
           </div>
         )}
       </div>
-    </Layout>
   );
 };
 

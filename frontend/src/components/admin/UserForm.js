@@ -80,16 +80,13 @@ const UserForm = () => {
 
   if (loading) {
     return (
-      <Layout>
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
       <div className="md:grid md:grid-cols-3 md:gap-6">
         <div className="md:col-span-1">
           <div className="px-4 sm:px-0">
@@ -241,7 +238,6 @@ const UserForm = () => {
           </form>
         </div>
       </div>
-    </Layout>
   );
 };
 
